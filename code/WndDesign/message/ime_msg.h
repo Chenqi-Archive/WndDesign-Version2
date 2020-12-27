@@ -1,0 +1,20 @@
+#pragma once
+
+#include "msg_base.h"
+#include "../system/ime.h"
+
+
+BEGIN_NAMESPACE(WndDesign)
+
+
+struct ImeCompositionMsg : _MsgPara {
+	const ImeComposition& ime_composition;
+};
+
+
+inline const ImeComposition& GetImeCompositionMsg(Para para) {
+	return static_cast<const ImeCompositionMsg&>(para).ime_composition;
+}
+
+
+END_NAMESPACE(WndDesign)

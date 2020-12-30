@@ -4,14 +4,15 @@
 #include "../geometry/geometry.h"
 
 #include <unordered_map>
+#include <memory>
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 using std::unordered_map;
+using std::unique_ptr;
 
 class Target;
-class Layer;
 
 using TileID = Point;
 using TileRange = Rect;
@@ -39,18 +40,20 @@ private:
 private:
 	void SwapOut();
 	void SetMaxCapacity(uint max_capacity);
+	void Clear() { _cache.clear(); }
 
 public:
+	TileCache(Size layer_size);
+	~TileCache();
+
 	const Size GetTileSize() const { return _tile_size; }
 	bool ResetTileSize(Size layer_size);
 
 	const Rect GetCachedRegion() const { return _cached_region; }
 	void SetCachedRegion(Rect accessible_region, Rect visible_region);
 
-	void Clear() { _cache.clear(); }
-
 	const Target& ReadTile(TileID tile_id) const;
-	Target& WriteTile(TileID tile_id, Layer& layer);
+	Target& WriteTile(TileID tile_id);
 };
 
 

@@ -1,12 +1,16 @@
 #include "text_style.h"
-#include "../system/directx/dwrite.h"
-#include "../system/directx/d2d.h"
 #include "../system/directx/directx_helper.h"
+#include "../system/directx/dwrite_api.h"
+#include "../system/directx/d2d_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
-class TextLayout : public IDWriteTextLayout {};  // Alias for IDWriteTextLayout.
+
+inline const DWRITE_TEXT_RANGE Interval2TextRange(Interval interval) {
+	assert(interval.begin >= 0);
+	return DWRITE_TEXT_RANGE{ static_cast<uint>(interval.begin), interval.length };
+}
 
 
 void TextStyleFont::ApplyTo(TextLayout& layout, Interval interval) const {
@@ -30,7 +34,7 @@ void TextStyleUnderline::ApplyTo(TextLayout& layout, Interval interval) const {
 }
 
 void TextStyleColor::ApplyTo(TextLayout& layout, Interval interval) const {
-	hr = layout.SetDrawingEffect(&SolidColorBrush(color), Interval2TextRange(interval));
+	hr = layout.SetDrawingEffect(&GetSolidColorBrush(color), Interval2TextRange(interval));
 }
 
 

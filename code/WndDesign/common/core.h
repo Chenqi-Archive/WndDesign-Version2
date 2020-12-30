@@ -28,6 +28,9 @@ BEGIN_NAMESPACE(WndDesign)
 template<class T>
 using ref_ptr = T*;   // A tag for raw pointer that is used only as a reference.
 
+template<class T>
+using alloc_ptr = T*;   // [BE CAREFUL] A tag for raw pointer that is allocated by operator new.
+						// It is recommended that you use a smart pointer like unique_ptr or shared_ptr, etc.
 
 using uchar = unsigned char;
 using ushort = unsigned short;

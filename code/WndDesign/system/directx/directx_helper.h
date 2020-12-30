@@ -79,10 +79,5 @@ inline const D2D1_COLOR_F Color2COLOR(Color color) {
 	return D2D1::ColorF(color.AsUnsigned(), Opacity2Float(color.alpha));
 }
 
-inline const DWRITE_TEXT_RANGE Interval2TextRange(Interval interval) {
-	assert(interval.begin >= 0);
-	return DWRITE_TEXT_RANGE{ static_cast<uint>(interval.begin), interval.length };
-}
-
 
 END_NAMESPACE(WndDesign)

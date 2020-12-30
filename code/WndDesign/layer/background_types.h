@@ -28,8 +28,6 @@ struct ImageTileBackground : Background {
 		image(image), opacity(opacity), offset_on_image(offset_on_image) {
 	}
 	virtual void DrawOn(Rect region, uchar opacity, RenderTarget& target, Vector offset) const override {
-		ImageFigure image_figure(image, opacity);
-		Rect repeat_range;
 
 	}
 };

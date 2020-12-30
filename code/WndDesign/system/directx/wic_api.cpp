@@ -1,6 +1,6 @@
-#include "wic.h"
-#include "d2d.h"
 #include "directx_helper.h"
+#include "wic_api.h"
+#include "d2d_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -18,9 +18,6 @@ public:
 };
 
 WICFactory::WICFactory() : factory(nullptr) {
-
-#error CoInitializeEx() should be called in main() or WinMain().
-
     hr = CoCreateInstance(
         CLSID_WICImagingFactory2,
         nullptr,
@@ -127,14 +124,11 @@ ImageResource::ImageResource(void* address, size_t size):
 
 void ImageResource::LoadD2DBitmap() {
 	if (wic_image == nullptr) { return; }
-
-#error Check if already loaded.
-
 	D2D1_BITMAP_PROPERTIES1 bitmap_properties = D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_NONE,  // Only used as source.
 		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 	);
-	hr = D2DDeviceContext().CreateBitmapFromWicBitmap(
+	hr = GetD2DDeviceContext().CreateBitmapFromWicBitmap(
 		wic_image,
 		&bitmap_properties,
 		&d2d_bitmap

@@ -1,5 +1,5 @@
-#include "dwrite.h"
 #include "directx_helper.h"
+#include "dwrite_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -59,7 +59,7 @@ TextLayoutResource::~TextLayoutResource() {
 void TextLayoutResource::TextChanged(const wstring& text) {
 	SafeRelease(&layout);
 	hr = DWriteFactory().CreateTextLayout(
-		text.c_str(), text.length(),
+		text.c_str(), static_cast<UINT>(text.length()),
 		format,
 		0, 0,
 		&layout

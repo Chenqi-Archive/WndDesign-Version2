@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/common.h"
+#include "../common/core.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -37,7 +37,7 @@ struct Color {
 constexpr Color color_transparent = Color(0x00000000);
 
 
-const Color BlendColorWithOpacity(Color color, uchar opacity) {
+inline const Color BlendColorWithOpacity(Color color, uchar opacity) {
     return Color(color.AsUnsigned(), color.alpha * opacity / 0xFF);
 }
 

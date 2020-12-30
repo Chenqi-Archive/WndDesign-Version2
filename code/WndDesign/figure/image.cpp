@@ -1,5 +1,5 @@
 #include "image.h"
-#include "../system/directx/wic.h"
+#include "../system/directx/wic_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

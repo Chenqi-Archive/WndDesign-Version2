@@ -1,6 +1,7 @@
-#include "dxgi.h"
 #include "directx_helper.h"
+#include "dxgi_api.h"
 
+#pragma comment(lib, "d3d11.lib")
 
 BEGIN_NAMESPACE(WndDesign)
 
@@ -34,7 +35,11 @@ D3DDevice::D3DDevice() : d3d_device(nullptr), dxgi_device(nullptr) {
     hr = D3D11CreateDevice(
         nullptr,
         D3D_DRIVER_TYPE_HARDWARE, nullptr,
-        D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+        D3D11_CREATE_DEVICE_BGRA_SUPPORT
+    #ifdef _DEBUG
+        | D3D11_CREATE_DEVICE_DEBUG
+    #endif
+        ,
         featureLevels, ARRAYSIZE(featureLevels),
         D3D11_SDK_VERSION,
         &d3d_device,
@@ -65,10 +70,10 @@ D3DDevice& D3DDevice::Get() {
 
 END_NAMESPACE(Anonymous)
 
-ID3D11Device& D3DDevice() { return *D3DDevice::Get().d3d_device; }
-IDXGIDevice1& DXGIDevice() { return *D3DDevice::Get().dxgi_device; }
-IDXGIAdapter& DXGIAdapter() { return *D3DDevice::Get().dxgi_adapter; }
-IDXGIFactory2& DXGIFactory() { return *D3DDevice::Get().dxgi_factory; }
+ID3D11Device& GetD3DDevice() { return *D3DDevice::Get().d3d_device; }
+IDXGIDevice1& GetDXGIDevice() { return *D3DDevice::Get().dxgi_device; }
+IDXGIAdapter& GetDXGIAdapter() { return *D3DDevice::Get().dxgi_adapter; }
+IDXGIFactory2& GetDXGIFactory() { return *D3DDevice::Get().dxgi_factory; }
 
 
 END_NAMESPACE(WndDesign)

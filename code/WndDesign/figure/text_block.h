@@ -1,6 +1,7 @@
 #pragma once
 
 #include "text_style.h"
+#include "figure_base.h"
 
 #include <array>
 #include <vector>
@@ -18,13 +19,14 @@ class TextLayoutResource;  // Wrapper for IDWriteTextLayout.
 class TextBlock {
 private:
 	unique_ptr<TextLayoutResource> layout;
-	const wstring& text;
+	const wstring& text; 
+	TextStyle default_style;
 
 public:
-	TextBlock(const wstring& text /*, initial styles*/) : text(text) {}
+	TextBlock(const wstring& text, TextStyle default_style = {}) : text(text) {}
 
 	TextLayoutResource& LayoutResource() const { return *layout; }
-	const TextStyle& DefaultStyle() const {}
+	const TextStyle& DefaultStyle() const { return default_style; }
 
 	// Size.
 
@@ -32,7 +34,7 @@ public:
 	///////////////////////////////////////////////////////////
 	////                       Style                       ////
 	///////////////////////////////////////////////////////////
-#error Put in helper
+#pragma message("Put in helper")
 private:
 	class TextStyleIntervalList {
 		struct TextStyleInterval {

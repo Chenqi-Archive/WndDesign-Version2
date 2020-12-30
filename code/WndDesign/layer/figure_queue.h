@@ -23,11 +23,16 @@ private:
 	vector<FigureContainer> figures;
 
 public:
-	void append(Vector offset, unique_ptr<const Figure> figure) {
+	auto begin() const { return figures.begin(); }
+	auto end() const { return figures.end(); }
+
+	void Append(Vector offset, unique_ptr<const Figure> figure) {
 		figures.emplace_back(FigureContainer{ offset, std::move(figure) });
 	}
-	auto begin() const { return figures.begin(); }
-	auto end() const { return figures.begin(); }
+	void Append(Vector offset, alloc_ptr<const Figure> figure) {
+		Append(offset, unique_ptr<const Figure>(figure));
+	}
+	bool IsEmpty() const { return figures.empty(); }
 };
 
 

@@ -60,18 +60,6 @@
     <ClInclude Include="system\ime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="system\directx\d2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system\directx\dwrite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system\directx\dxgi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system\directx\wic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="system\directx\directx_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -102,9 +90,6 @@
     <ClInclude Include="common\reversion_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common\common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="layer\figure_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,9 +100,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="message\ime_msg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="geometry\transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="figure\figure_base.h">
@@ -159,33 +141,39 @@
     <ClInclude Include="layer\desktop_layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\directx\dxgi_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\directx\d2d_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\directx\dwrite_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\directx\wic_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\directx\d2d_api_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\metrics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="figure\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="system\directx\d2d.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system\directx\dxgi.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="system\directx\directx_helper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system\directx\wic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="figure\text_style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="system\directx\dwrite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="figure\text_block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="geometry\transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="figure\figure_types.cpp">
@@ -201,6 +189,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="wnd\wnd_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="layer\desktop_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\directx\d2d_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\directx\dxgi_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\directx\dwrite_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\directx\wic_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\directx\d2d_api_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\metrics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

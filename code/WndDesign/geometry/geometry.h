@@ -4,7 +4,6 @@
 #include "vector.h"
 #include "size.h"
 #include "rect.h"
-#include "interval.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -26,10 +25,6 @@ constexpr Vector vector_zero = Vector(0, 0);
 
 constexpr Rect region_empty = Rect(point_zero, size_empty);
 constexpr Rect region_infinite = Rect(point_min, size_max);
-
-constexpr Interval interval_empty = Interval(0, 0);
-constexpr Interval interval_infinite = Interval(position_min, length_max);
-
 
 
 // begin_point + vector = end_point

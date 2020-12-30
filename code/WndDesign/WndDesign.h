@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/common.h"
+#include "common/core.h"
 #include "window/window.h"
 #include "common/feature.h"
 #include "system/system.h"

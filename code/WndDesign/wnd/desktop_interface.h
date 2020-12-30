@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/common.h"
+#include "../common/core.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -9,7 +9,7 @@ struct IWndBase;
 
 
 struct IDesktop {
-	WNDDESIGN_API static IDesktop& Get();
+	WNDDESIGNCORE_API static IDesktop& Get();
 
 	virtual void AddChild(IWndBase& child_wnd) pure;
 	virtual void RemoveChild(IWndBase& child_wnd) pure;

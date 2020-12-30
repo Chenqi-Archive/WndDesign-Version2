@@ -1,7 +1,7 @@
 #pragma once
 
 #include "color.h"
-#include "../geometry/geometry.h"
+#include "../geometry/interval.h"
 
 #include <memory>
 #include <string>

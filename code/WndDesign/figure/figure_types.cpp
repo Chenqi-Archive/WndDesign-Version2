@@ -2,10 +2,10 @@
 #include "image.h"
 #include "text_block.h"
 
-#include "../system/directx/d2d.h"
-#include "../system/directx/wic.h"
-#include "../system/directx/dwrite.h"
 #include "../system/directx/directx_helper.h"
+#include "../system/directx/d2d_api.h"
+#include "../system/directx/wic_api.h"
+#include "../system/directx/dwrite_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -29,7 +29,7 @@ void Line::DrawOn(RenderTarget& target, Vector offset) const {
 		target.DrawLine(
 			Point2POINT(point_zero + offset),
 			Point2POINT(point_zero + end + offset),
-			&SolidColorBrush(color),
+			&GetSolidColorBrush(color),
 			width
 		);
 	}
@@ -39,14 +39,14 @@ void Rectangle::DrawOn(RenderTarget& target, Vector offset) const {
 	if (border_width > 0 && !border_color.IsInvisible()) {
 		target.DrawRectangle(
 			Rect2RECT(Rect(point_zero + offset, size)),
-			&SolidColorBrush(border_color),
+			&GetSolidColorBrush(border_color),
 			border_width
 		);
 	}
 	if (!fill_color.IsInvisible()) {
 		target.FillRectangle(
 			Rect2RECT(Rect(point_zero + offset, size)),
-			&SolidColorBrush(fill_color)
+			&GetSolidColorBrush(fill_color)
 		);
 	}
 }
@@ -54,15 +54,15 @@ void Rectangle::DrawOn(RenderTarget& target, Vector offset) const {
 void RoundedRectangle::DrawOn(RenderTarget& target, Vector offset) const {
 	if (border_width > 0 && !border_color.IsInvisible()) {
 		target.DrawRoundedRectangle(
-			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), radius, radius),
-			&SolidColorBrush(border_color),
+			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), static_cast<FLOAT>(radius), static_cast<FLOAT>(radius)),
+			&GetSolidColorBrush(border_color),
 			border_width
 		);
 	}
 	if (!fill_color.IsInvisible()) {
 		target.FillRoundedRectangle(
-			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), radius, radius),
-			&SolidColorBrush(fill_color)
+			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), static_cast<FLOAT>(radius), static_cast<FLOAT>(radius)),
+			&GetSolidColorBrush(fill_color)
 		);
 	}
 }
@@ -71,14 +71,14 @@ void Ellipse::DrawOn(RenderTarget& target, Vector offset) const {
 	if (border_width > 0 && !border_color.IsInvisible()) {
 		target.DrawEllipse(
 			D2D1::Ellipse(Point2POINT(point_zero + offset), static_cast<FLOAT>(radius_x), static_cast<FLOAT>(radius_y)),
-			&SolidColorBrush(border_color),
+			&GetSolidColorBrush(border_color),
 			border_width
 		);
 	}
 	if (!fill_color.IsInvisible()) {
 		target.FillEllipse(
 			D2D1::Ellipse(Point2POINT(point_zero + offset), static_cast<FLOAT>(radius_x), static_cast<FLOAT>(radius_y)),
-			&SolidColorBrush(fill_color)
+			&GetSolidColorBrush(fill_color)
 		);
 	}
 }
@@ -115,7 +115,7 @@ void TextBlockFigure::DrawOn(RenderTarget& target, Vector offset) const {
 	target.DrawTextLayout(
 		Point2POINT(point_zero + offset),
 		&text_block.LayoutResource().DWriteTextLayout(),
-		&SolidColorBrush(text_block.DefaultStyle().color),
+		&GetSolidColorBrush(text_block.DefaultStyle().color),
 		D2D1_DRAW_TEXT_OPTIONS_CLIP | D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT
 	);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/common.h"
+#include "../../common/uncopyable.h"
 #include "../../geometry/geometry.h"
 #include "../../figure/color.h"
 

@@ -2,7 +2,7 @@
 
 #include "wnd_base_interface.h"
 #include "composite_style.h"
-#include "../common/common.h"
+#include "../common/core.h"
 #include "../common/uncopyable.h"
 #include "../geometry/geometry.h"
 #include "../message/msg_base.h"

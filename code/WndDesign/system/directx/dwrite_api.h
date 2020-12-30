@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common/common.h"
+#include "../../common/core.h"
 #include "../../figure/text_style.h"
 
 

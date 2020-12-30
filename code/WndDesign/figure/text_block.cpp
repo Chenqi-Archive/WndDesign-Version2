@@ -1,5 +1,6 @@
 #include "text_block.h"
-#include "../system/directx/dwrite.h"
+#include "../system/directx/directx_helper.h"
+#include "../system/directx/dwrite_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -146,8 +147,6 @@ inline void TextBlock::_ShrinkStyle(uint begin, uint length) {
 
 inline void TextBlock::_ApplyAllStyles() {
 	for (auto& style : styles) { style.ApplyTo(static_cast<TextLayout&>(layout->DWriteTextLayout())); }
-
-#error IDWriteTextLayout -> TextLayout should be put in "directx_helper.h".
 }
 
 

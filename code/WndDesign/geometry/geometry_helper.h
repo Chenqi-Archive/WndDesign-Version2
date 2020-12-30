@@ -34,11 +34,11 @@ inline float Distance(const Point& point, const Rect& rect) {
 //   region of the inner rect's left-top point.
 // That is, the returned region is at least 1x1.
 inline const Rect ShrinkRegionBySize(const Rect& region, const Size& size) {
-	Size size = Size(
+	Size new_size = Size(
 		(region.size.width > size.width ? region.size.width - size.width : 0) + 1,
 		(region.size.height > size.height ? region.size.height - size.height : 0) + 1
 	);
-	return Rect(region.point, size);
+	return Rect(region.point, new_size);
 }
 
 inline const Rect BoundRectInRegion(Rect rect, const Rect& region) {
@@ -87,7 +87,7 @@ inline const Rect RegionToOverlappingTileRange(Rect region, Size tile_size) {
 	Point begin_point(div_floor(region.point.x, tile_size.width), div_floor(region.point.y, tile_size.height));
 	Point end_point(div_ceil(region.right(), tile_size.width), div_ceil(region.bottom(), tile_size.height));
 	Size size = Size(static_cast<uint>(end_point.x - begin_point.x), static_cast<uint>(end_point.y - begin_point.y));
-	return Rect(begin_point, tile_size);
+	return Rect(begin_point, size);
 }
 
 

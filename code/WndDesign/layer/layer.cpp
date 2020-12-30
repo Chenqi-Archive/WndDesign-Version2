@@ -1,8 +1,8 @@
 #include "layer.h"
 #include "../geometry/geometry_helper.h"
 #include "../geometry/rect_point_iterator.h"
-#include "../system/directx/d2d.h"
 #include "../system/directx/directx_helper.h"
+#include "../system/directx/d2d_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -16,45 +16,54 @@ bool Layer::SetAccessibleRegion(Rect accessible_region, Rect visible_region) {
 }
 
 void Layer::ClearRegion(Rect region) {
-	auto device_context = D2DDeviceContext();
-
+	region = region.Intersect(GetCachedRegion());
+	auto& device_context = GetD2DDeviceContext();
 	for (RectPointIterator it(RegionToOverlappingTileRange(region, GetTileSize())); !it.Finished(); ++it) {
 		TileID tile_id = it.Item();
-		Point tile_origin = ScalePointBySize(tile_id, GetTileSize());
-		Rect region_on_tile = (region - (tile_origin - point_zero)).Intersect(Rect(point_zero, GetTileSize()));
-		Target& target = _tile_cache.WriteTile(tile_id, *this);
-		if (region_on_tile == Rect(point_zero, GetTileSize())) {
-			// The region overlaps the entire tile, just clear the tile.
-			target.Clear();
-		} else {
-			// Draw background on the tile.
-			device_context.SetTarget(&target.GetBitmap());
-			GetBackground().DrawOn(region_on_tile + (tile_origin - point_zero), 0xFF,
-								   static_cast<RenderTarget&>(device_context), region_on_tile.point - point_zero);
+		Vector tile_offset = ScalePointBySize(tile_id, GetTileSize()) - point_zero;
+		Rect region_on_tile = (region - tile_offset).Intersect(Rect(point_zero, GetTileSize()));
+		Target& target = _tile_cache.WriteTile(tile_id);
+		if (!target.BeginDraw(region_on_tile)) { 
+			_active_targets.push_back(&target); 
 		}
+		device_context.SetTarget(&target.GetBitmap());
+		GetBackground().DrawOn(region_on_tile + tile_offset, 0xFF,
+							   static_cast<RenderTarget&>(device_context), region_on_tile.point - point_zero);
 	}
 }
 
 void Layer::DrawFigureQueue(const FigureQueue& figure_queue, Vector position_offset, Rect bounding_region) {
-	auto device_context = D2DDeviceContext();
-
-#error cached_region, begin, 
-
+	bounding_region = bounding_region.Intersect(GetCachedRegion());
+	auto& device_context = GetD2DDeviceContext();
+	for (RectPointIterator it(RegionToOverlappingTileRange(bounding_region, GetTileSize())); !it.Finished(); ++it) {
+		TileID tile_id = it.Item();
+		Vector tile_offset = ScalePointBySize(tile_id, GetTileSize()) - point_zero;
+		Rect region_on_tile = (bounding_region - tile_offset).Intersect(Rect(point_zero, GetTileSize()));
+		Target& target = _tile_cache.WriteTile(tile_id);
+		if (!target.BeginDraw(region_on_tile)) {
+			_active_targets.push_back(&target);
+		}
+	}
 	for (auto& container : figure_queue) {
-		Rect figure_region = container.figure->GetRegion() + container.offset + position_offset;
-
-		Rect region_to_draw = bounding_region.Intersect(figure_region);
+		Vector figure_offset = container.offset + position_offset;
+		Rect region_to_draw = bounding_region.Intersect(container.figure->GetRegion() + figure_offset);
 		if (region_to_draw.IsEmpty()) { continue; }
-
 		for (RectPointIterator it(RegionToOverlappingTileRange(region_to_draw, GetTileSize())); !it.Finished(); ++it) {
 			TileID tile_id = it.Item();
-			Point tile_origin = ScalePointBySize(tile_id, GetTileSize());
-			Vector figure_offset_to_tile = figure_region.point - tile_origin;
-			Target& target = _tile_cache.WriteTile(tile_id, *this);
+			Vector tile_offset = ScalePointBySize(tile_id, GetTileSize()) - point_zero;
+			Vector figure_offset_to_tile = figure_offset - tile_offset;
+			Target& target = _tile_cache.WriteTile(tile_id);
 			device_context.SetTarget(&target.GetBitmap());
 			container.figure->DrawOn(static_cast<RenderTarget&>(device_context), figure_offset_to_tile);
 		}
 	}
+}
+
+void Layer::CommitDraw() {
+	for (auto target : _active_targets) {
+		target->EndDraw();
+	}
+	_active_targets.clear();
 }
 
 
@@ -62,10 +71,28 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 	Rect region_to_draw = Rect(region.point - offset, GetTargetSize(target)).Intersect(region);
 	for (RectPointIterator it(RegionToOverlappingTileRange(region_to_draw, layer.GetTileSize())); !it.Finished(); ++it) {
 		TileID tile_id = it.Item();
-		Point tile_origin = ScalePointBySize(tile_id, layer.GetTileSize());
-		Rect region_on_tile = (region_to_draw - (tile_origin - point_zero)).Intersect(Rect(point_zero, layer.GetTileSize()));
+		Vector tile_offset = ScalePointBySize(tile_id, layer.GetTileSize()) - point_zero;
+		Rect region_on_tile = (region_to_draw - tile_offset).Intersect(Rect(point_zero, layer.GetTileSize()));
 		const Target& source_target = layer._tile_cache.ReadTile(tile_id);
-		source_target.DrawOn(tile_origin - point_zero, region_on_tile, layer._composite_effect, target, offset);
+		if (source_target.HasBitmap()) {
+			target.DrawBitmap(
+				&source_target.GetBitmap(),
+				Rect2RECT(region_on_tile + tile_offset - (region.point - point_zero) + offset),
+				layer._composite_effect.opacity,
+				D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+				Rect2RECT(region_on_tile)
+			);
+		} else {
+			// Draw background.
+			// If has other effects, use an independent layer.
+			layer.GetBackground().DrawOn(
+				region_on_tile + tile_offset,
+				layer._composite_effect.opacity, 
+				target, 
+				offset
+			);
+		}
+
 	}
 }
 

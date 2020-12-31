@@ -48,16 +48,16 @@ void PopDraw();
 
 
 class Target : Uncopyable {
-private:
+protected:
+	// Inherited by WindowTarget to use swap-chain surface as the bitmap.
 	ID2D1Bitmap1* bitmap;
+private:
 	bool has_begun;
 
 public:
 	Target(Size size);
 	Target(nullptr_t) : bitmap(nullptr), has_begun(false) {}
 	~Target();
-
-	void SetSize(Size size);  // Only used by DesktopLayer target.
 
 	bool HasBitmap() const { return bitmap != nullptr; }  // Only read-only target doesn't have bitmap.
 	ID2D1Bitmap1& GetBitmap() const { assert(HasBitmap()); return *bitmap; }

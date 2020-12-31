@@ -2,6 +2,8 @@
 
 #include "d2d_api.h"
 
+#include <vector>
+
 
 //////////////////////////////////////////////////////////
 ////            Window Dependent Resources            ////
@@ -15,20 +17,22 @@ using HANDLE = void*;
 
 BEGIN_NAMESPACE(WndDesign)
 
+using std::vector;
+
 
 class WindowResource : Uncopyable {
 private:
 	HANDLE hwnd;
+	Size size;
 	IDXGISwapChain1* swap_chain;
-	ID2D1Bitmap1* bitmap;
+	bool has_presented;
 
-	// The target is directly drawn on, and is then bitblted to swap chain when present is called.
-	// This complex technique is used because when double buffering is used, 
-	//   the back buffer may not be consistent with the front buffer.
-	Target target;    
-
-	void CreateBitmapTarget();
-	void DestroyBitmapTarget();
+	class WindowTarget : public Target {
+	public:
+		WindowTarget() : Target(nullptr) {}
+		void Create(IDXGISwapChain1& swap_chain);
+		void Destroy();
+	}target;
 
 public:
 	WindowResource(HANDLE hwnd);
@@ -37,9 +41,9 @@ public:
 	void OnResize(Size size);
 
 	Target& GetTarget() { return target; }
-	const Size GetSize();
+	const Size GetSize() const { return size; }
 
-	void Present(Rect dirty_regions);
+	void Present(vector<Rect>& dirty_regions);
 };
 
 

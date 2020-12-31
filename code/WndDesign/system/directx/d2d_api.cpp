@@ -146,12 +146,6 @@ Target::~Target() {
     SafeRelease(&bitmap); 
 }
 
-void Target::SetSize(Size size) { 
-    assert(!has_begun);
-    SafeRelease(&bitmap);
-    bitmap = D2DCreateBitmap(size); 
-}
-
 bool Target::BeginDraw(Rect bounding_region) {
     auto& device_context = GetD2DDeviceContext();
     device_context.SetTarget(&GetBitmap());

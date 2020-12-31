@@ -7,8 +7,8 @@ BEGIN_NAMESPACE(WndDesign)
 
 
 inline void DesktopLayer::AddDirtyRegion(const Rect& region) {
-	// If the regions do not intersects, it may be better, but more complex to seperate them.
-	_dirty_region = _dirty_region.Union(region);
+	// Dirty regions may overlap, but DirectX should have optimized this.
+	_dirty_regions.push_back(region);
 }
 
 void DesktopLayer::ClearRegion(Rect region) {
@@ -31,11 +31,10 @@ void DesktopLayer::DrawFigureQueue(const FigureQueue& figure_queue, Vector posit
 }
 
 void DesktopLayer::CommitDraw() {
-	if (_dirty_region.IsEmpty()) {
-		_window.GetTarget().EndDraw();
-	} else { // EndDraw is called inside the Present function.
-		_window.Present(_dirty_region);
-		_dirty_region = region_empty;
+	_window.GetTarget().EndDraw();
+	if (!_dirty_regions.empty()) {
+		_window.Present(_dirty_regions);
+		_dirty_regions.clear();
 	}
 }
 

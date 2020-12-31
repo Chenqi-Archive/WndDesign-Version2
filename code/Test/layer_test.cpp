@@ -4,8 +4,6 @@
 #include "../WndDesign/system/metrics.h"
 #include "../WndDesign/system/directx/d2d_api.h"
 
-
-
 #include <Windows.h>
 #include <windowsx.h>
 
@@ -18,8 +16,6 @@ using std::shared_ptr;
 #else
 #pragma comment(lib, "..\\build\\x64\\Release\\WndDesignCore.lib")
 #endif // _DEBUG
-
-
 
 
 DesktopLayer* layer;

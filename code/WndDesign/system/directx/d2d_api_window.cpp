@@ -18,39 +18,42 @@ inline const Size GetWindowSize(HANDLE hwnd) {
 }
 
 
-WindowResource::WindowResource(HANDLE hwnd) : hwnd(hwnd), target(GetWindowSize(hwnd)){
-    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
-    swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    swapChainDesc.Stereo = false;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.BufferCount = 2;
-    swapChainDesc.Scaling = DXGI_SCALING_NONE;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-    swapChainDesc.Flags = 0;
-    swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+WindowResource::WindowResource(HANDLE hwnd) : 
+    hwnd(hwnd), size(GetWindowSize(hwnd)), swap_chain(nullptr), target(), has_presented(false) {
+    DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = { 0 };
+    swap_chain_desc.Width = size.width;
+    swap_chain_desc.Height = size.height;
+    swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    swap_chain_desc.Stereo = false;
+    swap_chain_desc.SampleDesc.Count = 1;
+    swap_chain_desc.SampleDesc.Quality = 0;
+    swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swap_chain_desc.BufferCount = 2;
+    swap_chain_desc.Scaling = DXGI_SCALING_NONE;
+    swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+    swap_chain_desc.Flags = 0;
+    swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
     hr = GetDXGIFactory().CreateSwapChainForHwnd(
         &GetD3DDevice(),
         static_cast<HWND>(hwnd),
-        &swapChainDesc,
+        &swap_chain_desc,
         nullptr,
         nullptr,
         &swap_chain
     );
 
-    CreateBitmapTarget();
+    target.Create(*swap_chain);
 }
 
 WindowResource::~WindowResource() {
-    DestroyBitmapTarget();
+    target.Destroy();
     SafeRelease(&swap_chain);
 }
 
-void WindowResource::CreateBitmapTarget() {
+void WindowResource::WindowTarget::Create(IDXGISwapChain1& swap_chain) {
     IDXGISurface* dxgi_surface = nullptr;
-    hr = swap_chain->GetBuffer(0, IID_PPV_ARGS(&dxgi_surface));
+    hr = swap_chain.GetBuffer(0, IID_PPV_ARGS(&dxgi_surface));
 
     D2D1_BITMAP_PROPERTIES1 bitmap_properties = D2D1::BitmapProperties1(
         D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
@@ -64,40 +67,30 @@ void WindowResource::CreateBitmapTarget() {
     SafeRelease(&dxgi_surface);
 }
 
-void WindowResource::DestroyBitmapTarget() {
+void WindowResource::WindowTarget::Destroy() {
     SafeRelease(&bitmap);
 }
 
 void WindowResource::OnResize(Size size) {
-    DestroyBitmapTarget();
-    target.SetSize(size);
-    hr = swap_chain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
-    CreateBitmapTarget();
+    this->size = size;
+    target.Destroy();
+    hr = swap_chain->ResizeBuffers(0, size.width, size.height, DXGI_FORMAT_UNKNOWN, 0);
+    target.Create(*swap_chain);
+    has_presented = false;
 }
 
-const Size WindowResource::GetSize() { 
-    return SIZE2Size(bitmap->GetSize()); 
-}
-
-void WindowResource::Present(Rect region) {
-    PushDraw();
-    target.EndDraw();
-    auto& device_context = GetD2DDeviceContext();
-    device_context.SetTarget(bitmap);
-    device_context.DrawBitmap(
-        &target.GetBitmap(),
-        Rect2RECT(region),
-        1.0F,
-        D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-        Rect2RECT(region)
-    );
-    PopDraw();
-
+void WindowResource::Present(vector<Rect>& dirty_regions) {
     DXGI_PRESENT_PARAMETERS present_parameters = {};
-    if (region.size != SIZE2Size(bitmap->GetSize())) {
-        *reinterpret_cast<RECT*>(&region) = { region.left(), region.top(), region.right(), region.bottom() };
-        present_parameters.DirtyRectsCount = 1;
-        present_parameters.pDirtyRects = reinterpret_cast<RECT*>(&region);
+    if (has_presented) {
+        static_assert(sizeof(RECT) == sizeof(Rect));  // In-place convert Rect to RECT.
+        for (auto& region : dirty_regions) {
+            *reinterpret_cast<RECT*>(&region) = { region.left(), region.top(), region.right(), region.bottom() };
+        }
+        present_parameters.DirtyRectsCount = dirty_regions.size();
+        present_parameters.pDirtyRects = reinterpret_cast<RECT*>(dirty_regions.data());
+    } else {
+        // The entire region must be presented for the first time.
+        has_presented = true;
     }
     hr = swap_chain->Present1(0, 0, &present_parameters);
 }

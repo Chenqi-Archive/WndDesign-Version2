@@ -16,7 +16,7 @@ private:
 
 public:
 	DesktopLayer(HANDLE hwnd, const Background& background) :
-		_window(hwnd), _background(background), _dirty_region(region_empty) {
+		_window(hwnd), _background(background), _dirty_regions() {
 	}
 
 	void OnResize(Size size) { _window.OnResize(size); }
@@ -25,7 +25,7 @@ public:
 	const Background& GetBackground() const { return _background; }
 
 private:
-	Rect _dirty_region;
+	vector<Rect> _dirty_regions;
 	void AddDirtyRegion(const Rect& region);
 
 public:

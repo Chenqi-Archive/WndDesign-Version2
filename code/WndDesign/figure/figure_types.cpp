@@ -1,6 +1,7 @@
 #include "figure_types.h"
 #include "image.h"
 #include "text_block.h"
+#include "../layer/background_types.h"
 
 #include "../system/directx/directx_helper.h"
 #include "../system/directx/d2d_api.h"
@@ -96,14 +97,15 @@ void Ellipse::DrawOn(RenderTarget& target, Vector offset) const {
 ///////////////////////////////////////////////////////////
 
 void ImageFigure::DrawOn(RenderTarget& target, Vector offset) const {
-	Rect region_on_image = this->region_on_image.Intersect(Rect(point_zero, image.GetSize()));
-	target.DrawBitmap(
-		&image.GetImageResource().GetD2DBitmap(),
-		Rect2RECT(Rect(point_zero + offset, region_on_image.size)),
-		Opacity2Float(opacity),
-		D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-		Rect2RECT(region_on_image)
-	);
+	if (!region_on_image.IsEmpty() && opacity > 0) {
+		target.DrawBitmap(
+			&image.GetImageResource().GetD2DBitmap(),
+			Rect2RECT(Rect(point_zero + offset, region_on_image.size)),
+			Opacity2Float(opacity),
+			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+			Rect2RECT(region_on_image)
+		);
+	}
 }
 
 
@@ -121,13 +123,14 @@ void TextBlockFigure::DrawOn(RenderTarget& target, Vector offset) const {
 }
 
 
-///////////////////////////////////////////////////////////
-////                      layer.h                      ////
-///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+////                background_types.h                ////
+//////////////////////////////////////////////////////////
 
 
-
-
+void SolidColorBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
+	target.Clear(Color2COLOR(color));
+}
 
 
 END_NAMESPACE(WndDesign)

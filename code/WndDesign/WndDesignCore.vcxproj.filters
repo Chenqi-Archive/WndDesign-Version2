@@ -111,12 +111,6 @@
     <ClInclude Include="figure\geometry_figure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="layer\background.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="layer\background_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\reference_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -160,6 +154,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system\metrics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="layer\background.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="layer\background_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -210,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="system\metrics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="layer\background_types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

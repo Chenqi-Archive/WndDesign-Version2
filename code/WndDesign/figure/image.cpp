@@ -22,7 +22,7 @@ bool Image::IsEmpty() const {
 }
 
 const Size Image::GetSize() const {
-    if (IsEmpty()) { throw std::logic_error("image file not loaded"); }
+    if (IsEmpty()) { throw std::invalid_argument("image file not loaded"); }
     return image->GetSize();
 }
 

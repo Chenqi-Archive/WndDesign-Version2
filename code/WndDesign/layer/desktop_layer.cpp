@@ -15,7 +15,7 @@ void DesktopLayer::ClearRegion(Rect region) {
 	region = region.Intersect(Rect(point_zero, GetSize()));
 	auto& device_context = GetD2DDeviceContext();
 	_window.GetTarget().BeginDraw(region); AddDirtyRegion(region);
-	GetBackground().DrawOn(region, 0xFF, static_cast<RenderTarget&>(device_context), region.point - point_zero);
+	GetBackground().Clear(region, static_cast<RenderTarget&>(device_context), region.point - point_zero);
 }
 
 void DesktopLayer::DrawFigureQueue(const FigureQueue& figure_queue, Vector position_offset, Rect bounding_region) {

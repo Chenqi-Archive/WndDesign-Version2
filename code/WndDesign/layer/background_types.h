@@ -12,12 +12,12 @@ BEGIN_NAMESPACE(WndDesign)
 
 struct SolidColorBackground : Background {
 	Color color;
+
 	SolidColorBackground(Color color) : color(color) {}
-	virtual void DrawOn(Rect region, uchar opacity, RenderTarget& target, Vector offset) const override {
-		Rectangle rectangle(region.size, BlendColorWithOpacity(color, opacity));
-		rectangle.DrawOn(target, offset);
-	}
+	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const override;
 };
+
 
 struct ImageTileBackground : Background {
 	const Image& image;
@@ -27,9 +27,8 @@ struct ImageTileBackground : Background {
 	ImageTileBackground(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) :
 		image(image), opacity(opacity), offset_on_image(offset_on_image) {
 	}
-	virtual void DrawOn(Rect region, uchar opacity, RenderTarget& target, Vector offset) const override {
-
-	}
+	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const override;
 };
 
 

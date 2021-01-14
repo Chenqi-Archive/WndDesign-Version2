@@ -21,9 +21,11 @@ using std::shared_ptr;
 DesktopLayer* layer;
 Layer* layer1;
 Layer* layer2;
+Image* image;
 Background* background;
 Background* background1;
 Background* background2;
+
 
 void OnPaint();
 
@@ -52,15 +54,16 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	if (hWnd == NULL) { throw; }
 
-	background = new SolidColorBackground(ColorSet::ForestGreen);
+	background = new SolidColorBackground(ColorSet::Cyan);
 	layer = new DesktopLayer(hWnd, *background);
 
-	background1 = new SolidColorBackground(ColorSet::Cyan);
-	layer1 = new Layer(*background1, CompositeEffect{}, Rect(point_zero, Size(200, 200)));
+	image = new Image(L"R:\\test.jpg");
+	background1 = new ImageTileBackground(*image, 0xF0, Vector{ 20, 20 });
+	layer1 = new Layer(Rect(point_zero, Size(200, 200)), *background1);
 	layer1->SetCachedRegion(Rect(point_zero, Size(200, 200)));
 
 	background2 = new SolidColorBackground(ColorSet::DarkMagenta);
-	layer2 = new Layer(*background2, CompositeEffect{}, region_infinite);
+	layer2 = new Layer(region_infinite, *background2);
 
 	Rect rect(point_zero, GetDesktopSize());
 	layer2->SetCachedRegion(rect - (rect.Center() - point_zero));
@@ -78,6 +81,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	delete layer;
 	delete background;
+	delete image;
 
 	delete layer1;
 	delete background1;
@@ -129,15 +133,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 void OnPaint() {
 	FigureQueue figure_queue1;
-	figure_queue1.Append(Vector{-50, -50}, new WndDesign::LayerFigure(*layer1, Rect(point_zero, Size(200, 200))));
+	figure_queue1.Append(Vector{ -50, -50 }, new WndDesign::LayerFigure(*layer1, Rect(point_zero, Size(200, 200)), CompositeEffect{}));
 	layer2->ClearRegion(region_infinite);
 	layer2->DrawFigureQueue(figure_queue1, vector_zero, Rect(-40, -40, 10, 10));
 	layer2->CommitDraw();
 
 	FigureQueue figure_queue2;
 	figure_queue2.Append(Vector(100, 100), new WndDesign::Ellipse(20, 20, 5.0, ColorSet::Crimson, ColorSet::Azure));
-	figure_queue2.Append(Vector(100, 200), new WndDesign::LayerFigure(*layer1, Rect(point_zero, Size(200, 200))));
-	figure_queue2.Append(Vector(300, 200), new WndDesign::LayerFigure(*layer2, Rect(-200, -50, 300, 50)));
+	figure_queue2.Append(Vector(100, 200), new WndDesign::LayerFigure(*layer1, Rect(point_zero, Size(200, 200)), CompositeEffect{}));
+	figure_queue2.Append(Vector(300, 200), new WndDesign::LayerFigure(*layer2, Rect(-200, -50, 300, 50), CompositeEffect{}));
 	layer->ClearRegion(region_infinite);
 	layer->DrawFigureQueue(figure_queue2, vector_zero, region_infinite);
 	layer->CommitDraw();

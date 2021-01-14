@@ -216,6 +216,7 @@
     <ClCompile Include="figure\image.cpp" />
     <ClCompile Include="figure\text_block.cpp" />
     <ClCompile Include="figure\text_style.cpp" />
+    <ClCompile Include="layer\background_types.cpp" />
     <ClCompile Include="geometry\region.cpp" />
     <ClCompile Include="layer\desktop_layer.cpp" />
     <ClCompile Include="layer\layer.cpp" />

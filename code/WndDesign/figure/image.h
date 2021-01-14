@@ -21,6 +21,8 @@ private:
 
 public:
 	Image() : image(nullptr) {}
+	Image(const wstring& file_name): image(nullptr) { Load(file_name); }
+	Image(void* address, size_t size): image(nullptr) { Load(address, size); }
 	~Image() {}
 
 	void Load(const wstring& file_name);
@@ -40,8 +42,9 @@ struct ImageFigure : Figure {
 	Rect region_on_image;
 
 	ImageFigure(const Image& image, uchar opacity = 0xFF, Rect region_on_image = region_infinite) :
-		image(image), opacity(opacity), region_on_image(region_on_image) {
+		image(image), opacity(opacity), region_on_image(region_on_image.Intersect(Rect(point_zero, image.GetSize()))) {
 	}
+	virtual const Rect GetRegion() const override {	return Rect(point_zero, image.GetSize()); }
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override; // defined in figure_types.cpp
 };
 

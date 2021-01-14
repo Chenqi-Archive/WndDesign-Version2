@@ -20,22 +20,19 @@ private:
 	Rect _accessible_region;
 	reference_wrapper<const Background> _background;
 
-	CompositeEffect _composite_effect;
-
 public:
-	Layer(const Background& background, const CompositeEffect& composite_effect, Rect accessible_region) :
+	Layer(Rect accessible_region, const Background& background) :
 		_accessible_region(accessible_region),
 		_background(background),
-		_composite_effect(composite_effect),
-		_tile_cache(accessible_region.size) {
+		_tile_cache(accessible_region.size),
+		_active_targets() {
 	}
 
-	const Background& GetBackground() const { return _background; }
 	const Rect GetAccessibleRegion() const { return _accessible_region; }
-
-	void SetBackground(const Background& background) { _background = background; }
 	bool SetAccessibleRegion(Rect accessible_region, Rect visible_region);
-	void SetCompositeEffect(CompositeEffect composite_effect) { _composite_effect = composite_effect; }
+
+	const Background& GetBackground() const { return _background; }
+	void SetBackground(const Background& background) { _background = background; }
 
 
 	////////////////////////////////////////////////////////////
@@ -70,8 +67,11 @@ public:
 struct LayerFigure : Figure {
 	const Layer& layer;
 	Rect region;
+	CompositeEffect composite_effect;
 
-	LayerFigure(const Layer& layer, Rect region = region_infinite) : layer(layer), region(region) {}
+	LayerFigure(const Layer& layer, Rect region, CompositeEffect composite_effect) :
+		layer(layer), region(region), composite_effect(composite_effect) {
+	}
 
 	virtual const Rect GetRegion() const override { return Rect(point_zero, region.size); }
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override;

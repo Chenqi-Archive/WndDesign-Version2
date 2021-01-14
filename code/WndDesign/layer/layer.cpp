@@ -23,12 +23,11 @@ void Layer::ClearRegion(Rect region) {
 		Vector tile_offset = ScalePointBySize(tile_id, GetTileSize()) - point_zero;
 		Rect region_on_tile = (region - tile_offset).Intersect(Rect(point_zero, GetTileSize()));
 		Target& target = _tile_cache.WriteTile(tile_id);
-		if (!target.BeginDraw(region_on_tile)) { 
-			_active_targets.push_back(&target); 
-		}
-		device_context.SetTarget(&target.GetBitmap());
-		GetBackground().DrawOn(region_on_tile + tile_offset, 0xFF,
-							   static_cast<RenderTarget&>(device_context), region_on_tile.point - point_zero);
+		bool has_begun = target.BeginDraw(region_on_tile);
+		if (!has_begun) { _active_targets.push_back(&target); }
+		GetBackground().Clear(region_on_tile + tile_offset,
+							  static_cast<RenderTarget&>(device_context),
+							  region_on_tile.point - point_zero);
 	}
 }
 
@@ -40,9 +39,8 @@ void Layer::DrawFigureQueue(const FigureQueue& figure_queue, Vector position_off
 		Vector tile_offset = ScalePointBySize(tile_id, GetTileSize()) - point_zero;
 		Rect region_on_tile = (bounding_region - tile_offset).Intersect(Rect(point_zero, GetTileSize()));
 		Target& target = _tile_cache.WriteTile(tile_id);
-		if (!target.BeginDraw(region_on_tile)) {
-			_active_targets.push_back(&target);
-		}
+		bool has_begun = target.BeginDraw(region_on_tile);
+		if (!has_begun) { _active_targets.push_back(&target); }
 	}
 	for (auto& container : figure_queue) {
 		Vector figure_offset = container.offset + position_offset;
@@ -73,26 +71,24 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 		TileID tile_id = it.Item();
 		Vector tile_offset = ScalePointBySize(tile_id, layer.GetTileSize()) - point_zero;
 		Rect region_on_tile = (region_to_draw - tile_offset).Intersect(Rect(point_zero, layer.GetTileSize()));
+
 		const Target& source_target = layer._tile_cache.ReadTile(tile_id);
 		if (source_target.HasBitmap()) {
 			target.DrawBitmap(
 				&source_target.GetBitmap(),
 				Rect2RECT(region_on_tile + tile_offset - (region.point - point_zero) + offset),
-				layer._composite_effect.opacity,
+				composite_effect.opacity,
 				D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
 				Rect2RECT(region_on_tile)
 			);
 		} else {
-			// Draw background.
-			// If has other effects, use an independent layer.
 			layer.GetBackground().DrawOn(
 				region_on_tile + tile_offset,
-				layer._composite_effect.opacity, 
-				target, 
-				offset
+				target,
+				offset,
+				composite_effect.opacity
 			);
 		}
-
 	}
 }
 

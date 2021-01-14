@@ -5,6 +5,15 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
+inline const RECT Rect2RECT(const Rect& rect) {
+    return { rect.left(), rect.top(), rect.right(), rect.bottom() };
+}
+
+inline const Rect RECT2Rect(const RECT& rect) {
+    return Rect(rect.left, rect.top, static_cast<uint>(rect.right - rect.left), static_cast<uint>(rect.bottom - rect.top));
+}
+
+
 static Region& TempRegion() {
     static Region region(Rect(0,0,0,0));
     return region;
@@ -50,7 +59,7 @@ void Region::Union(const Rect& region) {
     Union(temp);
 }
 
-vector<Rect> Region::GetRect() const {
+std::pair<Rect, vector<Rect>> Region::GetRect() const {
     int size = GetRegionData(static_cast<HRGN>(rgn), 0, NULL);
     char* buffer = new char[size];
     GetRegionData(static_cast<HRGN>(rgn), size, (LPRGNDATA)buffer);
@@ -59,14 +68,11 @@ vector<Rect> Region::GetRect() const {
     vector<Rect> regions((Rect*)(buffer + data.rdh.dwSize), (Rect*)(buffer + data.rdh.dwSize) + data.rdh.nCount);
     delete[] buffer;
     for (auto& region : regions) {
-        RECT* rect = reinterpret_cast<RECT*>(&region);
-        assert(rect->right >= rect->left && rect->bottom >= rect->top);
-        region = Rect(
-            rect->left, rect->top,
-            static_cast<uint>(rect->right - rect->left), static_cast<uint>(rect->bottom - rect->top)
-        );
+        RECT& rect = reinterpret_cast<RECT&>(region);
+        assert(rect.right >= rect.left && rect.bottom >= rect.top);
+        region = RECT2Rect(rect);
     }
-    return regions;
+    return { RECT2Rect(data.rdh.rcBound), regions };
 }
 
 

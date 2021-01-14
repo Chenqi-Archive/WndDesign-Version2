@@ -4,13 +4,11 @@
 #include "../geometry/region.h"
 
 #include <list>
-#include <set>
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 using std::list;
-using std::set;
 
 
 class WndBase {
@@ -18,7 +16,7 @@ class WndBase {
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
 protected:
-	WndBase() {}
+	WndBase();
 
 	~WndBase() {
 
@@ -77,58 +75,9 @@ protected:
 	}
 
 
-	///////////////////////////////////////////////////////////
-	////                    Composition                    ////
-	///////////////////////////////////////////////////////////
-
-	//// static RedrawQueue object ////
-private:
-
-	class RedrawQueue {
-	private:
-		/* redraw queue could use an indexed list */
-		set<WndBase&> wnds;
-
-
-	public:
-		set<WndBase&>::iterator AddWnd(const WndBase& wnd);
-		void RemoveWnd(set<WndBase&>::iterator it);
-		void CommitDraw();
-	};
-
-	static RedrawQueue redraw_queue;
-
-
-	//// window depth ////
-private:
-	uint _depth = 0;  // used for determining the redrawing priority.
-public:
-	bool operator<(const WndBase& wnd) const {
-		return _depth > wnd._depth;
-	}
-private:
-	void SetDepth(uint depth) {
-		_depth = depth;
-		// Set depth for child windows.
-	}
-
-
-	//// invalid region ////
-private:
-	Region _invalid_region;
-	set<WndBase&>::iterator _redraw_queue_index;
-
-private:
-	void PushRedrawQueue() {
-
-	}
-	void Invalidate(Rect region) { 
-		_invalid_region.Union(region); 
-	}
-	void Invalidate(const Region& region) { 
-		_invalid_region.Union(region); 
-	}
-
+	//////////////////////////////////////////////////////////
+	////                      Region                      ////
+	//////////////////////////////////////////////////////////
 
 	//// layer management ////
 private:
@@ -136,13 +85,77 @@ private:
 
 	bool HasLayer() const { return _layer != nullptr; }
 
+
+	//// relative region ////
 private:
-	void UpdateInvalidRegion() {
-		// Draw child windows of the region.
-		// Clear the invalid region.
-		// Invalidate parent region.
+	Rect _display_region;  // in accessibe_region's coordinates.
+	Vector _offset_to_parent;  // in parent's coordinates.
+
+public:
+	void SetDisplayRegion(Rect display_region) {
+
 	}
+
+	void SetAccessibleRegion(Rect accessible_region);
+
+	void SetVisibleRegion(Rect visible_region);
+
+	const Rect GetCachedRegion() const;
+
+
+	///////////////////////////////////////////////////////////
+	////                    Composition                    ////
+	///////////////////////////////////////////////////////////
+
+	//// window depth ////
 private:
+	uint _depth = 0;  // used for determining the redraw queue priority.
+public:
+	bool HasDepth() const { return _depth > 0; }
+	uint GetDepth() const { return _depth; }
+	void SetDepth(uint depth) {
+		if (_depth == depth) { return; }
+		// Depth has changed, re-enter redraw queue.
+		LeaveRedrawQueue();
+		_depth = depth;
+
+		// Set depth for child windows.
+
+		// Enter redraw queue, if depth > 0 && invalid region is not empty.
+		if (_depth > 0 && !_invalid_region.IsEmpty()) {
+
+		}
+	}
+
+
+	//// redraw queue ////
+private:
+	list<WndBase&>::iterator _redraw_queue_index;
+public:
+	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<WndBase&>::iterator(); }
+	const list<WndBase&>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
+	void SetRedrawQueueIndex(list<WndBase&>::iterator index = list<WndBase&>::iterator()) { _redraw_queue_index = index; }
+private:
+	void EnterRedrawQueue();
+	void LeaveRedrawQueue();
+
+
+	//// invalid region ////
+private:
+	Region _invalid_region;
+private:
+	void Invalidate(Rect region) {
+		region = region.Intersect(GetCachedRegion());
+		if (!region.IsEmpty()) {
+			_invalid_region.Union(region);
+			EnterRedrawQueue();
+		}
+	}
+	void Invalidate(const Region& region) {
+		_invalid_region.Union(region); 
+		EnterRedrawQueue();
+	}
+public:
 	void UpdateInvalidRegion() {
 		if (HasLayer()) {
 			// Draw figure queue to layer.
@@ -152,6 +165,8 @@ private:
 		}
 
 		// Invalidate region for parent window.
+
+		// Clear invalid region.
 
 	}
 

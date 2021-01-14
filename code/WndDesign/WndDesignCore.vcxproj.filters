@@ -150,6 +150,9 @@
     <ClInclude Include="geometry\region.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wnd\redraw_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="figure\image.cpp">
@@ -198,6 +201,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="geometry\region.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\redraw_queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

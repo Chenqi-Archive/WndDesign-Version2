@@ -36,7 +36,7 @@ public:
 
 	void Union(const Rect& region);
 
-	vector<Rect> GetRect() const;
+	std::pair<Rect, vector<Rect>> GetRect() const;
 };
 
 

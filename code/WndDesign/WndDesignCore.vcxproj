@@ -208,6 +208,7 @@
     <ClInclude Include="system\ime.h" />
     <ClInclude Include="WndDesign.h" />
     <ClInclude Include="wnd\desktop.h" />
+    <ClInclude Include="wnd\redraw_queue.h" />
     <ClInclude Include="wnd\wnd_base.h" />
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +228,7 @@
     <ClCompile Include="system\directx\dxgi_api.cpp" />
     <ClCompile Include="system\directx\wic_api.cpp" />
     <ClCompile Include="wnd\desktop.cpp" />
+    <ClCompile Include="wnd\redraw_queue.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,14 +16,18 @@ class WndBase;
 
 class RedrawQueue {
 private:
-	vector<list<WndBase&>> queue;
-	int next_depth;
+	vector<list<WndBase&>> _queue;
+	int _next_depth;
+
+private:
+	RedrawQueue();
 
 public:
-	RedrawQueue();
 	void AddWnd(WndBase& wnd);
 	void RemoveWnd(WndBase& wnd);
 	void Commit();
+
+	static RedrawQueue& Get();
 };
 
 

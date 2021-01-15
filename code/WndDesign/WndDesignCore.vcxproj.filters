@@ -153,6 +153,9 @@
     <ClInclude Include="layer\background_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wnd\WndObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="figure\image.cpp">
@@ -207,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="layer\background_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\wnd_base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

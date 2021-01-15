@@ -1,7 +1,11 @@
 #pragma once
 
 #include "../layer/layer.h"
+#include "../layer/background.h"
 #include "../geometry/region.h"
+#include "../common/reference_wrapper.h"
+
+#include "WndObject.h"
 
 #include <list>
 
@@ -15,15 +19,12 @@ class WndBase {
 	//////////////////////////////////////////////////////////
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
-protected:
-	WndBase();
+private:
+	WndObject& _object;
 
-	~WndBase() {
-
-		DetachFromParent();
-
-		// get out of the drawing queue.
-	}
+public:
+	WndBase(WndObject& object);
+	~WndBase();
 
 
 	///////////////////////////////////////////////////////////
@@ -32,27 +33,19 @@ protected:
 private:
 	ref_ptr<WndBase> _parent;
 	list<WndBase&>::iterator _index_on_parent;
-
-protected:
+public:
 	bool HasParent() const { return _parent != nullptr; }
-
-	// Called by new parent window.
-	void SetParent(ref_ptr<WndBase> parent, list<WndBase&>::iterator index_on_parent) {
-		DetachFromParent();
-		_parent = parent; _index_on_parent = index_on_parent;
+	WndObject& GetParent() const { 
+		if (!HasParent()) { throw std::invalid_argument("window has no parent"); }
+		return _parent->_object;
 	}
-
-	// Called by old parent window.
-	void ClearParent() {
-		_parent = nullptr;
-		_index_on_parent = {};
-	}
-
 private:
-	// Called by myself.
-	void DetachFromParent() {
-		if (HasParent()) { _parent->RemoveChild(*this); }
-	}
+	/* called by new parent window */
+	void SetParent(ref_ptr<WndBase> parent, list<WndBase&>::iterator index_on_parent);
+	/* called by old parent window */
+	void ClearParent();
+	/* called by myself */
+	void DetachFromParent();
 
 
 	///////////////////////////////////////////////////////////
@@ -60,47 +53,52 @@ private:
 	///////////////////////////////////////////////////////////
 private:
 	list<WndBase&> _child_wnds;
-
-protected:
-	void AddChild(WndBase& child_wnd) {
-		
-
-	}
-	void RemoveChild(WndBase& child_wnd) {
-		if (child_wnd._parent != this) { return; }
-		_child_wnds.erase(child_wnd._index_on_parent);
-		child_wnd.ClearParent();
-
-		// Clear message tracked windows.
-	}
+public:
+	void AddChild(WndBase& child_wnd);
+	void RemoveChild(WndBase& child_wnd);
 
 
 	//////////////////////////////////////////////////////////
 	////                      Region                      ////
 	//////////////////////////////////////////////////////////
+private:
+	// The entire region of the window.
+	Rect _accessible_region;
+	// The display region's offset, in my coordinates, size is determined by parent window.
+	// Rect(display_region_offset, display_region.size) must be contained in accessible_region.
+	Point _display_offset;
+	// The region shown on parent window, in parent's coordinates.
+	Rect _display_region;
+	// The region that is cached on parent layer and must be composited, also used for child layer caching.
+	//   (Parent's cached region relative to child is child's visible region.)
+	Rect _visible_region;
+public:
+	const Rect GetAccessibleRegion() const { return _accessible_region; }
+	void SetAccessibleRegion(Rect accessible_region);
+	void SetDisplayOffset(Point display_offset);
+	void SetDisplayRegion(Rect display_region);
+
+	//// background ////
+private:
+	reference_wrapper<const Background> _background;
+public:
+	const Background& GetBackground() const { return _background; }
+	void SetBackground(const Background& background) { _background = background; }
 
 	//// layer management ////
 private:
 	unique_ptr<Layer> _layer;
-
-	bool HasLayer() const { return _layer != nullptr; }
-
-
-	//// relative region ////
 private:
-	Rect _display_region;  // in accessibe_region's coordinates.
-	Vector _offset_to_parent;  // in parent's coordinates.
+	bool HasLayer() const { return _layer != nullptr; }
+	Layer& GetLayer() const { return *_layer; }
+public:
+	void AllocateLayer() { _layer.reset(new Layer()); }
+	void DeallocateLayer() { _layer.reset(); }
 
 public:
-	void SetDisplayRegion(Rect display_region) {
-
-	}
-
-	void SetAccessibleRegion(Rect accessible_region);
-
 	void SetVisibleRegion(Rect visible_region);
-
-	const Rect GetCachedRegion() const;
+private:
+	const Rect GetCachedRegion() const { return HasLayer() ? GetLayer().GetCachedRegion() : _visible_region; }
 
 
 	///////////////////////////////////////////////////////////
@@ -109,24 +107,11 @@ public:
 
 	//// window depth ////
 private:
-	uint _depth = 0;  // used for determining the redraw queue priority.
+	uint _depth;  // used for determining the redraw queue priority.
 public:
 	bool HasDepth() const { return _depth > 0; }
 	uint GetDepth() const { return _depth; }
-	void SetDepth(uint depth) {
-		if (_depth == depth) { return; }
-		// Depth has changed, re-enter redraw queue.
-		LeaveRedrawQueue();
-		_depth = depth;
-
-		// Set depth for child windows.
-
-		// Enter redraw queue, if depth > 0 && invalid region is not empty.
-		if (_depth > 0 && !_invalid_region.IsEmpty()) {
-
-		}
-	}
-
+	void SetDepth(uint depth);
 
 	//// redraw queue ////
 private:
@@ -136,39 +121,21 @@ public:
 	const list<WndBase&>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<WndBase&>::iterator index = list<WndBase&>::iterator()) { _redraw_queue_index = index; }
 private:
-	void EnterRedrawQueue();
+	void JoinRedrawQueue();
 	void LeaveRedrawQueue();
-
 
 	//// invalid region ////
 private:
 	Region _invalid_region;
 private:
-	void Invalidate(Rect region) {
-		region = region.Intersect(GetCachedRegion());
-		if (!region.IsEmpty()) {
-			_invalid_region.Union(region);
-			EnterRedrawQueue();
-		}
-	}
-	void Invalidate(const Region& region) {
-		_invalid_region.Union(region); 
-		EnterRedrawQueue();
-	}
+	/* called by child window when child has updated invalid region */
+	void Invalidate(const Region& region);
 public:
-	void UpdateInvalidRegion() {
-		if (HasLayer()) {
-			// Draw figure queue to layer.
-			// (Call ObjectBase)
-			// - background
-			// - child windows
-		}
-
-		// Invalidate region for parent window.
-
-		// Clear invalid region.
-
-	}
+	void Invalidate(Rect region);
+	/* called by redraw queue at commit time */
+	void UpdateInvalidRegion();
+	/* called by parent window (WndObject) */
+	void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const;
 
 
 	///////////////////////////////////////////////////////////
@@ -178,7 +145,6 @@ private:
 	ref_ptr<WndBase> _capture_wnd;
 	ref_ptr<WndBase> _focus_wnd;
 	ref_ptr<WndBase> _last_tracked_wnd;
-
 public:
 	void SetCapture();
 	void ReleaseCapture();

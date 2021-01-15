@@ -18,14 +18,14 @@ public:
 		Vector offset;
 		unique_ptr<const Figure> figure;
 	};
+	struct FigureGroup {
 
+	};
 private:
 	vector<FigureContainer> figures;
+	vector<FigureGroup> groups;
 
 public:
-	auto begin() const { return figures.begin(); }
-	auto end() const { return figures.end(); }
-
 	void Append(Vector offset, unique_ptr<const Figure> figure) {
 		figures.emplace_back(FigureContainer{ offset, std::move(figure) });
 	}
@@ -33,6 +33,7 @@ public:
 		Append(offset, unique_ptr<const Figure>(figure));
 	}
 	bool IsEmpty() const { return figures.empty(); }
+
 };
 
 

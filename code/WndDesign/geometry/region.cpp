@@ -14,8 +14,9 @@ inline const Rect RECT2Rect(const RECT& rect) {
 }
 
 
-static Region& TempRegion() {
+static Region& TempRegion(Rect rect) {
     static Region region(Rect(0,0,0,0));
+    region.Set(rect);
     return region;
 }
 
@@ -53,11 +54,9 @@ void Region::Sub(const Region& region) {
     CombineRgn(static_cast<HRGN>(rgn), static_cast<HRGN>(rgn), static_cast<HRGN>(region.rgn), RGN_DIFF);
 }
 
-void Region::Union(const Rect& region) {
-    Region& temp = TempRegion();
-    temp.Set(region);
-    Union(temp);
-}
+void Region::Union(const Rect& region) { Union(TempRegion(region)); }
+void Region::Intersect(const Rect& region) { Intersect(TempRegion(region)); }
+void Region::Sub(const Rect& region) { Sub(TempRegion(region)); }
 
 std::pair<Rect, vector<Rect>> Region::GetRect() const {
     int size = GetRegionData(static_cast<HRGN>(rgn), 0, NULL);

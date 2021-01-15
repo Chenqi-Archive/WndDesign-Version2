@@ -2,10 +2,7 @@
 
 #include "tile_cache.h"
 #include "figure_queue.h"
-#include "background.h"
 #include "composite_effect.h"
-
-#include "../common/reference_wrapper.h"
 
 #include <vector>
 
@@ -16,23 +13,11 @@ using std::vector;
 
 
 class Layer : public Uncopyable {
-private:
-	Rect _accessible_region;
-	reference_wrapper<const Background> _background;
-
 public:
-	Layer(Rect accessible_region, const Background& background) :
-		_accessible_region(accessible_region),
-		_background(background),
-		_tile_cache(accessible_region.size),
+	Layer(Size window_size) :
+		_tile_cache(window_size),
 		_active_targets() {
 	}
-
-	const Rect GetAccessibleRegion() const { return _accessible_region; }
-	bool SetAccessibleRegion(Rect accessible_region, Rect visible_region);
-
-	const Background& GetBackground() const { return _background; }
-	void SetBackground(const Background& background) { _background = background; }
 
 
 	////////////////////////////////////////////////////////////

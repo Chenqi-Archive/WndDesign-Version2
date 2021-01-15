@@ -19,7 +19,7 @@ private:
 	HANDLE rgn;
 
 public:
-	explicit Region(Rect region);
+	explicit Region(Rect region = region_empty);
 	~Region();
 
 	bool IsEmpty() const;
@@ -35,6 +35,8 @@ public:
 	void Sub(const Region& region);
 
 	void Union(const Rect& region);
+	void Intersect(const Rect& region);
+	void Sub(const Rect& region);
 
 	std::pair<Rect, vector<Rect>> GetRect() const;
 };

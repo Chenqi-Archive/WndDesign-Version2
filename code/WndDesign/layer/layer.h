@@ -14,10 +14,7 @@ using std::vector;
 
 class Layer : public Uncopyable {
 public:
-	Layer(Size window_size) :
-		_tile_cache(window_size),
-		_active_targets() {
-	}
+	Layer(Size window_size) : _tile_cache(window_size) {}
 
 
 	////////////////////////////////////////////////////////////
@@ -35,13 +32,8 @@ public:
 	///////////////////////////////////////////////////////////
 	////                      Drawing                      ////
 	///////////////////////////////////////////////////////////
-private:
-	vector<ref_ptr<Target>> _active_targets;
-
 public:
-	void ClearRegion(Rect region);	// Clear the region with background.
-	void DrawFigureQueue(const FigureQueue& figure_queue, Vector position_offset, Rect bounding_region);
-	void CommitDraw();
+	void DrawFigureQueue(const FigureQueue& figure_queue, Rect bounding_region);
 
 public:
 	// Draw myself on another target. For composition.
@@ -49,17 +41,20 @@ public:
 };
 
 
+struct Background;
+
 struct LayerFigure : Figure {
 	const Layer& layer;
+	const Background& background;
 	Rect region;
 	CompositeEffect composite_effect;
 
-	LayerFigure(const Layer& layer, Rect region, CompositeEffect composite_effect) :
-		layer(layer), region(region), composite_effect(composite_effect) {
+	LayerFigure(const Layer& layer, const Background& background, Rect region, CompositeEffect composite_effect) :
+		layer(layer), background(background), region(region), composite_effect(composite_effect) {
 	}
 
 	virtual const Rect GetRegion() const override { return Rect(point_zero, region.size); }
-	virtual void DrawOn(RenderTarget& target, Vector offset) const override;
+	virtual void DrawOn(RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
 };
 
 

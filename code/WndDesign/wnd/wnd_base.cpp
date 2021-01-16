@@ -1,5 +1,6 @@
 #include "wnd_base.h"
 #include "redraw_queue.h"
+#include "WndObject.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -15,12 +16,14 @@ WndBase::WndBase(WndObject& object) :
 	_display_region(region_empty),
 	_visible_region(region_empty),
 
+	_background(_object.GetBackground()),
 	_layer(),
 
 	_depth(0),
 	_redraw_queue_index(),
 	_invalid_region() 
-#pragma error /* capture */
+
+	/* capture */
 {
 }
 
@@ -29,7 +32,7 @@ WndBase::~WndBase() {
 	DetachFromParent();
 }
 
-void WndBase::SetParent(ref_ptr<WndBase> parent, list<WndBase&>::iterator index_on_parent) {
+void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
 
@@ -99,7 +102,7 @@ void WndBase::SetDisplayRegion(Rect display_region) {
 	_display_region = display_region;
 
 	// Set visible region.
-	SetVisibleRegion(GetParentCachedRegion());
+	SetVisibleRegion(GetVisibleRegion());
 
 	// Send scroll message.
 }
@@ -146,16 +149,18 @@ void WndBase::UpdateInvalidRegion() {
 	// But not erase the invalid region.
 	if (!HasParent()) { SetDepth(0); return; }
 
-	// Clip invalid region inside accessible region.
-	_invalid_region.Intersect(_accessible_region);
+	// Clip invalid region inside cached region.
+	_invalid_region.Intersect(GetCachedRegion());
 	if (_invalid_region.IsEmpty()) { return; }
 
 	// Draw figure queue to layer.
 	if (HasLayer()) {
 		auto [bounding_region, regions] = _invalid_region.GetRect();
 		FigureQueue figure_queue;
-		figure_queue.Append(vector_zero, new BackgroundFigure(_background, bounding_region, true));
+		uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
+		figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(_background, bounding_region, true));
 		_object.OnPaint(figure_queue, _accessible_region, bounding_region);
+		figure_queue.EndGroup(group_index);
 		for (auto& region : regions) {
 			GetLayer().DrawFigureQueue(figure_queue, region);
 		}
@@ -172,18 +177,17 @@ void WndBase::UpdateInvalidRegion() {
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
 	// Convert parent invalid region to my invalid region.
-	Rect invalid_region = parent_invalid_region.Intersect(_display_region) + (_display_offset - _display_region.point);
+	parent_invalid_region = parent_invalid_region.Intersect(_display_region);
+	Vector coordinate_offset = OffsetFromParent();
+	Rect invalid_region = parent_invalid_region + coordinate_offset;
 	if (HasLayer()) {
-		figure_queue.Append(invalid_region.point - point_zero, new LayerFigure(GetLayer(), invalid_region, {}));
+		// Draw layer directly in parent's coordinates, no need to create figure group.
+		figure_queue.Append(parent_invalid_region.point - point_zero, new LayerFigure(GetLayer(), _background, invalid_region, {}));
 	} else {
-		// Push region clip.
-
-		figure_queue.Append(vector_zero, new BackgroundFigure());
-		// (Call WndObject)
-		// Draw background.
-		// Draw child windows.
-
-		// Pop region clip.
+		uint group_index = figure_queue.BeginGroup(coordinate_offset, invalid_region);
+		figure_queue.Append(invalid_region.point - point_zero, new BackgroundFigure(_background, invalid_region, false));
+		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
+		figure_queue.EndGroup(group_index);
 	}
 }
 

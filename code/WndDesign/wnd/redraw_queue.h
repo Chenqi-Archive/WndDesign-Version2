@@ -16,7 +16,7 @@ class WndBase;
 
 class RedrawQueue {
 private:
-	vector<list<WndBase&>> _queue;
+	vector<list<ref_ptr<WndBase>>> _queue;
 	int _next_depth;
 
 private:

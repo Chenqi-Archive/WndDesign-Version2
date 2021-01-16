@@ -1,9 +1,9 @@
 #pragma once
 
+#include "wnd_base.h"  // use interface instead.
 #include "../common/uncopyable.h"
 #include "../geometry/geometry.h"
 #include "../message/msg_base.h"
-
 #include <memory>
 
 
@@ -49,6 +49,7 @@ private:
 	virtual void OnSizeChange(Rect accessible_region) {}
 	/* draw anything to the invalid region except for background */
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
+	virtual const Background& GetBackground() const {}
 
 
 	//// region computing ////

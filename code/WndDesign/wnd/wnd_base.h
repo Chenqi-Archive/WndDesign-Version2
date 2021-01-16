@@ -5,8 +5,6 @@
 #include "../geometry/region.h"
 #include "../common/reference_wrapper.h"
 
-#include "WndObject.h"
-
 #include <list>
 
 
@@ -14,6 +12,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 using std::list;
 
+class WndObject;
 
 class WndBase {
 	//////////////////////////////////////////////////////////
@@ -32,7 +31,7 @@ public:
 	///////////////////////////////////////////////////////////
 private:
 	ref_ptr<WndBase> _parent;
-	list<WndBase&>::iterator _index_on_parent;
+	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
 	bool HasParent() const { return _parent != nullptr; }
 	WndObject& GetParent() const { 
@@ -41,7 +40,7 @@ public:
 	}
 private:
 	/* called by new parent window */
-	void SetParent(ref_ptr<WndBase> parent, list<WndBase&>::iterator index_on_parent);
+	void SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent);
 	/* called by old parent window */
 	void ClearParent();
 	/* called by myself */
@@ -52,7 +51,7 @@ private:
 	////                   Child Windows                   ////
 	///////////////////////////////////////////////////////////
 private:
-	list<WndBase&> _child_wnds;
+	list<ref_ptr<WndBase>> _child_wnds;
 public:
 	void AddChild(WndBase& child_wnd);
 	void RemoveChild(WndBase& child_wnd);
@@ -77,13 +76,17 @@ public:
 	void SetAccessibleRegion(Rect accessible_region);
 	void SetDisplayOffset(Point display_offset);
 	void SetDisplayRegion(Rect display_region);
+public:
+	// point_on_parent + offset_from_parent = point_on_myself
+	const Vector OffsetFromParent() const { return _display_offset - _display_region.point; }
+
 
 	//// background ////
 private:
 	reference_wrapper<const Background> _background;
 public:
-	const Background& GetBackground() const { return _background; }
 	void SetBackground(const Background& background) { _background = background; }
+
 
 	//// layer management ////
 private:
@@ -92,13 +95,13 @@ private:
 	bool HasLayer() const { return _layer != nullptr; }
 	Layer& GetLayer() const { return *_layer; }
 public:
-	void AllocateLayer() { _layer.reset(new Layer()); }
-	void DeallocateLayer() { _layer.reset(); }
+	void AllocateLayer() { if (!HasLayer()) { _layer.reset(new Layer(_accessible_region.size)); } }
 
-public:
-	void SetVisibleRegion(Rect visible_region);
 private:
 	const Rect GetCachedRegion() const { return HasLayer() ? GetLayer().GetCachedRegion() : _visible_region; }
+	const Rect GetVisibleRegion() const { return HasParent() ? _parent->GetCachedRegion() + OffsetFromParent() : region_empty; }
+public:
+	void SetVisibleRegion(Rect visible_region);
 
 
 	///////////////////////////////////////////////////////////
@@ -113,16 +116,18 @@ public:
 	uint GetDepth() const { return _depth; }
 	void SetDepth(uint depth);
 
+
 	//// redraw queue ////
 private:
-	list<WndBase&>::iterator _redraw_queue_index;
+	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
 public:
-	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<WndBase&>::iterator(); }
-	const list<WndBase&>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
-	void SetRedrawQueueIndex(list<WndBase&>::iterator index = list<WndBase&>::iterator()) { _redraw_queue_index = index; }
+	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
+	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
+	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
 private:
 	void JoinRedrawQueue();
 	void LeaveRedrawQueue();
+
 
 	//// invalid region ////
 private:

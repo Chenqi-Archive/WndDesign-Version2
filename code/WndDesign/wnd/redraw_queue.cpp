@@ -1,5 +1,6 @@
 #include "redraw_queue.h"
 #include "wnd_base.h"
+#include "../system/directx/d2d_api.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -14,7 +15,7 @@ void RedrawQueue::AddWnd(WndBase& wnd) {
 	uint depth = wnd.GetDepth(); 
 	assert(depth > 0);	if (depth > max_wnd_depth) { throw std::invalid_argument("window hierarchy too deep"); }
 	assert(!wnd.HasRedrawQueueIndex());
-	wnd.SetRedrawQueueIndex(_queue[depth].insert(_queue[depth].begin(), wnd));
+	wnd.SetRedrawQueueIndex(_queue[depth].insert(_queue[depth].begin(), &wnd));
 	if (depth > _next_depth) { _next_depth = depth; }
 }
 
@@ -27,19 +28,19 @@ void RedrawQueue::RemoveWnd(WndBase& wnd) {
 }
 
 void RedrawQueue::Commit() {
-	// BeginDraw.
+	BeginDraw();
 
 	uint next_depth = _next_depth;
 	while (next_depth > 0) {
 		while (!_queue[next_depth].empty()) {
-			WndBase& wnd = _queue[next_depth].front();
+			WndBase& wnd = *_queue[next_depth].front();
 			wnd.UpdateInvalidRegion();
 			RemoveWnd(wnd);
 		}
 		next_depth--;
 	}
 
-	// EndDraw
+	EndDraw();
 
 	// Present system windows.
 

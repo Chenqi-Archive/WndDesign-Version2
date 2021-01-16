@@ -2,6 +2,7 @@
 #include "image.h"
 #include "text_block.h"
 #include "../layer/background_types.h"
+#include "../layer/layer.h"
 
 #include "../system/directx/directx_helper.h"
 #include "../system/directx/d2d_api.h"
@@ -127,9 +128,40 @@ void TextBlockFigure::DrawOn(RenderTarget& target, Vector offset) const {
 ////                background_types.h                ////
 //////////////////////////////////////////////////////////
 
-
 void SolidColorBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
 	target.Clear(Color2COLOR(color));
+}
+
+
+///////////////////////////////////////////////////////////
+////                      layer.h                      ////
+///////////////////////////////////////////////////////////
+
+void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
+	Rect region_to_draw = Rect(region.point - offset, GetTargetSize(target)).Intersect(region);
+	for (RectPointIterator it(RegionToOverlappingTileRange(region_to_draw, layer.GetTileSize())); !it.Finished(); ++it) {
+		TileID tile_id = it.Item();
+		Vector tile_offset = ScalePointBySize(tile_id, layer.GetTileSize()) - point_zero;
+		Rect region_on_tile = (region_to_draw - tile_offset).Intersect(Rect(point_zero, layer.GetTileSize()));
+
+		const Target& source_target = layer._tile_cache.ReadTile(tile_id);
+		if (source_target.HasBitmap()) {
+			target.DrawBitmap(
+				&source_target.GetBitmap(),
+				Rect2RECT(region_on_tile + tile_offset - (region.point - point_zero) + offset),
+				composite_effect.opacity,
+				D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+				Rect2RECT(region_on_tile)
+			);
+		} else {
+			background.DrawOn(
+				region_on_tile + tile_offset,
+				target,
+				offset,
+				composite_effect.opacity
+			);
+		}
+	}
 }
 
 

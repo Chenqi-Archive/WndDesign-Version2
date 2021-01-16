@@ -35,37 +35,31 @@ BEGIN_NAMESPACE(WndDesign)
 
 class ImageResource;
 
+class FigureQueue;
+
 
 ID2D1DeviceContext& GetD2DDeviceContext();
 
 ID2D1SolidColorBrush& GetSolidColorBrush(Color color);
 
 
-// Add the count when a target begin draws, and decrease the count when end draw,
-// when the count decreased to zero, the D2DDeviceContext really end draws.
-void PushDraw();
-void PopDraw();
+void BeginDraw();
+void EndDraw();
 
 
 class Target : Uncopyable {
 protected:
 	// Inherited by WindowTarget to use swap-chain surface as the bitmap.
 	ID2D1Bitmap1* bitmap;
-private:
-	bool has_begun;
-
 public:
 	Target(Size size);
-	Target(nullptr_t) : bitmap(nullptr), has_begun(false) {}
+	Target(nullptr_t) : bitmap(nullptr) {}
 	~Target();
 
 	bool HasBitmap() const { return bitmap != nullptr; }  // Only read-only target doesn't have bitmap.
 	ID2D1Bitmap1& GetBitmap() const { assert(HasBitmap()); return *bitmap; }
 
-	// Begin drawing on the target, and push the bounding_region as axis-aligned-clip.
-	// Returns true if already begun.
-	bool BeginDraw(Rect bounding_region);
-	void EndDraw();
+	void DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rect clip_region);
 };
 
 

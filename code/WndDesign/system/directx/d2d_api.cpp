@@ -1,3 +1,5 @@
+#include "../../layer/figure_queue.h"
+
 #include "directx_helper.h"
 #include "d2d_api.h"
 #include "dxgi_api.h"
@@ -103,9 +105,6 @@ inline ID2D1Bitmap1* D2DCreateBitmap(Size size) {
 }
 
 
-uint draw_count = 0;
-
-
 END_NAMESPACE(Anonymous)
 
 
@@ -120,54 +119,60 @@ ID2D1SolidColorBrush& GetSolidColorBrush(Color color) {
 }
 
 
-void PushDraw() {
-    if (draw_count == 0) {
-        auto& device_context = GetD2DDeviceContext();
-        device_context.BeginDraw();
-    }
-    draw_count++;
-}
-
-void PopDraw() {
-    assert(draw_count > 0);
-    if (draw_count == 1) {
-        auto& device_context = GetD2DDeviceContext();
-        hr = device_context.EndDraw();
-        device_context.SetTarget(nullptr);
-    }
-    draw_count--;
-}
-
-
-Target::Target(Size size) : bitmap(D2DCreateBitmap(size)), has_begun(false) {}
-
-Target::~Target() { 
-    assert(!has_begun);
-    SafeRelease(&bitmap); 
-}
-
-bool Target::BeginDraw(Rect bounding_region) {
+void BeginDraw() {
     auto& device_context = GetD2DDeviceContext();
-    device_context.SetTarget(&GetBitmap());
-    if (has_begun) {
-        device_context.PopAxisAlignedClip();
-        device_context.PushAxisAlignedClip(Rect2RECT(bounding_region), D2D1_ANTIALIAS_MODE_ALIASED);
-        return true;
-    } else {
-        has_begun = true;
-        PushDraw();
-        device_context.PushAxisAlignedClip(Rect2RECT(bounding_region), D2D1_ANTIALIAS_MODE_ALIASED);
-        return false;
-    }
+    device_context.BeginDraw();
 }
 
-void Target::EndDraw() {
-    assert(has_begun);
+void EndDraw() {
     auto& device_context = GetD2DDeviceContext();
-    device_context.SetTarget(&GetBitmap());
-    device_context.PopAxisAlignedClip();
-    PopDraw();
-    has_begun = false;
+    hr = device_context.EndDraw();
+    device_context.SetTarget(nullptr);
+}
+
+
+Target::Target(Size size) : bitmap(D2DCreateBitmap(size)) {}
+Target::~Target() { SafeRelease(&bitmap); }
+
+void Target::DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rect clip_region) {
+    ID2D1DeviceContext& device_context = GetD2DDeviceContext(); device_context.SetTarget(&GetBitmap());
+    auto& groups = figure_queue.GetFigureGroups();
+    auto& figures = figure_queue.GetFigures();
+    uint figure_index = 0;
+    clip_region = clip_region.Intersect(Rect(point_zero, SIZE2Size(bitmap->GetSize())));
+    for (uint group_index = 0; group_index < groups.size(); ++group_index) {
+        auto& group = groups[group_index];
+        for (; figure_index < group.figure_index; ++figure_index) {
+            Vector figure_offset = figures[figure_index].offset + offset;
+            Rect figure_region = figures[figure_index].figure->GetRegion() + figure_offset;
+            if (figure_region.Intersect(clip_region).IsEmpty()) { continue; }
+            figures[figure_index].figure->DrawOn(static_cast<RenderTarget&>(device_context), figure_offset);
+        }
+        if (group.IsBegin()) {
+            auto& group_end = groups[group.group_end_index];
+            // Calculate new offset and clip region.
+            Vector new_offset = offset + group.coordinate_offset;
+            Rect new_clip_region = clip_region.Intersect(group.bounding_region + offset);
+            // Jump to group end if new clip region is empty.
+            if (new_clip_region.IsEmpty()) { 
+                group_index = group.group_end_index;
+                figure_index = group_end.figure_index;
+                continue;
+            }
+            // Store old offset and clip region to group end.
+            group_end.prev_offset = offset;
+            group_end.prev_clip_region = clip_region;
+            // Set new offset and clip region.
+            offset = new_offset;
+            clip_region = new_clip_region;
+            device_context.PushAxisAlignedClip(Rect2RECT(clip_region), D2D1_ANTIALIAS_MODE_ALIASED);
+        } else {
+            // Restore to previous offset and clip region.
+            offset = group.prev_offset;
+            clip_region = group.prev_clip_region;
+            device_context.PopAxisAlignedClip();
+        }
+    }
 }
 
 

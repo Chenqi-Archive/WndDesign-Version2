@@ -1,6 +1,9 @@
 #include "wnd_base.h"
 #include "redraw_queue.h"
 #include "WndObject.h"
+#include "../layer/layer.h"
+#include "../layer/background.h"
+#include "../geometry/geometry_helper.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -13,7 +16,7 @@ WndBase::WndBase(WndObject& object) :
 
 	_accessible_region(region_empty), 
 	_display_offset(point_zero),
-	_display_region(region_empty),
+	_region_on_parent(region_empty),
 	_visible_region(region_empty),
 
 	_background(_object.GetBackground()),
@@ -86,42 +89,77 @@ void WndBase::SetDepth(uint depth) {
 }
 
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
+	if (_accessible_region == accessible_region) { return; }
 	_accessible_region = accessible_region;
-
-	// OnSizeChange.
-
+	if (HasLayer()) { 
+		_layer->ResetTileSize(_accessible_region.size); 
+		// If tile size changed, cached region has been cleared, 
+		//   and will be reset when SetDisplayRegion is called next.
+	}
+	_object.OnSizeChange(_accessible_region);
 }
 
-void WndBase::SetDisplayOffset(Point display_offset) {
-
-	// Send scroll message.
-
+const Vector WndBase::SetDisplayOffset(Point display_offset) {
+	display_offset = BoundRectInRegion(Rect(display_offset, _region_on_parent.size), _accessible_region).point;
+	Vector vector = display_offset - _display_offset;
+	if (vector == vector_zero) { return vector; }
+	_display_offset = display_offset;
+	ResetVisibleRegion();
+	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
+	return vector;
 }
 
-void WndBase::SetDisplayRegion(Rect display_region) {
-	_display_region = display_region;
-
-	// Set visible region.
-	SetVisibleRegion(GetVisibleRegion());
-
-	// Send scroll message.
+void WndBase::SetRegionOnParent(Rect region_on_parent) {
+	Rect display_region = BoundRectInRegion(Rect(_display_offset, region_on_parent.size), _accessible_region);
+	bool display_region_changed = display_region != GetDisplayRegion();
+	if (!display_region_changed && _region_on_parent.point == region_on_parent.point) { return; }
+	_region_on_parent = Rect(region_on_parent.point, display_region.size);
+	_display_offset = display_region.point;
+	ResetVisibleRegion();
+	if (!display_region_changed) { return; }
+	_object.OnDisplayRegionChange(_accessible_region, display_region);
 }
 
-void WndBase::SetVisibleRegion(Rect visible_region) {
+void WndBase::AllocateLayer() {
+	if (HasLayer()) { return; }
+	_layer = std::make_unique<Layer>();
+	_layer->ResetTileSize(_accessible_region.size);
+	ResetVisibleRegion();
+}
+
+const Rect WndBase::GetCachedRegion() const { 
+	return HasLayer() ? _accessible_region.Intersect(_layer->GetCachedRegion()) : _visible_region;
+}
+
+void WndBase::SetVisibleRegion(Rect parent_cached_region) {
+	Rect visible_region = (parent_cached_region.Intersect(_region_on_parent) + OffsetFromParent()).Intersect(_accessible_region);
+	if (_visible_region == visible_region) { return; }
 	_visible_region = visible_region;
-	if (HasLayer()) {
-		GetLayer().SetCachedRegion(_visible_region);
 
-		// invalidate new cached region.
+	if (HasLayer()) {
+		Rect old_cached_region = _layer->GetCachedRegion();
+		if (!old_cached_region.Contains(_visible_region)) {
+		#pragma message("It's arbitrary to decide when to reset cached region.")
+			_layer->SetCachedRegion(_accessible_region, _visible_region);
+			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion());
+			new_cached_region.Sub(old_cached_region);
+			Invalidate(std::move(new_cached_region));
+		}
 	}
 
 	// Set visible region for child windows.
+	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
 
+	// For object's lazy loading.
+	_object.OnVisibleRegionChange(_accessible_region, _visible_region);
 }
 
-void WndBase::Invalidate(const Region& region) {
-	_invalid_region.Union(region);
-	JoinRedrawQueue();
+void WndBase::Invalidate(Region&& region) {
+	region.Intersect(GetCachedRegion());
+	if (!region.IsEmpty()) {
+		_invalid_region.Union(region);
+		JoinRedrawQueue();
+	}
 }
 
 void WndBase::Invalidate(Rect region) {
@@ -162,14 +200,14 @@ void WndBase::UpdateInvalidRegion() {
 		_object.OnPaint(figure_queue, _accessible_region, bounding_region);
 		figure_queue.EndGroup(group_index);
 		for (auto& region : regions) {
-			GetLayer().DrawFigureQueue(figure_queue, region);
+			_layer->DrawFigureQueue(figure_queue, region);
 		}
 	}
 
 	// Invalidate region for parent window.
-	_invalid_region.Translate(_display_offset - _display_region.point);
-	_invalid_region.Intersect(_display_region);
-	_parent->Invalidate(_invalid_region);
+	_invalid_region.Translate(_display_offset - _region_on_parent.point);
+	_invalid_region.Intersect(_region_on_parent);
+	_parent->Invalidate(std::move(_invalid_region));
 
 	// Clear invalid region.
 	_invalid_region.Clear();
@@ -177,12 +215,12 @@ void WndBase::UpdateInvalidRegion() {
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
 	// Convert parent invalid region to my invalid region.
-	parent_invalid_region = parent_invalid_region.Intersect(_display_region);
+	parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
 	Vector coordinate_offset = OffsetFromParent();
 	Rect invalid_region = parent_invalid_region + coordinate_offset;
 	if (HasLayer()) {
 		// Draw layer directly in parent's coordinates, no need to create figure group.
-		figure_queue.Append(parent_invalid_region.point - point_zero, new LayerFigure(GetLayer(), _background, invalid_region, {}));
+		figure_queue.Append(parent_invalid_region.point - point_zero, new LayerFigure(*_layer, _background, invalid_region, {}));
 	} else {
 		uint group_index = figure_queue.BeginGroup(coordinate_offset, invalid_region);
 		figure_queue.Append(invalid_region.point - point_zero, new BackgroundFigure(_background, invalid_region, false));

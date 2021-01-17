@@ -22,7 +22,7 @@ inline uint RoundUpToMultipleOf(uint length, uint round) {
 	if (remainder > 0) { return length + round - remainder; } else { return length; }
 }
 
-inline Size CalculateTileSize(Size entire_size, Size previous_tile_size = tile_size_empty) {
+inline const Size CalculateTileSize(Size entire_size, Size previous_tile_size) {
 	Size tile_size;
 	// For empty region, return the initial size.
 	if (entire_size.IsEmpty()) { return previous_tile_size; }
@@ -81,7 +81,7 @@ inline Size CalculateTileSize(Size entire_size, Size previous_tile_size = tile_s
 
 
 // The vector start from the origin point, and re
-inline Vector ClipVectorInsideRectangle(int half_width, int half_height, Vector vector) {
+inline const Vector ClipVectorInsideRectangle(int half_width, int half_height, Vector vector) {
 	float shrink_ratio = 1;
 	if (vector.x > half_width) { shrink_ratio = min(shrink_ratio, half_width / (float)vector.x); }
 	if (vector.x < -half_width) { shrink_ratio = min(shrink_ratio, -half_width / (float)vector.x); }
@@ -91,7 +91,7 @@ inline Vector ClipVectorInsideRectangle(int half_width, int half_height, Vector 
 }
 
 // Scale the region by length in ratio(> 1). And shift the larger region by offset_hint.
-inline Rect ScaleRegion(const Rect& region, float ratio, Vector offset_hint = vector_zero) {
+inline const Rect ScaleRegion(const Rect& region, float ratio, Vector offset_hint = vector_zero) {
 	if (ratio <= 1.0) { return region; }
 	Size size = region.size;
 	size.width = static_cast<uint>(static_cast<float>(size.width) * ratio);
@@ -105,7 +105,7 @@ inline Rect ScaleRegion(const Rect& region, float ratio, Vector offset_hint = ve
 	return Rect(point, size);
 }
 
-inline Rect EnlargeRegion(Rect region, uint enlarge_length, Vector offset_hint = vector_zero) {
+inline const Rect EnlargeRegion(Rect region, uint enlarge_length, Vector offset_hint = vector_zero) {
 	offset_hint = ClipVectorInsideRectangle(enlarge_length, enlarge_length, offset_hint);
 	region.point.x = region.point.x - static_cast<int>(enlarge_length) + offset_hint.x;
 	region.point.y = region.point.y - static_cast<int>(enlarge_length) + offset_hint.x;

@@ -144,7 +144,7 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 		Vector tile_offset = ScalePointBySize(tile_id, layer.GetTileSize()) - point_zero;
 		Rect region_on_tile = (region_to_draw - tile_offset).Intersect(Rect(point_zero, layer.GetTileSize()));
 
-		const Target& source_target = layer._tile_cache.ReadTile(tile_id);
+		const Target& source_target = layer.ReadTile(tile_id);
 		if (source_target.HasBitmap()) {
 			target.DrawBitmap(
 				&source_target.GetBitmap(),

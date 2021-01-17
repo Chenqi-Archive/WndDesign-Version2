@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../common/uncopyable.h"
-#include "rect.h"
-#include "vector.h"
+#include "geometry.h"
 
 #include <vector>
 
@@ -17,6 +16,9 @@ class Region : Uncopyable {
 private:
 	using HANDLE = void*;
 	HANDLE rgn;
+
+public:
+	static Region& Temp(Rect rect);
 
 public:
 	explicit Region(Rect region = region_empty);

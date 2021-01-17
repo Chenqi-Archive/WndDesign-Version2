@@ -1,18 +1,22 @@
 #pragma once
 
-#include "../layer/layer.h"
-#include "../layer/background.h"
 #include "../geometry/region.h"
 #include "../common/reference_wrapper.h"
 
 #include <list>
+#include <memory>
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 using std::list;
+using std::unique_ptr;
 
 class WndObject;
+class Layer;
+class Background;
+class FigureQueue;
+
 
 class WndBase {
 	//////////////////////////////////////////////////////////
@@ -67,18 +71,21 @@ private:
 	// Rect(display_region_offset, display_region.size) must be contained in accessible_region.
 	Point _display_offset;
 	// The region shown on parent window, in parent's coordinates.
-	Rect _display_region;
-	// The region that is cached on parent layer and must be composited, also used for child layer caching.
+	Rect _region_on_parent;
+	// The region, in my coordinates, that is cached on parent layer and must be composited.
 	//   (Parent's cached region relative to child is child's visible region.)
 	Rect _visible_region;
+
 public:
 	const Rect GetAccessibleRegion() const { return _accessible_region; }
 	void SetAccessibleRegion(Rect accessible_region);
-	void SetDisplayOffset(Point display_offset);
-	void SetDisplayRegion(Rect display_region);
+	const Rect GetDisplayRegion() const { return Rect(_display_offset, _region_on_parent.size); }
+	const Vector SetDisplayOffset(Point display_offset);  // returns the display_offset change.
+	void SetRegionOnParent(Rect region_on_parent);
+
 public:
 	// point_on_parent + offset_from_parent = point_on_myself
-	const Vector OffsetFromParent() const { return _display_offset - _display_region.point; }
+	const Vector OffsetFromParent() const { return _display_offset - _region_on_parent.point; }
 
 
 	//// background ////
@@ -93,15 +100,13 @@ private:
 	unique_ptr<Layer> _layer;
 private:
 	bool HasLayer() const { return _layer != nullptr; }
-	Layer& GetLayer() const { return *_layer; }
 public:
-	void AllocateLayer() { if (!HasLayer()) { _layer.reset(new Layer(_accessible_region.size)); } }
+	void AllocateLayer();
 
 private:
-	const Rect GetCachedRegion() const { return HasLayer() ? GetLayer().GetCachedRegion() : _visible_region; }
-	const Rect GetVisibleRegion() const { return HasParent() ? _parent->GetCachedRegion() + OffsetFromParent() : region_empty; }
-public:
-	void SetVisibleRegion(Rect visible_region);
+	const Rect GetCachedRegion() const;
+	void ResetVisibleRegion() { SetVisibleRegion(HasParent() ? _parent->GetCachedRegion() : region_empty); }
+	void SetVisibleRegion(Rect parent_cached_region);
 
 
 	///////////////////////////////////////////////////////////
@@ -111,7 +116,7 @@ public:
 	//// window depth ////
 private:
 	uint _depth;  // used for determining the redraw queue priority.
-public:
+private:
 	bool HasDepth() const { return _depth > 0; }
 	uint GetDepth() const { return _depth; }
 	void SetDepth(uint depth);
@@ -120,7 +125,8 @@ public:
 	//// redraw queue ////
 private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
-public:
+private:
+	friend class RedrawQueue;
 	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
 	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
@@ -134,7 +140,7 @@ private:
 	Region _invalid_region;
 private:
 	/* called by child window when child has updated invalid region */
-	void Invalidate(const Region& region);
+	void Invalidate(Region&& region);
 public:
 	void Invalidate(Rect region);
 	/* called by redraw queue at commit time */

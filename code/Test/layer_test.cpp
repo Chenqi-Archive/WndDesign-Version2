@@ -1,3 +1,5 @@
+/*
+
 #include "../WndDesign/layer/layer.h"
 #include "../WndDesign/layer/desktop_layer.h"
 #include "../WndDesign/layer/background_types.h"
@@ -146,3 +148,6 @@ void OnPaint() {
 	layer->DrawFigureQueue(figure_queue2, vector_zero, region_infinite);
 	layer->CommitDraw();
 }
+
+
+*/

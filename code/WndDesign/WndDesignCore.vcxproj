@@ -199,14 +199,12 @@
     <ClInclude Include="system\metrics.h" />
     <ClInclude Include="layer\figure_queue.h" />
     <ClInclude Include="render\ObjectBase.h" />
-    <ClInclude Include="layer\tile_cache.h" />
     <ClInclude Include="system\directx\d2d_api.h" />
     <ClInclude Include="system\directx\directx_helper.h" />
     <ClInclude Include="system\directx\dwrite_api.h" />
     <ClInclude Include="system\directx\dxgi_api.h" />
     <ClInclude Include="system\directx\wic_api.h" />
     <ClInclude Include="system\ime.h" />
-    <ClInclude Include="WndDesign.h" />
     <ClInclude Include="wnd\desktop.h" />
     <ClInclude Include="wnd\WndObject.h" />
     <ClInclude Include="wnd\redraw_queue.h" />
@@ -219,9 +217,7 @@
     <ClCompile Include="figure\text_style.cpp" />
     <ClCompile Include="layer\background_types.cpp" />
     <ClCompile Include="geometry\region.cpp" />
-    <ClCompile Include="layer\desktop_layer.cpp" />
     <ClCompile Include="layer\layer.cpp" />
-    <ClCompile Include="layer\tile_cache.cpp" />
     <ClCompile Include="system\directx\d2d_api_window.cpp" />
     <ClCompile Include="system\metrics.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />

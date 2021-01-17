@@ -14,12 +14,19 @@ inline const Rect RECT2Rect(const RECT& rect) {
 }
 
 
+// For internal use.
 static Region& TempRegion(Rect rect) {
     static Region region(Rect(0,0,0,0));
     region.Set(rect);
     return region;
 }
 
+// Another temp Region for external use.
+Region& Region::Temp(Rect rect) {
+    static Region region(Rect(0, 0, 0, 0));
+    region.Set(rect);
+    return region;
+}
 
 Region::Region(Rect region) {
     rgn = CreateRectRgn(region.left(), region.top(), region.right(), region.bottom());

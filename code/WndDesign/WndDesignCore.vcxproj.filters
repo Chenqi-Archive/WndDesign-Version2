@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WndDesign.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\uncopyable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -82,9 +79,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="layer\figure_queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="layer\tile_cache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="layer\layer.h">
@@ -174,12 +168,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="layer\layer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="layer\tile_cache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="layer\desktop_layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="system\directx\d2d_api.cpp">

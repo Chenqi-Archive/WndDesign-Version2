@@ -20,6 +20,9 @@ struct Background {
 };
 
 
+const Background& NullBackground();
+
+
 struct BackgroundFigure : Figure {
 	const Background& background;
 	bool clear;

@@ -19,10 +19,10 @@ inline const Size GetWindowSize(HANDLE hwnd) {
 
 
 WindowResource::WindowResource(HANDLE hwnd) : 
-    hwnd(hwnd), size(GetWindowSize(hwnd)), swap_chain(nullptr), target(), has_presented(false) {
+    swap_chain(nullptr), target(), has_presented(false) {
     DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = { 0 };
-    swap_chain_desc.Width = size.width;
-    swap_chain_desc.Height = size.height;
+    swap_chain_desc.Width = 0;   // width and height will be calculated automatically
+    swap_chain_desc.Height = 0;
     swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     swap_chain_desc.Stereo = false;
     swap_chain_desc.SampleDesc.Count = 1;
@@ -72,21 +72,20 @@ void WindowResource::WindowTarget::Destroy() {
 }
 
 void WindowResource::OnResize(Size size) {
-    this->size = size;
     target.Destroy();
     hr = swap_chain->ResizeBuffers(0, size.width, size.height, DXGI_FORMAT_UNKNOWN, 0);
     target.Create(*swap_chain);
     has_presented = false;
 }
 
-void WindowResource::Present(vector<Rect>& dirty_regions) {
+void WindowResource::Present(vector<Rect>&& dirty_regions) {
     DXGI_PRESENT_PARAMETERS present_parameters = {};
     if (has_presented) {
         static_assert(sizeof(RECT) == sizeof(Rect));  // In-place convert Rect to RECT.
         for (auto& region : dirty_regions) {
             *reinterpret_cast<RECT*>(&region) = { region.left(), region.top(), region.right(), region.bottom() };
         }
-        present_parameters.DirtyRectsCount = dirty_regions.size();
+        present_parameters.DirtyRectsCount = (uint)dirty_regions.size();
         present_parameters.pDirtyRects = reinterpret_cast<RECT*>(dirty_regions.data());
     } else {
         // The entire region must be presented for the first time.

@@ -22,8 +22,6 @@ using std::vector;
 
 class WindowResource : Uncopyable {
 private:
-	HANDLE hwnd;
-	Size size;
 	IDXGISwapChain1* swap_chain;
 	bool has_presented;
 
@@ -41,9 +39,8 @@ public:
 	void OnResize(Size size);
 
 	Target& GetTarget() { return target; }
-	const Size GetSize() const { return size; }
 
-	void Present(vector<Rect>& dirty_regions);
+	void Present(vector<Rect>&& dirty_regions);
 };
 
 

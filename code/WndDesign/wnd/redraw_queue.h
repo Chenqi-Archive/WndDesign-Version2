@@ -17,7 +17,7 @@ class WndBase;
 class RedrawQueue {
 private:
 	vector<list<ref_ptr<WndBase>>> _queue;
-	int _next_depth;
+	uint _next_depth;
 
 private:
 	RedrawQueue();
@@ -25,6 +25,8 @@ private:
 public:
 	void AddWnd(WndBase& wnd);
 	void RemoveWnd(WndBase& wnd);
+	void AddDesktopWnd();
+	void RemoveDesktopWnd();
 	void Commit();
 
 	static RedrawQueue& Get();

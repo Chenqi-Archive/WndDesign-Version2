@@ -1,7 +1,9 @@
 #pragma once
 
+#include "wnd_base_interface.h"
 #include "../geometry/region.h"
 #include "../common/reference_wrapper.h"
+#include "../message/msg_base.h"
 
 #include <list>
 #include <memory>
@@ -18,7 +20,7 @@ class Background;
 class FigureQueue;
 
 
-class WndBase {
+class WndBase : public Uncopyable {
 	//////////////////////////////////////////////////////////
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
@@ -115,10 +117,11 @@ private:
 
 	//// window depth ////
 private:
-	uint _depth;  // used for determining the redraw queue priority.
+	uint _depth;  // used to determine the redraw queue priority. If depth is 0, the window should be detached.
 private:
 	bool HasDepth() const { return _depth > 0; }
 	uint GetDepth() const { return _depth; }
+	uint GetChildDepth() const { return _depth == 0 ? 0 : _depth + 1; }
 	void SetDepth(uint depth);
 
 
@@ -153,14 +156,24 @@ public:
 	////                      Message                      ////
 	///////////////////////////////////////////////////////////
 private:
-	ref_ptr<WndBase> _capture_wnd;
-	ref_ptr<WndBase> _focus_wnd;
-	ref_ptr<WndBase> _last_tracked_wnd;
+	ref_ptr<WndBase> _capture_child;	   // child, this, or nullptr
+	ref_ptr<WndBase> _focus_child;		   // child, this, or nullptr
+	ref_ptr<WndBase> _last_tracked_child;  // child or nullptr
+private:
+	void ChildLoseCapture();
+	void ChildLoseFocus();
+	void ChildLoseTrack();
+private:
+	virtual void SetChildCapture(WndBase& child);
+	virtual void SetChildFocus(WndBase& child);
 public:
-	void SetCapture();
-	void ReleaseCapture();
-	void SetFocus();
-	void ReleaseFocus();
+	void SetCapture() { SetChildCapture(*this); }
+	void SetFocus() { SetChildFocus(*this); }
+	virtual void ReleaseCapture();
+	virtual void ReleaseFocus();
+private:
+	void HandleMessage(Msg msg, Para para);
+	void DispatchMessage(Msg msg, Para para);
 };
 
 

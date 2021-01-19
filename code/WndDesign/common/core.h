@@ -11,6 +11,11 @@
 #endif
 
 
+#define __ToString(name) #name
+#define _ToString(name) __ToString(name)
+#define Remark	__FILE__ "(" _ToString(__LINE__) "): [" __FUNCTION__ "] Remark: "
+
+
 #include <stdexcept>
 #include <cassert>
 

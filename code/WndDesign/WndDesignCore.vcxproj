@@ -102,7 +102,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>_USRDLL</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,7 +120,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>_USRDLL</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,7 +138,8 @@
       <PreprocessorDefinitions>_DEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>_USRDLL</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -153,7 +156,8 @@
       <PreprocessorDefinitions>NDEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>_USRDLL</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -186,7 +190,6 @@
     <ClInclude Include="geometry\vector.h" />
     <ClInclude Include="layer\background.h" />
     <ClInclude Include="layer\background_types.h" />
-    <ClInclude Include="layer\desktop_layer.h" />
     <ClInclude Include="layer\layer.h" />
     <ClInclude Include="layer\tiling_helper.h" />
     <ClInclude Include="message\ime_msg.h" />
@@ -206,9 +209,11 @@
     <ClInclude Include="system\directx\wic_api.h" />
     <ClInclude Include="system\ime.h" />
     <ClInclude Include="wnd\desktop.h" />
+    <ClInclude Include="wnd\desktop_wnd.h" />
     <ClInclude Include="wnd\WndObject.h" />
     <ClInclude Include="wnd\redraw_queue.h" />
     <ClInclude Include="wnd\wnd_base.h" />
+    <ClInclude Include="wnd\wnd_base_interface.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="figure\figure_types.cpp" />

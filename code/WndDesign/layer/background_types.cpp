@@ -6,6 +6,12 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+const Background& NullBackground() {
+	static SolidColorBackground null_background(color_transparent);
+	return null_background;
+}
+
+
 void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
 	Rectangle rectangle(region.size, BlendColorWithOpacity(color, opacity));
 	rectangle.DrawOn(target, offset);

@@ -10,19 +10,11 @@ BEGIN_NAMESPACE(WndDesign)
 
 
 enum class Msg : uint {
-	// Message				// Parameters	// Descriptions(Optional)
+	// message				// parameters	// descriptions (optional)
 	_MSG_BEGIN,
 
 
-	//// Window Message ////
-	_WINDOW_MSG_BEGIN,
-
-	Scroll,					// nullmsg		Sent when the window's size has changed, and the sroll bar need to redraw.
-	
-	_WINDOW_MSG_END,
-
-
-	//// Mouse Message ////
+	//// mouse message ////
 	_MOUSE_MSG_BEGIN,
 
 	LeftDown,				// MouseMsg&
@@ -36,17 +28,17 @@ enum class Msg : uint {
 	_MOUSE_MSG_END,
 
 
-	//// Supplement Mouse Message ////
+	//// supplement mouse message ////
 	_SUPPLEMENT_MOUSE_MESSAGE_BEGIN,
 
-	MouseEnter,				// MouseMsg&	Sent when mouse enters a window region, used to set cursor.
+	MouseEnter,				// nullmsg     Sent when mouse enters a window region, used to set cursor.
 	MouseLeave,				// nullmsg
 	LoseCapture,			// nullmsg
 
 	_SUPPLEMENT_MOUSE_MESSAGE_END,
 
 
-	//// Keyboard Message ////
+	//// keyboard message ////
 	_KEYBOARD_MSG_BEGIN,
 
 	KeyDown,				// KeyMsg&
@@ -56,14 +48,14 @@ enum class Msg : uint {
 							// Visible character key messages are expected to be handled in Msg::Char,
 							//   while control key messages be handled in Msg::KeyDown.
 
-	ImeStartComposition,	// nullmsg					  (Remember the caret position when starts composition)
+	ImeCompositionBegin,	// nullmsg				 (Remember the caret position when starts composition)
 	ImeComposition,			// const ImeComposition* (Replace the composition string every time composition updates) 
-	ImeEndComposition,		// const ImeComposition* (Commit the result string and reset caret position)
+	ImeCompositionEnd,		// const ImeComposition* (Commit the result string and reset caret position)
 	
 	_KEYBOARD_MSG_END,
 
 
-	// Supplement keyboard Message
+	//// supplement keyboard message ////
 	_SUPPLEMENT_KEYBOARD_MESSAGE_BEGIN,
 
 	LoseFocus,				// nullptr
@@ -71,21 +63,8 @@ enum class Msg : uint {
 	_SUPPLEMENT_KEYBOARD_MSG_END,
 
 
-	//// Timer Message ////
-	Timer,					// Ref<Timer*>
-
-
-	//// User Message ////
-	_USER_MSG_BEGIN = 0x80000000,
-
-
 	_MSG_END = 0xFFFFFFFF
 };
-
-
-constexpr inline const Msg UserMsg(uint number) {
-	return static_cast<Msg>(static_cast<uint>(Msg::_USER_MSG_BEGIN) + number);
-}
 
 
 inline bool IsKeyboardMsg(Msg msg) {

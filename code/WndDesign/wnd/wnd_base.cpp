@@ -4,6 +4,7 @@
 #include "../layer/layer.h"
 #include "../layer/background.h"
 #include "../geometry/geometry_helper.h"
+#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -38,54 +39,52 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
-
-	// Set depth.
-
-	// If has invalid region, join figure queue.
-
-	// Set visible region.
+	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
 }
 
-void WndBase::ClearParent() {
-	_parent = nullptr;
-	_index_on_parent = {};
+void WndBase::ClearParent() { 
+	_parent = nullptr; _index_on_parent = {}; 
 }
 
 void WndBase::DetachFromParent() {
 	if (HasParent()) { _parent->RemoveChild(*this); }
-
-	// reset depth
-
 }
 
 void WndBase::AddChild(WndBase& child_wnd) {
+	if (child_wnd._parent == this) { return; }
 
-	// set child depth, display region and visible region.
+	_child_wnds.push_front(&child_wnd);
+	child_wnd.SetParent(this, _child_wnds.begin());
+	child_wnd.SetDepth(GetDepth());
+	child_wnd.ResetVisibleRegion();
 
+	// When to calculate child's display region? 
 }
 
 void WndBase::RemoveChild(WndBase& child_wnd) {
 	if (child_wnd._parent != this) { return; }
 	_child_wnds.erase(child_wnd._index_on_parent);
 	child_wnd.ClearParent();
+	// Child's depth will be reset at UpdateInvalidRegion, because the child window may soon be added as a child.
+	// Child's visible region remains unchanged until attached to a parent window next time.
 
-	// clear child depth and visible region.
-
-	// Clear message tracked windows.
+	if (_capture_child == &child_wnd) { _capture_child = nullptr; }
+	if (_focus_child == &child_wnd) { _focus_child = nullptr; }
+	if (_last_tracked_child == &child_wnd) { ChildLoseTrack(); }
 }
 
 void WndBase::SetDepth(uint depth) {
 	if (_depth == depth) { return; }
-	// Depth has changed, re-enter redraw queue.
+	// Depth has changed, leave redraw queue.
 	LeaveRedrawQueue();
+
 	_depth = depth;
 
 	// Set depth for child windows.
+	for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
 
-	// Enter redraw queue, if depth > 0 && invalid region is not empty.
-	if (_depth > 0 && !_invalid_region.IsEmpty()) {
-
-	}
+	// Join redraw queue, if depth > 0 && invalid region is not empty.
+	if (_depth > 0 && !_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
 }
 
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
@@ -139,7 +138,7 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 	if (HasLayer()) {
 		Rect old_cached_region = _layer->GetCachedRegion();
 		if (!old_cached_region.Contains(_visible_region)) {
-		#pragma message("It's arbitrary to decide when to reset cached region.")
+		#pragma message(Remark"It's arbitrary to decide when to reset cached region.")
 			_layer->SetCachedRegion(_accessible_region, _visible_region);
 			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion());
 			new_cached_region.Sub(old_cached_region);
@@ -151,7 +150,7 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
 
 	// For object's lazy loading.
-	_object.OnVisibleRegionChange(_accessible_region, _visible_region);
+	_object.OnCachedRegionChange(_accessible_region, GetCachedRegion());
 }
 
 void WndBase::Invalidate(Region&& region) {
@@ -195,10 +194,13 @@ void WndBase::UpdateInvalidRegion() {
 	if (HasLayer()) {
 		auto [bounding_region, regions] = _invalid_region.GetRect();
 		FigureQueue figure_queue;
+
 		uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
 		figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(_background, bounding_region, true));
 		_object.OnPaint(figure_queue, _accessible_region, bounding_region);
 		figure_queue.EndGroup(group_index);
+
+	#pragma message(Remark"Or just draw the bounding region once ?")
 		for (auto& region : regions) {
 			_layer->DrawFigureQueue(figure_queue, region);
 		}
@@ -227,6 +229,77 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
 		figure_queue.EndGroup(group_index);
 	}
+}
+
+void WndBase::ChildLoseCapture() {
+	if (_capture_child != nullptr) {
+		_capture_child == this ? HandleMessage(Msg::LoseCapture, nullmsg) : _capture_child->ChildLoseCapture();
+		_capture_child = nullptr;
+	}
+}
+
+void WndBase::ChildLoseFocus() {
+	if (_focus_child != nullptr) {
+		_focus_child == this ? HandleMessage(Msg::LoseFocus, nullmsg) : _focus_child->ChildLoseFocus();
+		_focus_child = nullptr;
+	}
+}
+
+void WndBase::ChildLoseTrack() {
+	if (_last_tracked_child != nullptr) {
+		_last_tracked_child->DispatchMessage(Msg::MouseLeave, nullmsg);
+		_last_tracked_child = nullptr;
+	}
+}
+
+void WndBase::SetChildCapture(WndBase& child) {
+	if (_capture_child == &child) { return; }
+	ChildLoseCapture();
+	_capture_child = &child;
+	if (HasParent()) { _parent->SetChildCapture(*this); }
+}
+
+void WndBase::SetChildFocus(WndBase& child) {
+	if (_focus_child == &child) { return; }
+	ChildLoseFocus();
+	_focus_child = &child;
+	if (HasParent()) { _parent->SetChildFocus(*this); }
+}
+
+void WndBase::ReleaseCapture() { 
+	ChildLoseCapture(); 
+	if (HasParent()) { _parent->ReleaseCapture(); } 
+}
+
+void WndBase::ReleaseFocus() { 
+	ChildLoseFocus(); 
+	if (HasParent()) { _parent->ReleaseFocus(); } 
+}
+
+void WndBase::HandleMessage(Msg msg, Para para) {
+#pragma message(Remark"May use the return value to implement message bubbling.")
+	_object.Handler(msg, para);
+}
+
+void WndBase::DispatchMessage(Msg msg, Para para) {
+	if (IsMouseMsg(msg)) {
+		MouseMsg mouse_msg = GetMouseMsg(para);
+		ref_ptr<WndBase> child = _capture_child;
+		if (child == nullptr) { child = _object.HitTestChild(mouse_msg.point).wnd.get(); }
+		if (child == this) { return HandleMessage(msg, para); }
+		if (child != _last_tracked_child) {
+			ChildLoseTrack();
+			_last_tracked_child = child;
+			child->HandleMessage(Msg::MouseEnter, nullmsg);
+		}
+		mouse_msg.point = mouse_msg.point + child->OffsetFromParent();
+		return child->DispatchMessage(msg, mouse_msg);
+	}
+	if (IsKeyboardMsg(msg) && _focus_child != nullptr && _focus_child != this) {
+		return _focus_child->DispatchMessage(msg, para);
+	}
+	if (msg == Msg::MouseLeave) { ChildLoseTrack(); }
+	return HandleMessage(msg, para);
 }
 
 

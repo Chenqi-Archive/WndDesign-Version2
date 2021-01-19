@@ -27,6 +27,12 @@ void RedrawQueue::RemoveWnd(WndBase& wnd) {
 	wnd.SetRedrawQueueIndex();
 }
 
+void RedrawQueue::AddDesktopWnd() {
+}
+
+void RedrawQueue::RemoveDesktopWnd() {
+}
+
 void RedrawQueue::Commit() {
 	BeginDraw();
 

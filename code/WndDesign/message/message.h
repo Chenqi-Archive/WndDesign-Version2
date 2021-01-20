@@ -22,7 +22,7 @@ enum class Msg : uint {
 	RightDown,				// MouseMsg&
 	RightUp,				// MouseMsg&
 	MouseMove,				// MouseMsg&
-	MouseWheelVertical,		// MouseMsg&
+	MouseWheel,				// MouseMsg&
 	MouseWheelHorizontal,	// MouseMsg&
 
 	_MOUSE_MSG_END,
@@ -47,7 +47,7 @@ enum class Msg : uint {
 	Char,				    // wchar (utf-16 character code. You will only get visible character key messages by GetCharMsg(). )
 							// Visible character key messages are expected to be handled in Msg::Char,
 							//   while control key messages be handled in Msg::KeyDown.
-
+	
 	ImeCompositionBegin,	// nullmsg				 (Remember the caret position when starts composition)
 	ImeComposition,			// const ImeComposition* (Replace the composition string every time composition updates) 
 	ImeCompositionEnd,		// const ImeComposition* (Commit the result string and reset caret position)

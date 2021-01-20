@@ -23,7 +23,7 @@ using TileRange = Rect;
 struct TileIDHasher {
 	size_t operator()(TileID tile_id) const noexcept {
 		static_assert(sizeof(TileID) == sizeof(size_t));   // 64bit
-		return *reinterpret_cast<size_t*>(&tile_id);
+		return reinterpret_cast<size_t&>(tile_id);
 	}
 };
 

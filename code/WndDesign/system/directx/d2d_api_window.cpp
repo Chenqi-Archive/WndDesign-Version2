@@ -83,7 +83,7 @@ void WindowResource::Present(vector<Rect>&& dirty_regions) {
     if (has_presented) {
         static_assert(sizeof(RECT) == sizeof(Rect));  // In-place convert Rect to RECT.
         for (auto& region : dirty_regions) {
-            *reinterpret_cast<RECT*>(&region) = { region.left(), region.top(), region.right(), region.bottom() };
+            reinterpret_cast<RECT&>(region) = { region.left(), region.top(), region.right(), region.bottom() };
         }
         present_parameters.DirtyRectsCount = (uint)dirty_regions.size();
         present_parameters.pDirtyRects = reinterpret_cast<RECT*>(dirty_regions.data());

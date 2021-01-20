@@ -2,7 +2,6 @@
 #include "redraw_queue.h"
 #include "WndObject.h"
 #include "../layer/layer.h"
-#include "../layer/background.h"
 #include "../geometry/geometry_helper.h"
 #include "../message/message.h"
 
@@ -10,9 +9,15 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
+	return std::make_unique<WndBase>(object);
+}
+
+
 WndBase::WndBase(WndObject& object) :
 	_object(object),
-	_parent(nullptr), _index_on_parent(),
+	_parent(nullptr), 
+	_index_on_parent(),
 	_child_wnds(),
 
 	_accessible_region(region_empty), 
@@ -25,10 +30,11 @@ WndBase::WndBase(WndObject& object) :
 
 	_depth(0),
 	_redraw_queue_index(),
-	_invalid_region() 
+	_invalid_region(),
 
-	/* capture */
-{
+	_capture_child(nullptr),
+	_focus_child(nullptr),
+	_last_tracked_child(nullptr) {
 }
 
 WndBase::~WndBase() {
@@ -50,27 +56,29 @@ void WndBase::DetachFromParent() {
 	if (HasParent()) { _parent->RemoveChild(*this); }
 }
 
-void WndBase::AddChild(WndBase& child_wnd) {
-	if (child_wnd._parent == this) { return; }
+void WndBase::AddChild(IWndBase& child_wnd) {
+	WndBase& child = static_cast<WndBase&>(child_wnd);
+	if (child._parent == this) { return; }
 
-	_child_wnds.push_front(&child_wnd);
-	child_wnd.SetParent(this, _child_wnds.begin());
-	child_wnd.SetDepth(GetDepth());
-	child_wnd.ResetVisibleRegion();
+	_child_wnds.push_front(&child);
+	child.SetParent(this, _child_wnds.begin());
+	child.SetDepth(GetDepth());
+	child.ResetVisibleRegion();
 
-	// When to calculate child's display region? 
+	// Child's accessible region and display region will be calculated and set by parent window later.
 }
 
-void WndBase::RemoveChild(WndBase& child_wnd) {
-	if (child_wnd._parent != this) { return; }
-	_child_wnds.erase(child_wnd._index_on_parent);
-	child_wnd.ClearParent();
+void WndBase::RemoveChild(IWndBase& child_wnd) {
+	WndBase& child = static_cast<WndBase&>(child_wnd);
+	if (child._parent != this) { return; }
+	_child_wnds.erase(child._index_on_parent);
+	child.ClearParent();
 	// Child's depth will be reset at UpdateInvalidRegion, because the child window may soon be added as a child.
 	// Child's visible region remains unchanged until attached to a parent window next time.
 
-	if (_capture_child == &child_wnd) { _capture_child = nullptr; }
-	if (_focus_child == &child_wnd) { _focus_child = nullptr; }
-	if (_last_tracked_child == &child_wnd) { ChildLoseTrack(); }
+	if (_capture_child == &child) { _capture_child = nullptr; }
+	if (_focus_child == &child) { _focus_child = nullptr; }
+	if (_last_tracked_child == &child) { ChildLoseTrack(); }
 }
 
 void WndBase::SetDepth(uint depth) {
@@ -140,9 +148,13 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 		if (!old_cached_region.Contains(_visible_region)) {
 		#pragma message(Remark"It's arbitrary to decide when to reset cached region.")
 			_layer->SetCachedRegion(_accessible_region, _visible_region);
-			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion());
+			// Invalidate new cached region.
+			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion().Intersect(_accessible_region));
 			new_cached_region.Sub(old_cached_region);
-			Invalidate(std::move(new_cached_region));
+			if (!new_cached_region.IsEmpty()) {
+				_invalid_region.Union(new_cached_region);
+				JoinRedrawQueue();
+			}
 		}
 	}
 
@@ -153,12 +165,15 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 	_object.OnCachedRegionChange(_accessible_region, GetCachedRegion());
 }
 
-void WndBase::Invalidate(Region&& region) {
-	region.Intersect(GetCachedRegion());
-	if (!region.IsEmpty()) {
-		_invalid_region.Union(region);
+void WndBase::Invalidate(WndBase& child) {
+	Region& child_invalid_region = child._invalid_region;
+	child_invalid_region.Translate(vector_zero - child.OffsetFromParent());
+	child_invalid_region.Intersect(child._region_on_parent.Intersect(GetCachedRegion()));
+	if (!child_invalid_region.IsEmpty()) {
+		_invalid_region.Union(child_invalid_region);
 		JoinRedrawQueue();
 	}
+	child_invalid_region.Clear();
 }
 
 void WndBase::Invalidate(Rect region) {
@@ -206,13 +221,8 @@ void WndBase::UpdateInvalidRegion() {
 		}
 	}
 
-	// Invalidate region for parent window.
-	_invalid_region.Translate(_display_offset - _region_on_parent.point);
-	_invalid_region.Intersect(_region_on_parent);
-	_parent->Invalidate(std::move(_invalid_region));
-
-	// Clear invalid region.
-	_invalid_region.Clear();
+	// Invalidate parent window, my invalid region will be cleared by parent window.
+	_parent->Invalidate(*this);
 }
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
@@ -276,16 +286,11 @@ void WndBase::ReleaseFocus() {
 	if (HasParent()) { _parent->ReleaseFocus(); } 
 }
 
-void WndBase::HandleMessage(Msg msg, Para para) {
-#pragma message(Remark"May use the return value to implement message bubbling.")
-	_object.Handler(msg, para);
-}
-
 void WndBase::DispatchMessage(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg mouse_msg = GetMouseMsg(para);
 		ref_ptr<WndBase> child = _capture_child;
-		if (child == nullptr) { child = _object.HitTestChild(mouse_msg.point).wnd.get(); }
+		if (child == nullptr) { child = static_cast<WndBase*>(_object.HitTestChild(mouse_msg.point).wnd.get()); }
 		if (child == this) { return HandleMessage(msg, para); }
 		if (child != _last_tracked_child) {
 			ChildLoseTrack();

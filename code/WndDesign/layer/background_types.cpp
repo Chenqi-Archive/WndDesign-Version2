@@ -6,7 +6,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-const Background& NullBackground() {
+WNDDESIGNCORE_API const Background& NullBackground() {
 	static SolidColorBackground null_background(color_transparent);
 	return null_background;
 }

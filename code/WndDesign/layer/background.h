@@ -5,8 +5,6 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-class RenderTarget;  // An alias for ID2D1DeviceContext.
-
 
 // Background abstract base class.
 // Background is an infinitly large "figure" that can be drawn on target.
@@ -20,7 +18,7 @@ struct Background {
 };
 
 
-const Background& NullBackground();
+WNDDESIGNCORE_API const Background& NullBackground();
 
 
 struct BackgroundFigure : Figure {

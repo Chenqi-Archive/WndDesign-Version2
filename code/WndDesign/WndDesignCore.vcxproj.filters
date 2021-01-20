@@ -147,10 +147,16 @@
     <ClInclude Include="wnd\WndObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\desktop_wnd.h">
+    <ClInclude Include="wnd\wnd_base_interface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\wnd_base_interface.h">
+    <ClInclude Include="system\win32_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\win32_ime_input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\win32_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -204,6 +210,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="wnd\wnd_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\win32_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\win32_ime_input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

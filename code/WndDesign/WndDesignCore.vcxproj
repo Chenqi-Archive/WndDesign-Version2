@@ -208,8 +208,10 @@
     <ClInclude Include="system\directx\dxgi_api.h" />
     <ClInclude Include="system\directx\wic_api.h" />
     <ClInclude Include="system\ime.h" />
+    <ClInclude Include="system\win32_api.h" />
+    <ClInclude Include="system\win32_helper.h" />
+    <ClInclude Include="system\win32_ime_input.h" />
     <ClInclude Include="wnd\desktop.h" />
-    <ClInclude Include="wnd\desktop_wnd.h" />
     <ClInclude Include="wnd\WndObject.h" />
     <ClInclude Include="wnd\redraw_queue.h" />
     <ClInclude Include="wnd\wnd_base.h" />
@@ -230,6 +232,8 @@
     <ClCompile Include="system\directx\dwrite_api.cpp" />
     <ClCompile Include="system\directx\dxgi_api.cpp" />
     <ClCompile Include="system\directx\wic_api.cpp" />
+    <ClCompile Include="system\win32_api.cpp" />
+    <ClCompile Include="system\win32_ime_input.cpp" />
     <ClCompile Include="wnd\desktop.cpp" />
     <ClCompile Include="wnd\redraw_queue.cpp" />
     <ClCompile Include="wnd\wnd_base.cpp" />

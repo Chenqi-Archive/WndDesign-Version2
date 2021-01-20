@@ -10,38 +10,34 @@ BEGIN_NAMESPACE(WndDesign)
 using std::unique_ptr;
 
 class WndObject;
+class Background;
+class FigureQueue;
 
 
-struct IWndBase {
+struct ABSTRACT_BASE IWndBase {
 	WNDDESIGNCORE_API static unique_ptr<IWndBase> Create(WndObject& object);
 
 	virtual ~IWndBase() pure {}
 
-
 	//// child and parent window relation ////
 	virtual bool HasParent() const pure;
 	virtual WndObject& GetParent() const pure;
-	virtual void RegisterChild(WndObject& child) pure;
-	virtual void UnregisterChild(WndObject& child) pure;
-
+	virtual void AddChild(IWndBase& child) pure;
+	virtual void RemoveChild(IWndBase& child) pure;
 
 	//// window region ////
 	virtual const Rect GetAccessibleRegion() const pure;
-	virtual const Size GetSize() const pure;
 	virtual const Rect GetDisplayRegion() const pure;
-	virtual const Vector SetDisplayOffset(Point display_offset) pure;
-	virtual const Point GetDisplayOffset() const pure;
-	virtual const Vector ScrollView(Vector vector) pure;  // returns the real vector shifted
+	virtual const Rect GetRegionOnParent() const pure;
 	virtual void SetAccessibleRegion(Rect accessible_region) pure;
+	virtual const Vector SetDisplayOffset(Point display_offset) pure;
 	virtual void SetRegionOnParent(Rect region_on_parent) pure;
-
 
 	//// painting and composition ////
 	virtual void SetBackground(const Background& background) pure;
-	virtual void AllocateLayer()  pure;
+	virtual void AllocateLayer() pure;
 	virtual void Invalidate(Rect region) pure;
 	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const pure;
-
 
 	//// message handling ////
 	virtual void SetCapture() pure;

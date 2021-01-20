@@ -1,13 +1,13 @@
 #pragma once
 
-#ifdef _USRDLL
-#ifdef WNDDESIGNCORE_EXPORTS
-#define WNDDESIGNCORE_API __declspec(dllexport)		// For exporting to a dynamic library
+#ifdef WNDDESIGNCORE_EXPORTS							 // For library
+	#ifdef _USRDLL
+		#define WNDDESIGNCORE_API __declspec(dllexport)		// For dynamic library
+	#else
+		#define WNDDESIGNCORE_API							// For static library
+	#endif
 #else
-#define WNDDESIGNCORE_API __declspec(dllimport)		// For importing from a dynamic library
-#endif
-#else
-#define WNDDESIGNCORE_API							// For static library
+	#define WNDDESIGNCORE_API __declspec(dllimport)		 // For user program
 #endif
 
 
@@ -16,15 +16,16 @@
 #define Remark	__FILE__ "(" _ToString(__LINE__) "): [" __FUNCTION__ "] Remark: "
 
 
-#include <stdexcept>
-#include <cassert>
-
-
 #define BEGIN_NAMESPACE(name) namespace name {
 #define END_NAMESPACE(name)   }
-
 #define Anonymous
+
+#define ABSTRACT_BASE _declspec(novtable)
 #define pure = 0
+
+
+#include <stdexcept>
+#include <cassert>
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -36,6 +37,7 @@ using ref_ptr = T*;   // A tag for raw pointer that is used only as a reference.
 template<class T>
 using alloc_ptr = T*;   // [BE CAREFUL] A tag for raw pointer that is allocated by operator new.
 						// It is recommended that you use a smart pointer like unique_ptr or shared_ptr, etc.
+
 
 using uchar = unsigned char;
 using ushort = unsigned short;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "wnd_base_interface.h"
-#include "../geometry/region.h"
 #include "../common/reference_wrapper.h"
+#include "../geometry/region.h"
 #include "../message/msg_base.h"
 
 #include <list>
@@ -14,13 +14,10 @@ BEGIN_NAMESPACE(WndDesign)
 using std::list;
 using std::unique_ptr;
 
-class WndObject;
 class Layer;
-class Background;
-class FigureQueue;
 
 
-class WndBase : public Uncopyable {
+class WndBase : public IWndBase, public Uncopyable {
 	//////////////////////////////////////////////////////////
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
@@ -31,6 +28,9 @@ public:
 	WndBase(WndObject& object);
 	~WndBase();
 
+	friend class Desktop;
+	friend class DesktopWndFrame;
+
 
 	///////////////////////////////////////////////////////////
 	////                   Parent Window                   ////
@@ -39,8 +39,8 @@ private:
 	ref_ptr<WndBase> _parent;
 	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
-	bool HasParent() const { return _parent != nullptr; }
-	WndObject& GetParent() const { 
+	virtual bool HasParent() const override { return _parent != nullptr; }
+	virtual WndObject& GetParent() const override {
 		if (!HasParent()) { throw std::invalid_argument("window has no parent"); }
 		return _parent->_object;
 	}
@@ -59,8 +59,8 @@ private:
 private:
 	list<ref_ptr<WndBase>> _child_wnds;
 public:
-	void AddChild(WndBase& child_wnd);
-	void RemoveChild(WndBase& child_wnd);
+	virtual void AddChild(IWndBase& child_wnd) override;
+	virtual void RemoveChild(IWndBase& child_wnd) override;
 
 
 	//////////////////////////////////////////////////////////
@@ -79,11 +79,12 @@ private:
 	Rect _visible_region;
 
 public:
-	const Rect GetAccessibleRegion() const { return _accessible_region; }
-	void SetAccessibleRegion(Rect accessible_region);
-	const Rect GetDisplayRegion() const { return Rect(_display_offset, _region_on_parent.size); }
-	const Vector SetDisplayOffset(Point display_offset);  // returns the display_offset change.
-	void SetRegionOnParent(Rect region_on_parent);
+	virtual const Rect GetAccessibleRegion() const override { return _accessible_region; }
+	virtual const Rect GetDisplayRegion() const override { return Rect(_display_offset, _region_on_parent.size); }
+	virtual const Rect GetRegionOnParent() const override { return _region_on_parent; }
+	virtual void SetAccessibleRegion(Rect accessible_region) override;
+	virtual const Vector SetDisplayOffset(Point display_offset) override;  // returns the display_offset change.
+	virtual void SetRegionOnParent(Rect region_on_parent) override;
 
 public:
 	// point_on_parent + offset_from_parent = point_on_myself
@@ -94,7 +95,7 @@ public:
 private:
 	reference_wrapper<const Background> _background;
 public:
-	void SetBackground(const Background& background) { _background = background; }
+	virtual void SetBackground(const Background& background) override { _background = background; }
 
 
 	//// layer management ////
@@ -103,7 +104,7 @@ private:
 private:
 	bool HasLayer() const { return _layer != nullptr; }
 public:
-	void AllocateLayer();
+	virtual void AllocateLayer() override;
 
 private:
 	const Rect GetCachedRegion() const;
@@ -143,13 +144,13 @@ private:
 	Region _invalid_region;
 private:
 	/* called by child window when child has updated invalid region */
-	void Invalidate(Region&& region);
+	virtual void Invalidate(WndBase& child);
 public:
-	void Invalidate(Rect region);
+	virtual void Invalidate(Rect region) override;
 	/* called by redraw queue at commit time */
 	void UpdateInvalidRegion();
 	/* called by parent window (WndObject) */
-	void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const;
+	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const override;
 
 
 	///////////////////////////////////////////////////////////
@@ -167,12 +168,15 @@ private:
 	virtual void SetChildCapture(WndBase& child);
 	virtual void SetChildFocus(WndBase& child);
 public:
-	void SetCapture() { SetChildCapture(*this); }
-	void SetFocus() { SetChildFocus(*this); }
-	virtual void ReleaseCapture();
-	virtual void ReleaseFocus();
+	virtual void SetCapture() override { SetChildCapture(*this); }
+	virtual void SetFocus() override { SetChildFocus(*this); }
+	virtual void ReleaseCapture() override;
+	virtual void ReleaseFocus() override;
 private:
-	void HandleMessage(Msg msg, Para para);
+	void HandleMessage(Msg msg, Para para) {
+	#pragma message(Remark"May use the return value to implement message bubbling.")
+		_object.Handler(msg, para);
+	}
 	void DispatchMessage(Msg msg, Para para);
 };
 

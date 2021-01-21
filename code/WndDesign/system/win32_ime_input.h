@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ime.h"
-#include "../common/feature.h"
+#include "../common/uncopyable.h"
 
 #include <Windows.h>
 

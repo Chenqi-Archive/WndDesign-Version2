@@ -2,11 +2,18 @@
 #include "redraw_queue.h"
 #include "WndObject.h"
 #include "../layer/layer.h"
+#include "../layer/background_types.h"
 #include "../geometry/geometry_helper.h"
 #include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
+
+
+const Background& NullBackground() {
+	static SolidColorBackground null_background(ColorSet::White);
+	return null_background;
+}
 
 
 WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
@@ -25,7 +32,7 @@ WndBase::WndBase(WndObject& object) :
 	_region_on_parent(region_empty),
 	_visible_region(region_empty),
 
-	_background(_object.GetBackground()),
+	_background(NullBackground()),
 	_layer(),
 
 	_depth(0),
@@ -53,7 +60,11 @@ void WndBase::ClearParent() {
 }
 
 void WndBase::DetachFromParent() {
-	if (HasParent()) { _parent->RemoveChild(*this); }
+	if (HasParent()) { 
+		_parent->RemoveChild(*this); 
+		// Send child detached message to notify parent window object.
+		_parent->_object.OnChildDetach(_object);
+	}
 }
 
 void WndBase::AddChild(IWndBase& child_wnd) {
@@ -62,7 +73,7 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 
 	_child_wnds.push_front(&child);
 	child.SetParent(this, _child_wnds.begin());
-	child.SetDepth(GetDepth());
+	child.SetDepth(GetChildDepth());
 	child.ResetVisibleRegion();
 
 	// Child's accessible region and display region will be calculated and set by parent window later.

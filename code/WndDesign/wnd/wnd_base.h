@@ -21,14 +21,14 @@ class WndBase : public IWndBase, public Uncopyable {
 	//////////////////////////////////////////////////////////
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
-private:
+protected:
 	WndObject& _object;
 
 public:
 	WndBase(WndObject& object);
 	~WndBase();
 
-	friend class Desktop;
+	friend class DesktopBase;
 	friend class DesktopWndFrame;
 
 
@@ -39,8 +39,8 @@ private:
 	ref_ptr<WndBase> _parent;
 	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
-	virtual bool HasParent() const override { return _parent != nullptr; }
-	virtual WndObject& GetParent() const override {
+	virtual bool HasParent() const override final { return _parent != nullptr; }
+	virtual WndObject& GetParent() const override final {
 		if (!HasParent()) { throw std::invalid_argument("window has no parent"); }
 		return _parent->_object;
 	}
@@ -121,16 +121,16 @@ private:
 	uint _depth;  // used to determine the redraw queue priority. If depth is 0, the window should be detached.
 private:
 	bool HasDepth() const { return _depth > 0; }
-	uint GetDepth() const { return _depth; }
 	uint GetChildDepth() const { return _depth == 0 ? 0 : _depth + 1; }
 	void SetDepth(uint depth);
+public:
+	uint GetDepth() const { return _depth; }
 
 
 	//// redraw queue ////
 private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
-private:
-	friend class RedrawQueue;
+public:
 	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
 	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }

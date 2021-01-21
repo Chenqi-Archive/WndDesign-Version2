@@ -1,10 +1,12 @@
 #include "win32_ime_input.h"
 
-
 #pragma comment(lib, "imm32.lib")
 
 
 BEGIN_NAMESPACE(WndDesign)
+
+using UnderlineStyle = ImeComposition::UnderlineStyle;
+
 
 BEGIN_NAMESPACE(Anonymous)
 

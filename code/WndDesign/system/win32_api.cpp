@@ -1,5 +1,6 @@
 #include "../message/message.h"
 #include "../wnd/desktop.h"
+#include "../wnd/redraw_queue.h"
 
 #include "win32_api.h"
 #include "win32_ime_input.h"
@@ -49,13 +50,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_LBUTTONUP: msg_type = Msg::LeftUp; break;
         case WM_RBUTTONDOWN: msg_type = Msg::RightDown; break;
         case WM_RBUTTONUP: msg_type = Msg::RightUp; break;
-        case WM_MOUSEWHEEL:
-            msg_type = Msg::MouseWheel;
+        case WM_MOUSEWHEEL: msg_type = Msg::MouseWheel;
             // The point is relative to the desktop, convert it to the point on window.
-            mouse_msg.point = mouse_msg.point - (frame->ConvertToParentPoint(point_zero) - point_zero);
+            mouse_msg.point = mouse_msg.point + frame->OffsetFromParent();
             break;
-        case WM_MOUSEHWHEEL: msg_type = Msg::MouseWheelHorizontal;
-            break;
+        case WM_MOUSEHWHEEL: msg_type = Msg::MouseWheelHorizontal; break;
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
         }
         frame->ReceiveMessage(msg_type, mouse_msg);
@@ -70,15 +69,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         CharMsg char_msg;
         char_msg.ch = static_cast<wchar>(wParam);
         switch (msg) {
-        case WM_KEYDOWN:frame->ReceiveMessage(Msg::KeyDown, key_msg); break;
-        case WM_KEYUP:frame->ReceiveMessage(Msg::KeyUp, key_msg); break;
+        case WM_KEYDOWN: frame->ReceiveMessage(Msg::KeyDown, key_msg); break;
+        case WM_KEYUP: frame->ReceiveMessage(Msg::KeyUp, key_msg); break;
         case WM_CHAR: frame->ReceiveMessage(Msg::Char, char_msg); break;
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
         }
         return 0; // never reached
     }
 
-    //// ime message, region related message and other messages ////
+    //// ime message, region related message and other frame related messages ////
     {
         ImeInput& ime = ImeInput::Get();
         switch (msg) {
@@ -98,12 +97,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_IME_COMPOSITION:
             ime.UpdateImeWindow(hWnd);
             if (ime.UpdateComposition(hWnd, lParam)) {
-                frame->ReceiveMessage(Msg::ImeComposition, const_cast<ImeComposition*>(&ime.GetComposition()));
+                frame->ReceiveMessage(Msg::ImeComposition, ImeCompositionMsg(ime.GetComposition()));
             }
             ime.UpdateResult(hWnd, lParam);
             break;
         case WM_IME_ENDCOMPOSITION:
-            frame->ReceiveMessage(Msg::ImeCompositionEnd, const_cast<ImeComposition*>(&ime.GetResult()));
+            frame->ReceiveMessage(Msg::ImeCompositionEnd, ImeCompositionMsg(ime.GetResult()));
             ime.ResetComposition();
             ime.DestroyImeWindow(hWnd);
             break;
@@ -127,11 +126,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_PAINT: {
                 PAINTSTRUCT ps;
                 HDC hdc = BeginPaint(hWnd, &ps);
-                frame->RegionUpdated(RECT2Rect(ps.rcPaint));
+                frame->Invalidate(RECT2Rect(ps.rcPaint));
                 EndPaint(hWnd, &ps);
             }break;
 
-        case WM_MOUSELEAVE: frame->ReceiveMessage(Msg::MouseLeave, nullptr); mouse_leave_tracked = false; break;
+        case WM_MOUSELEAVE: frame->ReceiveMessage(Msg::MouseLeave, nullmsg); mouse_leave_tracked = false; break;
         case WM_CAPTURECHANGED:frame->LoseCapture(); break;
         case WM_KILLFOCUS: frame->LoseFocus(); break;
         default: goto FrameIrrelevantMessages;
@@ -139,7 +138,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return 0;
     }
 
-    //// layer irrelevant message ////
+    //// frame irrelevant message ////
 FrameIrrelevantMessages:
     switch (msg) {
     case WM_CREATE: window_cnt++; break;
@@ -167,7 +166,7 @@ END_NAMESPACE(Anonymous)
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(DesktopWndFrame& frame, Rect region, const wstring& title) {
+HANDLE CreateWnd(Rect region, const wstring& title) {
     if (!has_wnd_class_registered) { RegisterWndClass(); }
     HWND hWnd = CreateWindowExW(
         NULL, wnd_class_name, L"",
@@ -175,16 +174,17 @@ HANDLE CreateWnd(DesktopWndFrame& frame, Rect region, const wstring& title) {
         region.point.x, region.point.y, region.size.width, region.size.height,
         NULL, NULL, hInstance, NULL
     );
-#error check return value
-    // Store the pointer of the attached frame as the user data.
-    SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)&frame);
+#pragma message(Remark"Check return value!")
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     return hWnd;
 }
 
 void DestroyWnd(HANDLE hWnd) {
-    SetWindowLongPtr((HWND)hWnd, GWLP_USERDATA, NULL);
     DestroyWindow((HWND)hWnd);
+}
+
+void SetWndUserData(HANDLE hWnd, void* data) {
+    SetWindowLongPtrW((HWND)hWnd, GWLP_USERDATA, (LONG_PTR)data);
 }
 
 void MoveWnd(HANDLE hWnd, Rect region) {
@@ -209,9 +209,11 @@ void ReleaseFocus() {
 
 int MessageLoop() {
     MSG msg;
-    while (GetMessage(&msg, nullptr, 0, 0)) {
+    RedrawQueue& redraw_queue = GetRedrawQueue(); // Initialize redraw queue.
+    while (GetMessageW(&msg, nullptr, 0, 0)) {
         TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        DispatchMessageW(&msg);
+        redraw_queue.Commit(); // Commit redraw queue every message loop.
     }
     return (int)msg.wParam;
 }

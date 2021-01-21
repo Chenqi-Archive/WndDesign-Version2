@@ -1,5 +1,6 @@
 #include "redraw_queue.h"
 #include "wnd_base.h"
+#include "desktop.h"
 #include "../system/directx/d2d_api.h"
 
 
@@ -21,21 +22,25 @@ void RedrawQueue::AddWnd(WndBase& wnd) {
 
 void RedrawQueue::RemoveWnd(WndBase& wnd) {
 	uint depth = wnd.GetDepth();
-	assert(depth <= max_wnd_depth);
+	assert(0 < depth && depth <= max_wnd_depth);
 	assert(wnd.HasRedrawQueueIndex());
 	_queue[depth].erase(wnd.GetRedrawQueueIndex());
 	wnd.SetRedrawQueueIndex();
 }
 
-void RedrawQueue::AddDesktopWnd() {
+void RedrawQueue::AddDesktopWnd(DesktopWndFrame& frame) {
+	frame.SetRedrawQueueIndex(_queue[0].insert(_queue[0].begin(), reinterpret_cast<ref_ptr<WndBase>>(&frame)));
 }
 
-void RedrawQueue::RemoveDesktopWnd() {
+void RedrawQueue::RemoveDesktopWnd(DesktopWndFrame& frame) {
+	_queue[0].erase(frame.GetRedrawQueueIndex());
+	frame.SetRedrawQueueIndex();
 }
 
 void RedrawQueue::Commit() {
-	BeginDraw();
+	if (_next_depth == 0) { return; }
 
+	BeginDraw();
 	uint next_depth = _next_depth;
 	while (next_depth > 0) {
 		while (!_queue[next_depth].empty()) {
@@ -45,11 +50,14 @@ void RedrawQueue::Commit() {
 		}
 		next_depth--;
 	}
-
 	EndDraw();
 
-	// Present system windows.
-
+	// Present desktop windows whose depth is 0. (Now next_depth must be 0.)
+	while (!_queue[next_depth].empty()) {
+		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(_queue[next_depth].front());
+		frame.Present();
+		RemoveDesktopWnd(frame);
+	}
 }
 
 RedrawQueue& RedrawQueue::Get() {

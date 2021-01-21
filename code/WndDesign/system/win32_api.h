@@ -13,8 +13,10 @@ class DesktopWndFrame;
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(DesktopWndFrame& layer, Rect region, const wstring& title);
+HANDLE CreateWnd(Rect region, const wstring& title);
 void DestroyWnd(HANDLE hWnd);
+
+void SetWndUserData(HANDLE hWnd, void* data);
 
 void MoveWnd(HANDLE hWnd, Rect region);
 

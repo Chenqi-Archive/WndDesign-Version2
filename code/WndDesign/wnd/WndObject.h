@@ -3,7 +3,6 @@
 #include "wnd_base_interface.h"
 #include "../common/uncopyable.h"
 #include "../message/msg_base.h"
-#include "../layer/background.h"
 
 #include <string>
 
@@ -34,6 +33,8 @@ public:
 protected:
 	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); }
 	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); }
+public:
+	virtual void OnChildDetach(WndObject& child) {}
 
 	//// child window data ////
 protected:
@@ -97,7 +98,6 @@ protected:
 	/* called by parent window when parent window is painting */
 	void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const { wnd->Composite(figure_queue, parent_invalid_region); }
 private:
-	virtual const Background& GetBackground() const { return NullBackground(); }
 	/* draw anything to the invalid region except for background */
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
 
@@ -115,25 +115,20 @@ private:
 };
 
 
-
-class DesktopObject final : private WndObject {
-private:
-	DesktopObject();
-	~DesktopObject();
+class DesktopObject : protected WndObject {
+protected:
+	DesktopObject(unique_ptr<IWndBase> desktop) : WndObject(std::move(desktop)) {}
+	~DesktopObject() {}
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
-
-public:
-	virtual void AddChild(WndObject& child);
-	virtual void OnChildRegionChange(WndObject& child) override { 
-		Rect child_region = child.CalculateRegion(GetSize());
-		// update child region.
-	}
-	virtual void MessageLoop();
-	virtual void Terminate();
+	virtual void AddChild(WndObject& child) pure;
+	virtual void RemoveChild(WndObject& child) pure;
+	virtual void OnChildRegionChange(WndObject& child) override pure;
+	virtual void MessageLoop() pure;
+	virtual void Terminate() pure;
 };
 
-inline DesktopObject& desktop() { return DesktopObject::Get(); }
+inline DesktopObject& Desktop() { return DesktopObject::Get(); }
 
 
 END_NAMESPACE(WndDesign)

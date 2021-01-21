@@ -9,6 +9,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 struct ImeCompositionMsg : _MsgPara {
 	const ImeComposition& ime_composition;
+	ImeCompositionMsg(const ImeComposition& ime_composition) : ime_composition(ime_composition) {}
 };
 
 

@@ -144,6 +144,7 @@ void Target::DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rec
         auto& group = groups[group_index];
         for (; figure_index < group.figure_index; ++figure_index) {
             Vector figure_offset = figures[figure_index].offset + offset;
+        #pragma message(Remark"The region of the figure could be cached in the figure queue when it is appended.")
             Rect figure_region = figures[figure_index].figure->GetRegion() + figure_offset;
             if (figure_region.Intersect(clip_region).IsEmpty()) { continue; }
             figures[figure_index].figure->DrawOn(static_cast<RenderTarget&>(device_context), figure_offset);

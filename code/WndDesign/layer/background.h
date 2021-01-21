@@ -18,9 +18,6 @@ struct Background {
 };
 
 
-WNDDESIGNCORE_API const Background& NullBackground();
-
-
 struct BackgroundFigure : Figure {
 	const Background& background;
 	bool clear;

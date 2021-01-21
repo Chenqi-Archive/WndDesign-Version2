@@ -12,6 +12,7 @@ using std::vector;
 using std::list;
 
 class WndBase;
+class DesktopWndFrame;
 
 
 class RedrawQueue {
@@ -25,8 +26,8 @@ private:
 public:
 	void AddWnd(WndBase& wnd);
 	void RemoveWnd(WndBase& wnd);
-	void AddDesktopWnd();
-	void RemoveDesktopWnd();
+	void AddDesktopWnd(DesktopWndFrame& frame);
+	void RemoveDesktopWnd(DesktopWndFrame& frame);
 	void Commit();
 
 	static RedrawQueue& Get();

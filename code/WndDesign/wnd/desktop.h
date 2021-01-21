@@ -1,6 +1,7 @@
 #pragma once
 
 #include "wnd_base.h"
+#include "WndObject.h"
 #include "../system/directx/d2d_api_window.h"
 
 
@@ -9,93 +10,103 @@ BEGIN_NAMESPACE(WndDesign)
 using std::pair;
 
 
-class DesktopWndFrame {
+class DesktopWndFrame : public Uncopyable{
 private:
 	WndBase& _wnd;
+	WndObject& _wnd_object;
 	HANDLE _hwnd;
 	WindowResource _resource;
-public:
-	DesktopWndFrame(WndBase& wnd, HANDLE hwnd) :_wnd(wnd), _hwnd(hwnd), _resource(_hwnd) {}
-	~DesktopWndFrame() {}
-	void OnResize(Size size) { _resource.OnResize(size); }
-	void DrawFigureQueue(const FigureQueue& figure_queue, Rect bounding_region) {
-		_resource.GetTarget().DrawFigureQueue(figure_queue, vector_zero, bounding_region);
-	}
-	void SetRegion(Rect region);
+private:
+	friend class DesktopObjectImpl;
+	list<DesktopWndFrame>::iterator _desktop_index;
 
+public:
+	DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd);
+	~DesktopWndFrame();
+
+private:
+	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
+public:
+	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
+	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
+	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
+private:
+	void JoinRedrawQueue();
+	void LeaveRedrawQueue();
+
+public:
+	void UpdateInvalidRegion();
+	void Present();
+
+private:
 	void SetCapture();
 	void SetFocus();
 	void ReleaseCapture();
 	void ReleaseFocus();
 
-	/* called by WndProc */
-	void RegionUpdated(Rect region);
+public:
+	/* callback by WndProc */
+	void LoseCapture() { _wnd.ChildLoseCapture(); }
+	void LoseFocus() { _wnd.ChildLoseFocus(); }
+	void Invalidate(Rect region) { _wnd.Invalidate(region);	}
+	void ReceiveMessage(Msg msg, Para para) const { _wnd.DispatchMessage(msg, para); }
 	void SetRegion(Rect region);
-	void ReceiveMessage(Msg msg, Para para) const;
-	void LoseCapture() {_wnd.ChildLoseCapture();}
-	void LoseFocus() {_wnd.ChildLoseFocus();}
+	const Vector OffsetFromParent() const { return _wnd.OffsetFromParent(); }
 	const pair<Size, Size> CalculateMinMaxSize();
 };
 
 
-class Desktop : public WndBase {
-public:
-	Desktop(WndObject& desktop_object) : WndBase(desktop_object) {}
-	~Desktop() {}
-
+class DesktopObjectImpl : public DesktopObject {
 private:
+	friend class DesktopBase;
 	list<DesktopWndFrame> _child_wnds;
 
-	static inline DesktopWndFrame& GetChildFrame(WndBase& child) {
-		static_assert(sizeof(list<DesktopWndFrame>::iterator) == sizeof(list<ref_ptr<WndBase>>::iterator));
-		return *reinterpret_cast<list<DesktopWndFrame>::iterator&>(child._index_on_parent);
+public:
+	DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {}
+	~DesktopObjectImpl() {}
+
+	virtual void AddChild(WndObject& child) override;
+	virtual void RemoveChild(WndObject& child) override;
+	virtual void OnChildDetach(WndObject& child) override;
+	virtual void OnChildRegionChange(WndObject& child) override;
+
+	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
+		SetChildData(child, reinterpret_cast<Data>(&frame));
 	}
-	static inline void SetChildFrame(WndBase& child, const list<DesktopWndFrame>::iterator& frame) {
-		static_assert(sizeof(list<DesktopWndFrame>::iterator) == sizeof(list<ref_ptr<WndBase>>::iterator));
-		reinterpret_cast<list<DesktopWndFrame>::iterator&>(child._index_on_parent) = frame;
+	static DesktopWndFrame& GetChildFrame(WndObject& child) {
+		return *reinterpret_cast<DesktopWndFrame*>(GetChildData(child));
 	}
 
-	virtual void AddChild(IWndBase& child_wnd) override;
-	virtual void RemoveChild(IWndBase& child_wnd) override;
+	void AddChild(WndBase& child, WndObject& child_object);
 
+	void UpdateChildInvalidRegion(WndObject& child) { GetChildFrame(child).UpdateInvalidRegion(); }
+	void SetChildCapture(WndObject& child) { GetChildFrame(child).SetCapture(); }
+	void SetChildFocus(WndObject& child) { GetChildFrame(child).SetFocus(); }
+
+	virtual void MessageLoop() override;
+	virtual void Terminate() override;
+};
+
+
+class DesktopBase : public WndBase {
+public:
+	DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {}
+	~DesktopBase() {}
 private:
-	void JoinRedrawQueue();
-	void LeaveRedrawQueue();
-
+	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }
+private:
 	const Rect GetCachedRegion() const { return Rect(point_zero, size); }
-
-
-	void DrawFigureQueue(const FigureQueue& figure_queue, Rect bounding_region) {
-
-	}
-
-	virtual void Invalidate(WndBase& child) override {
-		auto [bounding_region, regions] = _invalid_region.GetRect();
-
-		FigureQueue figure_queue;
-		uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
-		figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(_background, bounding_region, true));
-
-		_object.OnPaint(figure_queue, _accessible_region, bounding_region);  /* no object */
-
-		figure_queue.EndGroup(group_index);
-
-		Target& target = _window.GetTarget();
-		for (auto& region : regions) {
-			target.DrawFigureQueue(figure_queue, vector_zero, region);
-		}
-
-		_window.Present(std::move(regions));
-
-		_invalid_region.Clear();  // Clear invalid region.
-
-	}
-
 private:
-	virtual void SetChildCapture(WndBase& child) override { ::SetCapture(static_cast<HWND>(_hwnd)); }
-	virtual void SetChildFocus(WndBase& child) override { ::SetFocus(static_cast<HWND>(_hwnd)); }
-	virtual void ReleaseCapture() override { ::ReleaseCapture(); }
-	virtual void ReleaseFocus() override { ::SetFocus(NULL); }
+	virtual void AddChild(IWndBase& child_wnd) override {
+		WndBase::AddChild(child_wnd);
+		WndBase& child = static_cast<WndBase&>(child_wnd);
+		GetObject().AddChild(child, child._object);
+	}
+	virtual void Invalidate(WndBase& child) override { GetObject().UpdateChildInvalidRegion(child._object); }
+	virtual void SetChildCapture(WndBase& child) override { GetObject().SetChildCapture(child._object); }
+	virtual void SetChildFocus(WndBase& child) override { GetObject().SetChildFocus(child._object); }
+	virtual void ReleaseCapture() override;
+	virtual void ReleaseFocus() override;
 };
 
 

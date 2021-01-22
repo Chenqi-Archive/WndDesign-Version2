@@ -6,15 +6,14 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-
-inline static const uint max_wnd_depth = 63;
+inline static const uint max_wnd_depth = WndBase::max_wnd_depth;  // depth <= 63
 
 
 RedrawQueue::RedrawQueue() : _queue(max_wnd_depth + 1), _next_depth(0) {}
 
 void RedrawQueue::AddWnd(WndBase& wnd) {
 	uint depth = wnd.GetDepth(); 
-	assert(depth > 0);	if (depth > max_wnd_depth) { throw std::invalid_argument("window hierarchy too deep"); }
+	assert(0 < depth && depth <= max_wnd_depth);
 	assert(!wnd.HasRedrawQueueIndex());
 	wnd.SetRedrawQueueIndex(_queue[depth].insert(_queue[depth].begin(), &wnd));
 	if (depth > _next_depth) { _next_depth = depth; }
@@ -42,6 +41,7 @@ void RedrawQueue::Commit() {
 
 	BeginDraw();
 	uint next_depth = _next_depth;
+	_next_depth = 0;
 	while (next_depth > 0) {
 		while (!_queue[next_depth].empty()) {
 			WndBase& wnd = *_queue[next_depth].front();

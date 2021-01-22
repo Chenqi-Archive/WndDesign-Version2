@@ -1,5 +1,5 @@
 #include "../WndDesign/WndDesign.h"
-#include "../WndDesign/wnd/OverlapView.h"
+//#include "../WndDesign/wnd/OverlapView.h"
 
 using namespace WndDesign;
 
@@ -11,7 +11,7 @@ using namespace WndDesign;
 #endif // _DEBUG
 
 
-class MainWnd : public OverlapView {
+class MainWnd : public WndObject {
 
 };
 

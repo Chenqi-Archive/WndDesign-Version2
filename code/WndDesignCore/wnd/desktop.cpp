@@ -86,6 +86,10 @@ DesktopObject& DesktopObject::Get() {
     return desktop_object;
 }
 
+const Rect DesktopObjectImpl::CalculateRegionOnParent(Size parent_size) {
+	return Rect(point_zero, GetDesktopSize());
+}
+
 void DesktopObjectImpl::AddChild(WndObject& child) {
 	RegisterChild(child);
 }
@@ -125,6 +129,10 @@ void DesktopObjectImpl::Terminate() {
 	}
 }
 
+
+const Rect DesktopBase::GetCachedRegion() const { 
+	return Rect(point_zero, GetDesktopSize()); 
+}
 
 void DesktopBase::ReleaseCapture() {
 	Win32::ReleaseCapture();

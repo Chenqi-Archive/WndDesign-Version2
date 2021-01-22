@@ -6,7 +6,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-WNDDESIGNCORE_API const Size GetDesktopSize();
+const Size GetDesktopSize();
 
 
 END_NAMESPACE(WndDesign)

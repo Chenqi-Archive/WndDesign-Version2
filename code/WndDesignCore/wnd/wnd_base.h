@@ -107,7 +107,7 @@ public:
 	virtual void AllocateLayer() override;
 
 private:
-	const Rect GetCachedRegion() const;
+	virtual const Rect GetCachedRegion() const;
 	void ResetVisibleRegion() { SetVisibleRegion(HasParent() ? _parent->GetCachedRegion() : region_empty); }
 	void SetVisibleRegion(Rect parent_cached_region);
 
@@ -117,6 +117,8 @@ private:
 	///////////////////////////////////////////////////////////
 
 	//// window depth ////
+public:
+	inline static const uint max_wnd_depth = 63;  // depth <= 63
 private:
 	uint _depth;  // used to determine the redraw queue priority. If depth is 0, the window should be detached.
 private:

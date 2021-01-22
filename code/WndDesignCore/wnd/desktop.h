@@ -62,8 +62,13 @@ private:
 	list<DesktopWndFrame> _child_wnds;
 
 public:
-	DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {}
+	DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
+		// Initialize the size of desktop.
+		CalculateRegion(size_min);
+	}
 	~DesktopObjectImpl() {}
+
+	virtual const Rect CalculateRegionOnParent(Size parent_size);
 
 	virtual void AddChild(WndObject& child) override;
 	virtual void RemoveChild(WndObject& child) override;
@@ -95,7 +100,7 @@ public:
 private:
 	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }
 private:
-	const Rect GetCachedRegion() const { return Rect(point_zero, size); }
+	virtual const Rect GetCachedRegion() const override;
 private:
 	virtual void AddChild(IWndBase& child_wnd) override {
 		WndBase::AddChild(child_wnd);

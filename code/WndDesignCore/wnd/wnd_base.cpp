@@ -88,7 +88,12 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 
 void WndBase::SetDepth(uint depth) {
 	if (_depth == depth) { return; }
-	// Depth has changed, leave redraw queue.
+
+	if (depth > max_wnd_depth) { 
+		throw std::invalid_argument("window hierarchy too deep"); 
+	}
+
+	// Depth will be changed, leave redraw queue.
 	LeaveRedrawQueue();
 
 	_depth = depth;

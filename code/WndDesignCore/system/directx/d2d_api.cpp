@@ -116,6 +116,8 @@ void BeginDraw() {
 void EndDraw() {
     auto& device_context = GetD2DDeviceContext();
     hr = device_context.EndDraw();
+#pragma message(Remark"If a target was freed after being drawn, EndDraw should fail!")
+#pragma message(Remark"And D2DERR_RECREATE_TARGET should be handled.")
     device_context.SetTarget(nullptr);
 }
 

@@ -2,6 +2,8 @@
 #include "wic_api.h"
 #include "d2d_api.h"
 
+#pragma comment(lib, "windowscodecs.lib")
+
 
 BEGIN_NAMESPACE(WndDesign)
 

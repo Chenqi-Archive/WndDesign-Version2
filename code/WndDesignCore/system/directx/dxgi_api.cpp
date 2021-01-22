@@ -3,6 +3,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 
+
 BEGIN_NAMESPACE(WndDesign)
 
 

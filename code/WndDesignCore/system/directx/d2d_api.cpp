@@ -43,7 +43,7 @@ ID2D1Factory1& D2DFactory::Get() {
 
 END_NAMESPACE(Anonymous)
 
-ID2D1Factory1& GetD2DFactory() { return D2DFactory::Get(); }
+WNDDESIGNCORE_API ID2D1Factory1& GetD2DFactory() { return D2DFactory::Get(); }
 
 
 //////////////////////////////////////////////////////////
@@ -59,11 +59,10 @@ private:
     ~D2DDeviceContext();
 public:
     ID2D1DeviceContext* device_context;
-    ID2D1SolidColorBrush* solid_color_brush;
     static D2DDeviceContext& Get();
 };
 
-D2DDeviceContext::D2DDeviceContext() :device_context(nullptr), solid_color_brush(nullptr) {
+D2DDeviceContext::D2DDeviceContext() :device_context(nullptr) {
 	IDXGIDevice1* dxgi_device = nullptr;
 	hr = GetD3DDevice().QueryInterface(IID_PPV_ARGS(&dxgi_device));
 
@@ -73,17 +72,13 @@ D2DDeviceContext::D2DDeviceContext() :device_context(nullptr), solid_color_brush
 
 	hr = d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &device_context);
 	SafeRelease(&d2d_device);
-
-
-    device_context->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &solid_color_brush);
 }
 
 D2DDeviceContext::~D2DDeviceContext() {
-    SafeRelease(&solid_color_brush);
 	SafeRelease(&device_context);
 }
 
-inline D2DDeviceContext& D2DDeviceContext::Get() {
+D2DDeviceContext& D2DDeviceContext::Get() {
 	static D2DDeviceContext device_context;
 	return device_context;
 }
@@ -108,14 +103,8 @@ inline ID2D1Bitmap1* D2DCreateBitmap(Size size) {
 END_NAMESPACE(Anonymous)
 
 
-ID2D1DeviceContext& GetD2DDeviceContext() { 
+WNDDESIGNCORE_API ID2D1DeviceContext& GetD2DDeviceContext() {
     return *D2DDeviceContext::Get().device_context; 
-}
-
-ID2D1SolidColorBrush& GetSolidColorBrush(Color color) {
-    ID2D1SolidColorBrush& brush = *D2DDeviceContext::Get().solid_color_brush;
-    brush.SetColor(Color2COLOR(color));
-    return brush;
 }
 
 

@@ -1,6 +1,8 @@
 #include "directx_helper.h"
 #include "dwrite_api.h"
 
+#pragma comment(lib, "dwrite.lib")
+
 
 BEGIN_NAMESPACE(WndDesign)
 

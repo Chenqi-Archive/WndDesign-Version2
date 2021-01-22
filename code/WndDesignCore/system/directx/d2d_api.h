@@ -3,7 +3,6 @@
 #include "../../common/core.h"
 #include "../../common/uncopyable.h"
 #include "../../geometry/geometry.h"
-#include "../../figure/color.h"
 
 
 //////////////////////////////////////////////////////////
@@ -15,7 +14,7 @@ struct ID2D1Factory1;
 
 BEGIN_NAMESPACE(WndDesign)
 
-ID2D1Factory1& GetD2DFactory();
+WNDDESIGNCORE_API ID2D1Factory1& GetD2DFactory();
 
 END_NAMESPACE(WndDesign)
 
@@ -27,21 +26,14 @@ END_NAMESPACE(WndDesign)
 
 struct ID2D1DeviceContext;
 struct ID2D1Bitmap1;
-struct ID2D1SolidColorBrush;
-struct ID2D1BitmapBrush;
 
 
 BEGIN_NAMESPACE(WndDesign)
 
-class ImageResource;
-
 class FigureQueue;
 
 
-ID2D1DeviceContext& GetD2DDeviceContext();
-
-ID2D1SolidColorBrush& GetSolidColorBrush(Color color);
-
+WNDDESIGNCORE_API ID2D1DeviceContext& GetD2DDeviceContext();
 
 void BeginDraw();
 void EndDraw();

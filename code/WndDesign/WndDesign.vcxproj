@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8cdf6105-2e72-4dd6-9578-2e68ab57bf41}</ProjectGuid>
-    <RootNamespace>WndDesignCore</RootNamespace>
+    <ProjectGuid>{e3e0471b-901b-4d43-9579-277659a428b0}</ProjectGuid>
+    <RootNamespace>WndDesign</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>WndDesignCore</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -73,25 +72,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>WndDesignCore</TargetName>
     <OutDir>$(SolutionDir)build\$(platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>WndDesignCore</TargetName>
     <OutDir>$(SolutionDir)build\$(platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>WndDesignCore</TargetName>
     <OutDir>$(SolutionDir)build\$(platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>WndDesignCore</TargetName>
     <OutDir>$(SolutionDir)build\$(platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -99,16 +94,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>
-      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,34 +110,30 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>
-      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>
-      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -153,73 +142,54 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;WNDDESIGNCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <UndefinePreprocessorDefinitions>
-      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="common\core.h" />
-    <ClInclude Include="common\reference_wrapper.h" />
-    <ClInclude Include="common\uncopyable.h" />
-    <ClInclude Include="figure\figure_base.h" />
-    <ClInclude Include="geometry\geometry.h" />
-    <ClInclude Include="geometry\geometry_helper.h" />
-    <ClInclude Include="geometry\point.h" />
-    <ClInclude Include="geometry\rect.h" />
-    <ClInclude Include="geometry\rect_point_iterator.h" />
-    <ClInclude Include="geometry\region.h" />
-    <ClInclude Include="geometry\size.h" />
-    <ClInclude Include="geometry\vector.h" />
-    <ClInclude Include="layer\background_base.h" />
-    <ClInclude Include="layer\background_types.h" />
-    <ClInclude Include="layer\layer.h" />
-    <ClInclude Include="layer\tiling_helper.h" />
-    <ClInclude Include="message\ime_msg.h" />
-    <ClInclude Include="message\key_msg.h" />
-    <ClInclude Include="message\message.h" />
-    <ClInclude Include="message\mouse_msg.h" />
-    <ClInclude Include="message\msg_base.h" />
-    <ClInclude Include="layer\composite_effect.h" />
-    <ClInclude Include="system\directx\d2d_api_window.h" />
-    <ClInclude Include="system\metrics.h" />
-    <ClInclude Include="layer\figure_queue.h" />
-    <ClInclude Include="render\ObjectBase.h" />
-    <ClInclude Include="system\directx\d2d_api.h" />
-    <ClInclude Include="system\directx\directx_helper.h" />
-    <ClInclude Include="system\directx\dxgi_api.h" />
-    <ClInclude Include="system\ime.h" />
-    <ClInclude Include="system\win32_api.h" />
-    <ClInclude Include="system\win32_helper.h" />
-    <ClInclude Include="system\win32_ime_input.h" />
-    <ClInclude Include="wnd\desktop.h" />
-    <ClInclude Include="wnd\WndObject.h" />
-    <ClInclude Include="wnd\redraw_queue.h" />
-    <ClInclude Include="wnd\wnd_base.h" />
-    <ClInclude Include="wnd\wnd_base_interface.h" />
+    <ClCompile Include="figure\background_types.cpp" />
+    <ClCompile Include="figure\figure_types.cpp" />
+    <ClCompile Include="figure\image.cpp" />
+    <ClCompile Include="figure\text_block.cpp" />
+    <ClCompile Include="figure\text_style.cpp" />
+    <ClCompile Include="system\directx\d2d_api.cpp" />
+    <ClCompile Include="system\directx\dwrite_api.cpp" />
+    <ClCompile Include="system\directx\wic_api.cpp" />
+    <ClCompile Include="system\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="figure\figure_types.cpp" />
-    <ClCompile Include="geometry\region.cpp" />
-    <ClCompile Include="layer\layer.cpp" />
-    <ClCompile Include="system\directx\d2d_api_window.cpp" />
-    <ClCompile Include="system\metrics.cpp" />
-    <ClCompile Include="system\directx\d2d_api.cpp" />
-    <ClCompile Include="system\directx\dxgi_api.cpp" />
-    <ClCompile Include="system\win32_api.cpp" />
-    <ClCompile Include="system\win32_ime_input.cpp" />
-    <ClCompile Include="wnd\desktop.cpp" />
-    <ClCompile Include="wnd\redraw_queue.cpp" />
-    <ClCompile Include="wnd\wnd_base.cpp" />
+    <ClInclude Include="common\core.h" />
+    <ClInclude Include="common\reversion_wrapper.h" />
+    <ClInclude Include="figure\background_base.h" />
+    <ClInclude Include="figure\background_types.h" />
+    <ClInclude Include="figure\color.h" />
+    <ClInclude Include="figure\figure_base.h" />
+    <ClInclude Include="figure\figure_types.h" />
+    <ClInclude Include="figure\geometry_figure.h" />
+    <ClInclude Include="figure\image.h" />
+    <ClInclude Include="figure\text_block.h" />
+    <ClInclude Include="figure\text_style.h" />
+    <ClInclude Include="geometry\geometry.h" />
+    <ClInclude Include="geometry\geometry_helper.h" />
+    <ClInclude Include="geometry\interval.h" />
+    <ClInclude Include="geometry\rect_point_iterator.h" />
+    <ClInclude Include="system\directx\d2d_api.h" />
+    <ClInclude Include="system\directx\directx_helper.h" />
+    <ClInclude Include="system\directx\dwrite_api.h" />
+    <ClInclude Include="system\directx\wic_api.h" />
+    <ClInclude Include="wnd\ImageBox.h" />
+    <ClInclude Include="wnd\ListView.h" />
+    <ClInclude Include="wnd\OverlapView.h" />
+    <ClInclude Include="WndDesign.h" />
+    <ClInclude Include="wnd\WndObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

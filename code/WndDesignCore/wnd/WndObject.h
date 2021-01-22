@@ -128,7 +128,5 @@ public:
 	virtual void Terminate() pure;
 };
 
-inline DesktopObject& Desktop() { return DesktopObject::Get(); }
-
 
 END_NAMESPACE(WndDesign)

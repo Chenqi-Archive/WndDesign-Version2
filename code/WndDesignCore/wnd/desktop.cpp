@@ -1,14 +1,12 @@
 #include "desktop.h"
 #include "redraw_queue.h"
 #include "../layer/figure_queue.h"
-#include "../layer/background.h"
+#include "../layer/background_types.h"
 #include "../system/win32_api.h"
 #include "../system/metrics.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
-
-const Background& NullBackground();  // defined in wnd_base.cpp
 
 
 DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd) :
@@ -36,7 +34,7 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 
 	FigureQueue figure_queue;
 	uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
-	figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(NullBackground(), bounding_region, true));
+	figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(NullBackground::Get(), bounding_region, true));
 	_wnd.Composite(figure_queue, bounding_region - _wnd.OffsetFromParent());
 	figure_queue.EndGroup(group_index);
 

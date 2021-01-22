@@ -10,12 +10,6 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-const Background& NullBackground() {
-	static SolidColorBackground null_background(ColorSet::White);
-	return null_background;
-}
-
-
 WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
 	return std::make_unique<WndBase>(object);
 }
@@ -32,7 +26,7 @@ WndBase::WndBase(WndObject& object) :
 	_region_on_parent(region_empty),
 	_visible_region(region_empty),
 
-	_background(NullBackground()),
+	_background(NullBackground::Get()),
 	_layer(),
 
 	_depth(0),

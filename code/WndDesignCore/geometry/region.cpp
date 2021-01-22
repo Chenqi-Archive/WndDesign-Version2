@@ -62,6 +62,7 @@ std::pair<Rect, vector<Rect>> Region::GetRect() const {
     GetRegionData(static_cast<HRGN>(rgn), size, (LPRGNDATA)buffer);
     RGNDATA& data = *(LPRGNDATA)buffer;
     static_assert(sizeof(RECT) == sizeof(Rect));  // In-place convert RECT to Rect.
+    Rect bounding_region = RECT2Rect(data.rdh.rcBound);
     vector<Rect> regions((Rect*)(buffer + data.rdh.dwSize), (Rect*)(buffer + data.rdh.dwSize) + data.rdh.nCount);
     delete[] buffer;
     for (auto& region : regions) {
@@ -69,7 +70,7 @@ std::pair<Rect, vector<Rect>> Region::GetRect() const {
         assert(rect.right >= rect.left && rect.bottom >= rect.top);
         region = RECT2Rect(rect);
     }
-    return { RECT2Rect(data.rdh.rcBound), regions };
+    return { bounding_region , regions };
 }
 
 

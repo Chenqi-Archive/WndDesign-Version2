@@ -121,6 +121,7 @@ void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 	frame._desktop_index = _child_wnds.begin();
 	SetChildRegion(child_object, child_region);
 	SetChildFrame(child_object, frame);
+	frame.Invalidate(region_infinite);
 }
 
 void DesktopObjectImpl::MessageLoop() {
@@ -135,7 +136,11 @@ void DesktopObjectImpl::Terminate() {
 }
 
 
-const Rect DesktopBase::GetCachedRegion() const { 
+DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {
+	SetDepth(0);
+}
+
+const Rect DesktopBase::GetCachedRegion() const {
 	return Rect(point_zero, GetDesktopSize()); 
 }
 

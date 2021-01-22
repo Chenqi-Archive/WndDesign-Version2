@@ -12,7 +12,11 @@ using namespace WndDesign;
 
 
 class MainWnd : public WndObject {
-
+public:
+	MainWnd() {}
+	virtual const Rect CalculateRegionOnParent(Size parent_size) { 
+		return Rect(100, 100, 800, 500); 
+	}
 };
 
 

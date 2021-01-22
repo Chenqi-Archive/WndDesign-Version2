@@ -27,7 +27,7 @@ public:
 private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
 public:
-	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
+	bool HasRedrawQueueIndex() const { return _redraw_queue_index._Ptr != nullptr; }
 	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { return _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
 private:
@@ -92,7 +92,7 @@ public:
 
 class DesktopBase : public WndBase {
 public:
-	DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {}
+	DesktopBase(DesktopObjectImpl& desktop_object);
 	~DesktopBase() {}
 private:
 	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }

@@ -35,7 +35,7 @@ public:
 				mutable Rect prev_clip_region;
 			};
 		};
-		bool IsBegin() const { return figure_index != (uint)-1; }
+		bool IsBegin() const { return group_end_index != (uint)-1; }
 	};
 private:
 	vector<FigureContainer> figures;

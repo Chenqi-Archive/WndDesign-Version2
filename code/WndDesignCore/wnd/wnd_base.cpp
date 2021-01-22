@@ -29,7 +29,7 @@ WndBase::WndBase(WndObject& object) :
 	_background(NullBackground::Get()),
 	_layer(),
 
-	_depth(0),
+	_depth(-1),
 	_redraw_queue_index(),
 	_invalid_region(),
 
@@ -89,7 +89,7 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 void WndBase::SetDepth(uint depth) {
 	if (_depth == depth) { return; }
 
-	if (depth > max_wnd_depth) { 
+	if (depth != -1 && depth > max_wnd_depth) { 
 		throw std::invalid_argument("window hierarchy too deep"); 
 	}
 
@@ -101,8 +101,8 @@ void WndBase::SetDepth(uint depth) {
 	// Set depth for child windows.
 	for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
 
-	// Join redraw queue, if depth > 0 && invalid region is not empty.
-	if (_depth > 0 && !_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
+	// Join redraw queue, if invalid region is not empty && depth != -1(checked in JoinRedrawQueue) .
+	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
 }
 
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
@@ -195,7 +195,7 @@ void WndBase::Invalidate(Rect region) {
 }
 
 void WndBase::JoinRedrawQueue() {
-	if (_depth > 0 && !HasRedrawQueueIndex()) {
+	if (_depth != -1 && !HasRedrawQueueIndex()) {
 		RedrawQueue::Get().AddWnd(*this);
 	}
 }
@@ -209,7 +209,7 @@ void WndBase::LeaveRedrawQueue() {
 void WndBase::UpdateInvalidRegion() {
 	// First check if has parent window, reset depth when detached from parent.
 	// But not erase the invalid region.
-	if (!HasParent()) { SetDepth(0); return; }
+	if (!HasParent()) { SetDepth(-1); return; }
 
 	// Clip invalid region inside cached region.
 	_invalid_region.Intersect(GetCachedRegion());

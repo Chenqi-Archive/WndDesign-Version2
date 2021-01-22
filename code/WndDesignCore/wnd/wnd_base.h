@@ -118,14 +118,17 @@ private:
 
 	//// window depth ////
 public:
-	inline static const uint max_wnd_depth = 63;  // depth <= 63
+	inline static const uint max_wnd_depth = 63;  // depth (valid) <= 63
 private:
-	uint _depth;  // used to determine the redraw queue priority. If depth is 0, the window should be detached.
+	// Depth is used to determine the redraw queue priority. 
+	// For desktop, depth is 0; for desktop window, depth is 1;
+	//   and for detached window and its child windows, depth is -1.
+	uint _depth;
 private:
-	bool HasDepth() const { return _depth > 0; }
-	uint GetChildDepth() const { return _depth == 0 ? 0 : _depth + 1; }
-	void SetDepth(uint depth);
+	bool HasDepth() const { return _depth != -1; }
+	uint GetChildDepth() const { return _depth == -1 ? -1 : _depth + 1; }
 public:
+	void SetDepth(uint depth);
 	uint GetDepth() const { return _depth; }
 
 
@@ -133,7 +136,7 @@ public:
 private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
 public:
-	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
+	bool HasRedrawQueueIndex() const { return _redraw_queue_index._Ptr != nullptr; }
 	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { return _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
 private:

@@ -51,7 +51,7 @@ public:
 	bool HasBitmap() const { return bitmap != nullptr; }  // Only read-only target doesn't have bitmap.
 	ID2D1Bitmap1& GetBitmap() const { assert(HasBitmap()); return *bitmap; }
 
-	void DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rect clip_region);
+	void DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rect clip_region); // defined in figure_types.cpp
 };
 
 

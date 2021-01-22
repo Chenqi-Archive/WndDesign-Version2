@@ -182,6 +182,7 @@
     <ClInclude Include="geometry\geometry_helper.h" />
     <ClInclude Include="geometry\interval.h" />
     <ClInclude Include="geometry\rect_point_iterator.h" />
+    <ClInclude Include="message\message.h" />
     <ClInclude Include="system\directx\d2d_api.h" />
     <ClInclude Include="system\directx\directx_helper.h" />
     <ClInclude Include="system\directx\dwrite_api.h" />

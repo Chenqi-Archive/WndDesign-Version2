@@ -244,7 +244,8 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 		// Draw layer directly in parent's coordinates, no need to create figure group.
 		figure_queue.Append(parent_invalid_region.point - point_zero, new LayerFigure(*_layer, _background, invalid_region, {}));
 	} else {
-		uint group_index = figure_queue.BeginGroup(coordinate_offset, invalid_region);
+		// figure in my coordinates - coordinate_offset = figure in parent's coordinates.
+		uint group_index = figure_queue.BeginGroup(vector_zero - coordinate_offset, invalid_region);
 		figure_queue.Append(invalid_region.point - point_zero, new BackgroundFigure(_background, invalid_region, false));
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
 		figure_queue.EndGroup(group_index);

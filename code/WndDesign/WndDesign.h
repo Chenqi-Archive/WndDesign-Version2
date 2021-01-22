@@ -2,6 +2,8 @@
 
 #include "common/core.h"
 #include "wnd/WndObject.h"
+#include "figure/figure_types.h"
+#include "message/message.h"
 
 #include <vector>
 #include <string>

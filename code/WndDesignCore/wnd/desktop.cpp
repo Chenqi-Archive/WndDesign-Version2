@@ -32,16 +32,21 @@ void DesktopWndFrame::LeaveRedrawQueue() {
 void DesktopWndFrame::UpdateInvalidRegion() {
 	auto [bounding_region, regions] = _wnd._invalid_region.GetRect();
 
+	// A little tricky here. 
+	// Figures are drawn in desktop's coordinates, but the target is in window's coordinates, so first
+	//   push the group as the desktop relative to the target.
 	FigureQueue figure_queue;
-	uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
-	figure_queue.Append(bounding_region.point - point_zero, new BackgroundFigure(NullBackground::Get(), bounding_region, true));
-	_wnd.Composite(figure_queue, bounding_region - _wnd.OffsetFromParent());
+	Vector offset_from_desktop = _wnd.OffsetFromParent();
+	uint group_index = figure_queue.BeginGroup(offset_from_desktop, Rect(point_zero, GetDesktopSize()));
+	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);
 	figure_queue.EndGroup(group_index);
 
 	Target& target = _resource.GetTarget();
 	for (auto& region : regions) {
-		target.DrawFigureQueue(figure_queue, vector_zero, region);
+		target.DrawFigureQueue(figure_queue, vector_zero, bounding_region);
 	}
+
+	// The invalid region will still be used at present time, and will be cleared after presentation, see below.
 
 	JoinRedrawQueue();
 }

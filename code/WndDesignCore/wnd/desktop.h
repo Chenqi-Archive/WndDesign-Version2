@@ -28,7 +28,7 @@ private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
 public:
 	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
-	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
+	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { return _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
 private:
 	void JoinRedrawQueue();
@@ -62,10 +62,7 @@ private:
 	list<DesktopWndFrame> _child_wnds;
 
 public:
-	DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
-		// Initialize the size of desktop.
-		CalculateRegion(size_min);
-	}
+	DesktopObjectImpl();
 	~DesktopObjectImpl() {}
 
 	virtual const Rect CalculateRegionOnParent(Size parent_size);

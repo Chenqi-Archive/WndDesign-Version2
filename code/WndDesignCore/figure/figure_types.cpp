@@ -10,6 +10,15 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+///////////////////////////////////////////////////////////
+////                   figure_base.h                   ////
+///////////////////////////////////////////////////////////
+
+const Size GetTargetSize(const RenderTarget& target) {
+	return SIZE2Size(target.GetSize());
+}
+
+
 //////////////////////////////////////////////////////////
 ////                background_types.h                ////
 //////////////////////////////////////////////////////////
@@ -20,12 +29,13 @@ const NullBackground& NullBackground::Get() {
 }
 
 void NullBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	target.Clear(D2D1::ColorF(D2D1::ColorF::White));
+	target.Clear(Color2COLOR(ColorSet::White));
 }
 
 void NullBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
-	ID2D1SolidColorBrush* solid_color_brush;
-	hr = target.CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &solid_color_brush);
+#pragma message(Remark"Brush may be created once and reused.")
+	ID2D1SolidColorBrush* solid_color_brush = nullptr;
+	hr = target.CreateSolidColorBrush(Color2COLOR(ColorSet::White), &solid_color_brush);
 	target.FillRectangle(Rect2RECT(Rect(point_zero + offset, region.size)), solid_color_brush);
 	SafeRelease(&solid_color_brush);
 }

@@ -296,6 +296,11 @@ void WndBase::ReleaseFocus() {
 	if (HasParent()) { _parent->ReleaseFocus(); } 
 }
 
+void WndBase::HandleMessage(Msg msg, Para para) {
+#pragma message(Remark"May use the return value to implement message bubbling.")
+	_object.Handler(msg, para);
+}
+
 void WndBase::DispatchMessage(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg mouse_msg = GetMouseMsg(para);

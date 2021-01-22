@@ -10,8 +10,8 @@ BEGIN_NAMESPACE(WndDesign)
 using std::unique_ptr;
 
 class WndObject;
-class Background;
 class FigureQueue;
+struct Background;
 
 
 struct ABSTRACT_BASE IWndBase {

@@ -33,7 +33,7 @@ public:
 	static RedrawQueue& Get();
 };
 
-RedrawQueue& GetRedrawQueue() { return RedrawQueue::Get(); }
+inline RedrawQueue& GetRedrawQueue() { return RedrawQueue::Get(); }
 
 
 END_NAMESPACE(WndDesign)

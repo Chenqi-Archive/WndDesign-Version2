@@ -2,7 +2,7 @@
 
 #include "../common/core.h"
 #include "../figure/color.h"
-#include "../geometry/rect.h"
+#include "../geometry/geometry.h"
 
 #include <string>
 #include <vector>

@@ -81,9 +81,14 @@ const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
 }
 
 
-DesktopObject& DesktopObject::Get() {
+WNDDESIGNCORE_API DesktopObject& DesktopObject::Get() {
     static DesktopObjectImpl desktop_object;
     return desktop_object;
+}
+
+DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
+	// Initialize the size of desktop.
+	CalculateRegion(size_min);
 }
 
 const Rect DesktopObjectImpl::CalculateRegionOnParent(Size parent_size) {

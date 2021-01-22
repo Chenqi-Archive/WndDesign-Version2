@@ -8,7 +8,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 struct NullBackground : public Background {
 private:
-	NullBackground();
+	NullBackground() {}
 public:
 	static const NullBackground& Get();
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp

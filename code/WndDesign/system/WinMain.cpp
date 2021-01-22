@@ -3,7 +3,8 @@
 
 #include <Windows.h>
 
-using namespace WndDesign;
+using std::vector;
+using std::wstring;
 
 
 #ifdef _DEBUG
@@ -16,12 +17,16 @@ using namespace WndDesign;
 extern int main();
 
 
+BEGIN_NAMESPACE(WndDesign)
+
 DesktopObject& desktop = DesktopObject::Get();
+
+END_NAMESPACE(WndDesign)
 
 
 vector<wstring> GetCommandLineArgs() {
 	int argc;
-	const wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	vector<wstring> args;
 	for (int i = 0; i < argc; ++i) {
 		args.push_back(argv[i]);
@@ -31,7 +36,7 @@ vector<wstring> GetCommandLineArgs() {
 }
 
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	if (FAILED(CoInitialize(NULL))) { return 0; }
 	int ret = main();
 	CoUninitialize();

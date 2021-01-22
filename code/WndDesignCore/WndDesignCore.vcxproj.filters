@@ -129,6 +129,9 @@
     <ClInclude Include="layer\background_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="figure\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="layer\layer.cpp">

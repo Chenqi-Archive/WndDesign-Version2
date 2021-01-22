@@ -134,7 +134,7 @@ private:
 	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
 public:
 	bool HasRedrawQueueIndex() const { return _redraw_queue_index != list<ref_ptr<WndBase>>::iterator(); }
-	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { _redraw_queue_index; }
+	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { return _redraw_queue_index; }
 	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
 private:
 	void JoinRedrawQueue();
@@ -175,10 +175,7 @@ public:
 	virtual void ReleaseCapture() override;
 	virtual void ReleaseFocus() override;
 private:
-	void HandleMessage(Msg msg, Para para) {
-	#pragma message(Remark"May use the return value to implement message bubbling.")
-		_object.Handler(msg, para);
-	}
+	void HandleMessage(Msg msg, Para para);
 	void DispatchMessage(Msg msg, Para para);
 };
 

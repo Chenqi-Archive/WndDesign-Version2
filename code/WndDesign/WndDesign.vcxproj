@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="common\core.h" />
     <ClInclude Include="common\reversion_wrapper.h" />
+    <ClInclude Include="common\uncopyable.h" />
     <ClInclude Include="figure\background_base.h" />
     <ClInclude Include="figure\background_types.h" />
     <ClInclude Include="figure\color.h" />

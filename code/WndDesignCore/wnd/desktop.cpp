@@ -42,7 +42,7 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 
 	Target& target = _resource.GetTarget();
 	for (auto& region : regions) {
-		target.DrawFigureQueue(figure_queue, vector_zero, bounding_region);
+		target.DrawFigureQueue(figure_queue, vector_zero, region);
 	}
 
 	// The invalid region will still be used at present time, and will be cleared after presentation, see below.

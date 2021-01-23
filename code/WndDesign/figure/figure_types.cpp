@@ -12,6 +12,13 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+// Used to shrink the figure who has border to make sure the border is drawn inside the bounding region.
+inline const D2D1_RECT_F ShrinkD2DRectByLength(D2D1_RECT_F rect, float length) {
+#pragma message(Remark"The new rect may be ill-formed.")
+	return D2D1::RectF(rect.left + length, rect.top + length, rect.right - length, rect.bottom - length);
+}
+
+
 ///////////////////////////////////////////////////////////
 ////                   figure_base.h                   ////
 ///////////////////////////////////////////////////////////
@@ -37,49 +44,49 @@ void Line::DrawOn(RenderTarget& target, Vector offset) const {
 }
 
 void Rectangle::DrawOn(RenderTarget& target, Vector offset) const {
-	if (border_width > 0 && !border_color.IsInvisible()) {
-		target.DrawRectangle(
-			Rect2RECT(Rect(point_zero + offset, size)),
-			&GetSolidColorBrush(border_color),
-			border_width
-		);
-	}
 	if (!fill_color.IsInvisible()) {
 		target.FillRectangle(
 			Rect2RECT(Rect(point_zero + offset, size)),
 			&GetSolidColorBrush(fill_color)
 		);
 	}
-}
-
-void RoundedRectangle::DrawOn(RenderTarget& target, Vector offset) const {
 	if (border_width > 0 && !border_color.IsInvisible()) {
-		target.DrawRoundedRectangle(
-			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), static_cast<FLOAT>(radius), static_cast<FLOAT>(radius)),
+		target.DrawRectangle(
+			ShrinkD2DRectByLength(Rect2RECT(Rect(point_zero + offset, size)), border_width / 2),
 			&GetSolidColorBrush(border_color),
 			border_width
 		);
 	}
+}
+
+void RoundedRectangle::DrawOn(RenderTarget& target, Vector offset) const {
 	if (!fill_color.IsInvisible()) {
 		target.FillRoundedRectangle(
 			D2D1::RoundedRect(Rect2RECT(Rect(point_zero + offset, size)), static_cast<FLOAT>(radius), static_cast<FLOAT>(radius)),
 			&GetSolidColorBrush(fill_color)
 		);
 	}
-}
-
-void Ellipse::DrawOn(RenderTarget& target, Vector offset) const {
 	if (border_width > 0 && !border_color.IsInvisible()) {
-		target.DrawEllipse(
-			D2D1::Ellipse(Point2POINT(point_zero + offset), static_cast<FLOAT>(radius_x), static_cast<FLOAT>(radius_y)),
+		target.DrawRoundedRectangle(
+			D2D1::RoundedRect(ShrinkD2DRectByLength(Rect2RECT(Rect(point_zero + offset, size)), border_width / 2), static_cast<FLOAT>(radius), static_cast<FLOAT>(radius)),
 			&GetSolidColorBrush(border_color),
 			border_width
 		);
 	}
+}
+
+void Ellipse::DrawOn(RenderTarget& target, Vector offset) const {
 	if (!fill_color.IsInvisible()) {
 		target.FillEllipse(
 			D2D1::Ellipse(Point2POINT(point_zero + offset), static_cast<FLOAT>(radius_x), static_cast<FLOAT>(radius_y)),
 			&GetSolidColorBrush(fill_color)
+		);
+	}
+	if (border_width > 0 && !border_color.IsInvisible()) {
+		target.DrawEllipse(
+			D2D1::Ellipse(Point2POINT(point_zero + offset), static_cast<FLOAT>(radius_x) - border_width / 2, static_cast<FLOAT>(radius_y) - border_width / 2),
+			&GetSolidColorBrush(border_color),
+			border_width
 		);
 	}
 }

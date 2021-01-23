@@ -23,7 +23,9 @@ public:
 		return L"MainWnd"; 
 	}
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
-		figure_queue.Append(center - point_zero, new Ellipse(50, 50, 3.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
+		figure_queue.Append(center - point_zero - Vector(50, 50), new Rectangle(Size(100, 100), ColorSet::Firebrick));
+		figure_queue.Append(center - point_zero, new Ellipse(50, 50, 5.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
+		figure_queue.Append(center - point_zero - Vector(50, 50), new Rectangle(Size(100, 100), 5.0, ColorSet::DarkOliveGreen));
 	}
 	virtual bool Handler(Msg msg, Para para) { 
 		if (IsMouseMsg(msg)) {

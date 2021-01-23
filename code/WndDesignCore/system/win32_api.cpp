@@ -53,7 +53,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             // The point is relative to the desktop, convert it to the point on window.
             mouse_msg.point = mouse_msg.point + frame->OffsetFromParent();
             break;
-        case WM_MOUSEHWHEEL: msg_type = Msg::MouseWheelHorizontal; break;
+        case WM_MOUSEHWHEEL: msg_type = Msg::MouseWheelHorizontal; 
+            mouse_msg.point = mouse_msg.point + frame->OffsetFromParent();
+            break;
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
         }
         frame->ReceiveMessage(msg_type, mouse_msg);
@@ -132,6 +134,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_MOUSELEAVE: frame->ReceiveMessage(Msg::MouseLeave, nullmsg); mouse_leave_tracked = false; break;
         case WM_CAPTURECHANGED:frame->LoseCapture(); break;
         case WM_KILLFOCUS: frame->LoseFocus(); break;
+
+            // convert scroll message to mouse wheel message
+        case WM_HSCROLL:
+        case WM_VSCROLL: {
+                POINT cursor_position;
+                GetCursorPos(&cursor_position);
+                short key_state = 0;
+                if (GetAsyncKeyState(VK_SHIFT)) { key_state |= MK_SHIFT; }
+                if (GetAsyncKeyState(VK_CONTROL)) { key_state |= MK_CONTROL; }
+                short wheel_delta = 0;
+                switch (LOWORD(wParam)) {
+                case SB_LINEUP: case SB_PAGEUP:wheel_delta = WHEEL_DELTA; break;
+                case SB_LINEDOWN:case SB_PAGEDOWN:wheel_delta = -WHEEL_DELTA; break;
+                default:assert(0);
+                }
+                return SendMessageW(
+                    hWnd, msg == WM_HSCROLL ? WM_MOUSEHWHEEL : WM_MOUSEWHEEL,
+                    (wheel_delta << 16) | key_state, ((short)cursor_position.y << 16) | (short)cursor_position.x
+                );
+            }break;
         default: goto FrameIrrelevantMessages;
         }
         return 0;
@@ -142,9 +164,17 @@ FrameIrrelevantMessages:
     switch (msg) {
     case WM_CREATE: window_cnt++; break;
     case WM_DESTROY: window_cnt--; if (window_cnt == 0) { PostQuitMessage(0); }break;
+
+        // Intercept all non-client messages.
     case WM_NCCALCSIZE: break;  // Process the message to set client region the same as the window region.
     case WM_NCACTIVATE: break;  // Do not draw the nonclient area.
+    case WM_NCHITTEST: return HTCLIENT;  // There's no non-client region.
+    case WM_NCCREATE: return TRUE;
+    //case WM_NCDESTROY: break; // It doesn't matter.
+    case WM_NCPAINT: break;
+
     case WM_ERASEBKGND: break;  // Intercept WM_ERASEBKGND from DefWindowProc(), else there may be problem using driect2d.
+   
     default: return DefWindowProc(hWnd, msg, wParam, lParam);
     }
     return 0;  // The message is handled.
@@ -174,7 +204,7 @@ HANDLE CreateWnd(Rect region, const wstring& title) {
     RegisterWndClass(); 
     HWND hWnd = CreateWindowExW(
         NULL, wnd_class_name, title.c_str(),
-        WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX,
+        WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_HSCROLL | WS_VSCROLL,
         region.point.x, region.point.y, region.size.width, region.size.height,
         NULL, NULL, hInstance, NULL
     );

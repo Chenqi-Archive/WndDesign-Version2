@@ -86,6 +86,8 @@ public:
 
 	virtual void MessageLoop() override;
 	virtual void Terminate() override;
+
+	std::pair<HANDLE, const Point> ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const;
 };
 
 

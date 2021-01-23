@@ -164,6 +164,7 @@
     <ClCompile Include="system\directx\d2d_api.cpp" />
     <ClCompile Include="system\directx\dwrite_api.cpp" />
     <ClCompile Include="system\directx\wic_api.cpp" />
+    <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@
     <ClInclude Include="geometry\rect_point_iterator.h" />
     <ClInclude Include="message\message.h" />
     <ClInclude Include="message\mouse_msg_tracker.h" />
+    <ClInclude Include="style\border_helper.h" />
     <ClInclude Include="style\style_helper.h" />
     <ClInclude Include="style\wnd_style.h" />
     <ClInclude Include="style\value_tag.h" />
@@ -192,6 +194,8 @@
     <ClInclude Include="system\directx\directx_helper.h" />
     <ClInclude Include="system\directx\dwrite_api.h" />
     <ClInclude Include="system\directx\wic_api.h" />
+    <ClInclude Include="system\win32.h" />
+    <ClInclude Include="system\win32_aero_snap.h" />
     <ClInclude Include="wnd\Button.h" />
     <ClInclude Include="wnd\EditBox.h" />
     <ClInclude Include="wnd\ImageBox.h" />

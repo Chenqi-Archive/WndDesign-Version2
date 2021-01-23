@@ -28,8 +28,8 @@ protected:
 
 	//// child and parent window relation ////
 public:
-	bool HasParent() const { return wnd->HasParent(); }
-	WndObject& GetParent() const { return wnd->GetParent(); }
+	ref_ptr<WndObject> GetParent() const { return wnd->GetParent(); }
+	bool HasParent() const { return GetParent() != nullptr; }
 protected:
 	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); }
 	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); }
@@ -59,6 +59,8 @@ public:
 	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
 	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real vector shifted
 	const Rect GetRegionOnParnet() const { return wnd->GetRegionOnParent(); }
+public:
+	const Point ConvertPointToParentPoint(Point point) { return point + (GetRegionOnParnet().point - point_zero); }
 protected:
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
 private:
@@ -70,7 +72,7 @@ private:
 
 	// region computing
 protected:
-	void RegionChanged() { if (HasParent()) { GetParent().OnChildRegionChange(*this); } }
+	void RegionChanged() { if (auto parent = GetParent(); parent != nullptr) { parent->OnChildRegionChange(*this); } }
 public:
 	/* called by parent window to get the child window's region */
 	const Rect CalculateRegion(Size parent_size) {
@@ -125,7 +127,6 @@ public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
 	virtual void OnChildRegionChange(WndObject& child) override pure;
-
 	virtual void AddChild(WndObject& child) pure;
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;

@@ -1,4 +1,5 @@
 #include "../WndDesign/WndDesign.h"
+#include "../WndDesign/system/win32_aero_snap.h"
 
 using namespace WndDesign;
 
@@ -13,7 +14,7 @@ using namespace WndDesign;
 class MainWnd : public WndObject , public WndStyle {
 public:
 	MainWnd() {
-		size.setFixed(800px, 500px);
+		size.normal(800px, 500px).max(100pct, 100pct);
 		position.setHorizontalCenter().setVerticalCenter();
 		border.width(5.0).color(ColorSet::DarkGreen);
 		background.setColor(ColorSet::LightGray);
@@ -21,6 +22,9 @@ public:
 	}
 	virtual const Rect CalculateRegionOnParent(Size parent_size) { 
 		return CalculateRectFromStyle(*this, parent_size); 
+	}
+	virtual void OnSizeChange(Rect accessible_region) {
+
 	}
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { 
 		return CalculateMinMaxSizeFromStyle(*this, parent_size); 
@@ -35,6 +39,9 @@ public:
 		figure_queue.Append(point_zero, new Rectangle(accessible_region.size, border._width, border._color));
 	}
 	virtual bool Handler(Msg msg, Para para) { 
+		if (msg == Msg::LeftDown) {
+			AeroSnapDraggingEffect(*this, GetMouseMsg(para).point);
+		}
 		return true; 
 	}
 };

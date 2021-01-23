@@ -39,11 +39,8 @@ private:
 	ref_ptr<WndBase> _parent;
 	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
-	virtual bool HasParent() const override final { return _parent != nullptr; }
-	virtual WndObject& GetParent() const override final {
-		if (!HasParent()) { throw std::invalid_argument("window has no parent"); }
-		return _parent->_object;
-	}
+	bool HasParent() const { return _parent != nullptr; }
+	virtual ref_ptr<WndObject> GetParent() const override { return HasParent() ? &_parent->_object : nullptr; }
 private:
 	/* called by new parent window */
 	void SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent);

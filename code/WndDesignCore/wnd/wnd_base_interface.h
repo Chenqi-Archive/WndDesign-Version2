@@ -20,8 +20,7 @@ struct ABSTRACT_BASE IWndBase {
 	virtual ~IWndBase() pure {}
 
 	//// child and parent window relation ////
-	virtual bool HasParent() const pure;
-	virtual WndObject& GetParent() const pure;
+	virtual ref_ptr<WndObject> GetParent() const pure;
 	virtual void AddChild(IWndBase& child) pure;
 	virtual void RemoveChild(IWndBase& child) pure;
 

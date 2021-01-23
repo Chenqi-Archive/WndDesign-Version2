@@ -199,6 +199,7 @@
     <ClInclude Include="system\directx\directx_helper.h" />
     <ClInclude Include="system\directx\dxgi_api.h" />
     <ClInclude Include="system\ime.h" />
+    <ClInclude Include="system\win32.h" />
     <ClInclude Include="system\win32_api.h" />
     <ClInclude Include="system\win32_helper.h" />
     <ClInclude Include="system\win32_ime_input.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="system\metrics.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
     <ClCompile Include="system\directx\dxgi_api.cpp" />
+    <ClCompile Include="system\win32.cpp" />
     <ClCompile Include="system\win32_api.cpp" />
     <ClCompile Include="system\win32_ime_input.cpp" />
     <ClCompile Include="wnd\desktop.cpp" />

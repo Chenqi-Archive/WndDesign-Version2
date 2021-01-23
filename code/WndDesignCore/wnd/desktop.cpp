@@ -138,6 +138,21 @@ void DesktopObjectImpl::Terminate() {
 	}
 }
 
+std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const {
+	auto child = &wnd;
+	auto parent = wnd.GetParent();
+	while (parent != this) {
+		if (parent == nullptr) { 
+			return std::make_pair(nullptr, point_zero); 
+		}
+		point = child->ConvertPointToParentPoint(point);
+		child = parent;
+		parent = child->GetParent();
+	}
+	DesktopWndFrame& frame = GetChildFrame(*child);
+	return std::make_pair(frame._hwnd, point);
+}
+
 
 DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {
 	SetDepth(0);

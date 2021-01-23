@@ -45,6 +45,9 @@
     <ClCompile Include="style\style_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="system\win32_aero_snap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -144,6 +147,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="message\mouse_msg_tracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\win32_aero_snap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\border_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

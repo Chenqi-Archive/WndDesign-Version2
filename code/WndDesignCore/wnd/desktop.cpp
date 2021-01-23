@@ -17,7 +17,6 @@ DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwn
 
 DesktopWndFrame::~DesktopWndFrame() {
 	Win32::SetWndUserData(_hwnd, nullptr);
-	Win32::DestroyWnd(_hwnd);
 	LeaveRedrawQueue();
 }
 
@@ -102,15 +101,14 @@ const Rect DesktopObjectImpl::CalculateRegionOnParent(Size parent_size) {
 
 void DesktopObjectImpl::AddChild(WndObject& child) {
 	RegisterChild(child);
-}
-
-void DesktopObjectImpl::RemoveChild(WndObject& child) {
-	UnregisterChild(child);
-	OnChildDetach(child);
+	// DesktopBase will call AddChild again with child's WndBase information.
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
-	_child_wnds.erase(GetChildFrame(child)._desktop_index);
+	DesktopWndFrame& frame = GetChildFrame(child);
+	HANDLE hwnd = frame._hwnd;
+	_child_wnds.erase(frame._desktop_index);
+	Win32::DestroyWnd(hwnd);
 }
 
 void DesktopObjectImpl::OnChildRegionChange(WndObject& child) {
@@ -147,6 +145,12 @@ DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_ob
 
 const Rect DesktopBase::GetCachedRegion() const {
 	return Rect(point_zero, GetDesktopSize()); 
+}
+
+void DesktopBase::AddChild(IWndBase& child_wnd) {
+	WndBase::AddChild(child_wnd);
+	WndBase& child = static_cast<WndBase&>(child_wnd);
+	GetObject().AddChild(child, child._object);
 }
 
 void DesktopBase::ReleaseCapture() {

@@ -11,8 +11,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 BEGIN_NAMESPACE(Anonymous)
 
-bool has_wnd_class_registered = false;
-const wchar_t wnd_class_name[] = L"WndDesignFrame";
+static const wchar_t wnd_class_name[] = L"WndDesignFrame";
 HINSTANCE hInstance = NULL;
 
 inline bool IsMouseMsg(UINT msg) { return WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST; }
@@ -152,13 +151,18 @@ FrameIrrelevantMessages:
 }
 
 inline void RegisterWndClass() {
-    WNDCLASSEXW wcex = {};
-    wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.lpfnWndProc = WndProc;
-    wcex.hInstance = (hInstance = GetModuleHandle(NULL));
-    wcex.lpszClassName = wnd_class_name;
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    ATOM res = RegisterClassExW(&wcex);
+    static bool has_wnd_class_registered = false;
+    if (!has_wnd_class_registered) {
+        WNDCLASSEXW wcex = {};
+        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.lpfnWndProc = WndProc;
+        wcex.hInstance = (hInstance = GetModuleHandle(NULL));
+        wcex.lpszClassName = wnd_class_name;
+        wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+        ATOM res = RegisterClassExW(&wcex);
+        assert(res != 0);
+        has_wnd_class_registered = true;
+    }
 }
 
 END_NAMESPACE(Anonymous)
@@ -167,14 +171,14 @@ BEGIN_NAMESPACE(Win32)
 
 
 HANDLE CreateWnd(Rect region, const wstring& title) {
-    if (!has_wnd_class_registered) { RegisterWndClass(); }
+    RegisterWndClass(); 
     HWND hWnd = CreateWindowExW(
-        NULL, wnd_class_name, L"",
+        NULL, wnd_class_name, title.c_str(),
         WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX,
         region.point.x, region.point.y, region.size.width, region.size.height,
         NULL, NULL, hInstance, NULL
     );
-#pragma message(Remark"Check return value!")
+    assert(hWnd != NULL);
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     return hWnd;
 }

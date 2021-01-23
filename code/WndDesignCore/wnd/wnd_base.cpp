@@ -55,9 +55,9 @@ void WndBase::ClearParent() {
 
 void WndBase::DetachFromParent() {
 	if (HasParent()) { 
-		_parent->RemoveChild(*this); 
 		// Send child detached message to notify parent window object.
 		_parent->_object.OnChildDetach(_object);
+		_parent->RemoveChild(*this); 
 	}
 }
 

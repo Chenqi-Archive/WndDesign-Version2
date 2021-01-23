@@ -16,8 +16,12 @@ private:
 	Point center = Point(400, 250);
 public:
 	MainWnd() {}
-	virtual const Rect CalculateRegionOnParent(Size parent_size) { return Rect(100, 100, 800, 500); }
-	virtual const wstring GetTitle() const { return L"MainWnd"; }
+	virtual const Rect CalculateRegionOnParent(Size parent_size) { 
+		return Rect(100, 100, 800, 500); 
+	}
+	virtual const wstring GetTitle() const { 
+		return L"MainWnd"; 
+	}
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
 		figure_queue.Append(center - point_zero, new Ellipse(50, 50, 3.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
 	}

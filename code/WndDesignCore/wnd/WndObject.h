@@ -34,6 +34,8 @@ protected:
 	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); }
 	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); }
 public:
+	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
+	/* called when child window was detached from me, who may be added by another parent window */
 	virtual void OnChildDetach(WndObject& child) {}
 
 	//// child window data ////
@@ -121,9 +123,10 @@ protected:
 	~DesktopObject() {}
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
-	virtual void AddChild(WndObject& child) pure;
-	virtual void RemoveChild(WndObject& child) pure;
+
 	virtual void OnChildRegionChange(WndObject& child) override pure;
+
+	virtual void AddChild(WndObject& child) pure;
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;
 };

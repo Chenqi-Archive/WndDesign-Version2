@@ -58,7 +58,6 @@ public:
 
 public:
 	void Append(Vector offset, unique_ptr<const Figure> figure) {
-		sizeof(FigureGroup);
 		figures.emplace_back(FigureContainer{ offset, std::move(figure) });
 	}
 	void Append(Vector offset, alloc_ptr<const Figure> figure) {

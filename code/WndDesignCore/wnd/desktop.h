@@ -68,7 +68,6 @@ public:
 	virtual const Rect CalculateRegionOnParent(Size parent_size);
 
 	virtual void AddChild(WndObject& child) override;
-	virtual void RemoveChild(WndObject& child) override;
 	virtual void OnChildDetach(WndObject& child) override;
 	virtual void OnChildRegionChange(WndObject& child) override;
 
@@ -99,11 +98,7 @@ private:
 private:
 	virtual const Rect GetCachedRegion() const override;
 private:
-	virtual void AddChild(IWndBase& child_wnd) override {
-		WndBase::AddChild(child_wnd);
-		WndBase& child = static_cast<WndBase&>(child_wnd);
-		GetObject().AddChild(child, child._object);
-	}
+	virtual void AddChild(IWndBase& child_wnd) override;
 	virtual void Invalidate(WndBase& child) override { GetObject().UpdateChildInvalidRegion(child._object); }
 	virtual void SetChildCapture(WndBase& child) override { GetObject().SetChildCapture(child._object); }
 	virtual void SetChildFocus(WndBase& child) override { GetObject().SetChildFocus(child._object); }

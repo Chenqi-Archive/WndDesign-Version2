@@ -4,8 +4,12 @@
 #include "../figure/figure_types.h"
 #include "../figure/image.h"
 
+#include <memory>
+
 
 BEGIN_NAMESPACE(WndDesign)
+
+using std::shared_ptr;
 
 
 struct SolidColorBackground : Background {
@@ -17,12 +21,12 @@ struct SolidColorBackground : Background {
 };
 
 
-struct ImageTileBackground : Background {
-	const Image& image;
+struct ImageRepeatBackground : Background {
+	Image image;
 	uchar opacity;
 	Vector offset_on_image;
 
-	ImageTileBackground(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) :
+	ImageRepeatBackground(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) :
 		image(image), opacity(opacity), offset_on_image(offset_on_image) {
 	}
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;

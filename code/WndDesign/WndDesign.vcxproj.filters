@@ -42,6 +42,9 @@
     <ClCompile Include="system\directx\d2d_api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="style\style_helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -120,6 +123,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="message\message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\TextBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\Button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\EditBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\value_tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\wnd_style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\style_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message\mouse_msg_tracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

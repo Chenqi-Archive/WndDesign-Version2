@@ -57,10 +57,10 @@ public:
 	}
 
 public:
-	void Append(Vector offset, unique_ptr<const Figure> figure) {
-		figures.emplace_back(FigureContainer{ offset, std::move(figure) });
+	void Append(Point offset, unique_ptr<const Figure> figure) {
+		figures.emplace_back(FigureContainer{ offset - point_zero, std::move(figure) });
 	}
-	void Append(Vector offset, alloc_ptr<const Figure> figure) {
+	void Append(Point offset, alloc_ptr<const Figure> figure) {
 		Append(offset, unique_ptr<const Figure>(figure));
 	}
 };

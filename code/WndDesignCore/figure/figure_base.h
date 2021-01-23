@@ -18,7 +18,9 @@ struct Figure {
 	//   but for circle it means the center point.
 	virtual void DrawOn(RenderTarget& target, Vector offset) const pure;
 
-	// virtual ~Figure() pure {}  // Doesn't need yet.
+	// Figures only serve as temporary drawing commands and should not contain any allocated resource, 
+	//   so the virtual destructor is not needed.
+	// virtual ~Figure() pure {}
 };
 
 

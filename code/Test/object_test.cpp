@@ -1,5 +1,4 @@
 #include "../WndDesign/WndDesign.h"
-//#include "../WndDesign/wnd/OverlapView.h"
 
 using namespace WndDesign;
 
@@ -11,31 +10,31 @@ using namespace WndDesign;
 #endif // _DEBUG
 
 
-class MainWnd : public WndObject {
-private:
-	Point center = Point(400, 250);
+class MainWnd : public WndObject , public WndStyle {
 public:
-	MainWnd() {}
-	virtual const Rect CalculateRegionOnParent(Size parent_size) { 
-		return Rect(100, 100, 800, 500); 
+	MainWnd() {
+		size.setFixed(800px, 500px);
+		position.setHorizontalCenter().setVerticalCenter();
+		border.width(5.0).color(ColorSet::DarkGreen);
+		background.setColor(ColorSet::LightGray);
+		SetBackground(*background._background_resource);
 	}
-	virtual const wstring GetTitle() const { 
+	virtual const Rect CalculateRegionOnParent(Size parent_size) { 
+		return CalculateRectFromStyle(*this, parent_size); 
+	}
+	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { 
+		return CalculateMinMaxSizeFromStyle(*this, parent_size); 
+	}
+	virtual const wstring GetTitle() const {
 		return L"MainWnd"; 
 	}
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
-		figure_queue.Append(center - point_zero - Vector(50, 50), new Rectangle(Size(100, 100), ColorSet::Firebrick));
-		figure_queue.Append(center - point_zero, new Ellipse(50, 50, 5.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
-		figure_queue.Append(center - point_zero - Vector(50, 50), new Rectangle(Size(100, 100), 5.0, ColorSet::DarkOliveGreen));
+		Point center = accessible_region.Center();
+		figure_queue.Append(center - Vector(50, 50), new Rectangle(Size(100, 100), ColorSet::Firebrick));
+		figure_queue.Append(center, new Ellipse(50, 50, 5.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
+		figure_queue.Append(point_zero, new Rectangle(accessible_region.size, border._width, border._color));
 	}
 	virtual bool Handler(Msg msg, Para para) { 
-		if (IsMouseMsg(msg)) {
-			Point new_center = GetMouseMsg(para).point;
-			if (new_center != center) {
-				Invalidate(Rect(center - Vector(50, 50), Size(100, 100)));
-				Invalidate(Rect(new_center - Vector(50, 50), Size(100, 100)));
-				center = new_center;
-			}
-		}
 		return true; 
 	}
 };

@@ -4,6 +4,7 @@
 #include "wnd/WndObject.h"
 #include "figure/figure_types.h"
 #include "message/message.h"
+#include "style/style_helper.h"
 
 #include <vector>
 #include <string>

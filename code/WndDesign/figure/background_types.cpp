@@ -12,13 +12,13 @@ void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offs
 }
 
 
-void ImageTileBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
+void ImageRepeatBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
 	SolidColorBackground solid_color(color_transparent);
 	solid_color.Clear(region, target, offset);  // First clear the region to be transparent.
 	DrawOn(region, target, offset, 0xFF);
 }
 
-void ImageTileBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
+void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
 	if (image.IsEmpty()) { return; }
 
 	using RepeatRange = Rect;

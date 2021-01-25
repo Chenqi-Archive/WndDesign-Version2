@@ -204,7 +204,7 @@
     <ClInclude Include="system\win32_helper.h" />
     <ClInclude Include="system\win32_ime_input.h" />
     <ClInclude Include="wnd\desktop.h" />
-    <ClInclude Include="wnd\WndObject.h" />
+    <ClInclude Include="wnd\WndObjectBase.h" />
     <ClInclude Include="wnd\redraw_queue.h" />
     <ClInclude Include="wnd\wnd_base.h" />
     <ClInclude Include="wnd\wnd_base_interface.h" />

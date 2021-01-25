@@ -48,6 +48,12 @@
     <ClCompile Include="system\win32_aero_snap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="system\cursor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\WndObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -90,12 +96,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="geometry\interval.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\ListView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\OverlapView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wnd\ImageBox.h">
@@ -156,6 +156,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system\win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="figure\figure_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\cursor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\FlowLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\OverlapLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\ListLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\TableLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

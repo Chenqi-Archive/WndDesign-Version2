@@ -10,22 +10,24 @@ BEGIN_NAMESPACE(WndDesign)
 
 struct WndStyle {
 
-	// The size of the window (may be fixed or relative to parent window).
+	// The size of the window (may be in fixed size or relative to parent window).
 	struct SizeStyle {
 	public:
 		struct SizeTag { ValueTag width; ValueTag height; };
+	public:
 		SizeTag _normal = { length_auto, length_auto };
 		SizeTag _min = { px(length_min), px(length_min) };
 		SizeTag _max = { px(length_max), px(length_max) };
 	public:
+		constexpr void setFixed(ValueTag width, ValueTag height) { _normal = _min = _max = { width, height }; }
 		constexpr SizeStyle& normal(ValueTag width, ValueTag height) { _normal = { width, height }; return *this; }
 		constexpr SizeStyle& min(ValueTag width, ValueTag height) { _min = { width, height }; return *this; }
 		constexpr SizeStyle& max(ValueTag width, ValueTag height) { _max = { width, height }; return *this; }
-		constexpr void setFixed(ValueTag width, ValueTag height) { _normal = _min = _max = { width, height }; }
 	}size;
 
 
 	// The position of the window, or the margin between the window and the parent window's client region.
+	// Size and position determines the display region of the window on parent window. 
 	struct PositionStyle {
 	public:
 		ValueTag _left = position_auto;
@@ -47,16 +49,39 @@ struct WndStyle {
 	public:
 		float _width = 0;
 		Color _color = ColorSet::Black;
+		uint _radius = 0;
 	public:
 		constexpr BorderStyle& width(float width) { _width = width; return *this; }
 		constexpr BorderStyle& color(Color color) { _color = color; return *this; }
+		constexpr BorderStyle& radius(Color color) { _color = color; return *this; }
 	}border;
+
+
+	// The accessible region of the window, relative to the region on parent.
+	// The region is used for calculating the size of child windows, and is the same as the display region by default.
+	struct RegionStyle {
+	public:
+		ValueTag _left = 0pct;
+		ValueTag _top = 0pct;
+		ValueTag _width = 100pct;
+		ValueTag _height = 100pct;
+
+		bool _width_auto_resize = false;
+		bool _height_auto_resize = false;
+	public:
+		constexpr void set(ValueTag left, ValueTag top, ValueTag width, ValueTag height) {
+			_left = left; _top = top; _width = width; _height = height;
+		}
+		constexpr void setInfinite() { set(position_min_tag, position_min_tag, length_max_tag, length_max_tag); }
+		constexpr SizeStyle& widthAutoResize(bool width_auto_resize = true) { _width_auto_resize = width_auto_resize; return *this; }
+		constexpr SizeStyle& heightAutoResize(bool height_auto_resize = true) { _height_auto_resize = height_auto_resize; return *this; }
+	}region;
 
 
 	// The background of the window.
 	struct BackgroundStyle {
 	public:
-		shared_ptr<Background> _background_resource;
+		shared_ptr<Background> _background_resource = GetNullBackground();
 	public:
 		void setColor(Color color) { _background_resource.reset(new SolidColorBackground(color)); }
 		void setImage(const wstring& image_file, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
@@ -65,7 +90,18 @@ struct WndStyle {
 		void setImage(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
 			_background_resource.reset(new ImageRepeatBackground(image, opacity, offset_on_image));
 		}
+		const Background& get() const { return *_background_resource; }
 	}background;
+
+
+	// The title of the window. (May not be used)
+	struct TitleStyle {
+	public:
+		wstring _title;
+	public:
+		void set(const wstring& title) { _title = title; }
+	}title;
+
 };
 
 

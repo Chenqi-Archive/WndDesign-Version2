@@ -22,10 +22,10 @@ class WndBase : public IWndBase, public Uncopyable {
 	////                  Initialization                  ////
 	//////////////////////////////////////////////////////////
 protected:
-	WndObject& _object;
+	WndObjectBase& _object;
 
 public:
-	WndBase(WndObject& object);
+	WndBase(WndObjectBase& object);
 	~WndBase();
 
 	friend class DesktopBase;
@@ -40,7 +40,7 @@ private:
 	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
 	bool HasParent() const { return _parent != nullptr; }
-	virtual ref_ptr<WndObject> GetParent() const override { return HasParent() ? &_parent->_object : nullptr; }
+	virtual ref_ptr<WndObjectBase> GetParent() const override { return HasParent() ? &_parent->_object : nullptr; }
 private:
 	/* called by new parent window */
 	void SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent);
@@ -151,7 +151,7 @@ public:
 	virtual void Invalidate(Rect region) override;
 	/* called by redraw queue at commit time */
 	void UpdateInvalidRegion();
-	/* called by parent window (WndObject) */
+	/* called by parent window (WndObjectBase) */
 	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const override;
 
 

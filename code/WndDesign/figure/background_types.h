@@ -12,6 +12,9 @@ BEGIN_NAMESPACE(WndDesign)
 using std::shared_ptr;
 
 
+shared_ptr<Background> GetNullBackground();
+
+
 struct SolidColorBackground : Background {
 	Color color;
 

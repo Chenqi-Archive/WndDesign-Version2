@@ -2,18 +2,31 @@
 
 #include "WndObject.h"
 
+#include <vector>
+
 
 BEGIN_NAMESPACE(WndDesign)
 
+using namespace std;
 
-class ListView : public WndObject {
+
+class ListLayout : public WndObject {
 public:
-	struct Style {
-		int max_height;
+	struct Style : public WndObject::Style {
+		struct HeightStyle {
+
+		}height;
+
+
 	};
 
 private:
-	vector<uint> row_height;
+	struct RowContainer {
+		reference_wrapper<WndObjectBase> wnd;
+		uint y;
+		uint height;
+	};
+	vector<uint> _rows;
 
 	const Size GetSizeAsParent() {
 		return GetSize();
@@ -37,6 +50,12 @@ public:
 		// Check if is child.
 		uint row = GetChildData(child);
 		RemoveChild(row);
+	}
+	virtual void OnChildDetach(WndObjectBase& child) override {
+		ChildWndContainer& child_container = *GetChildData<ChildWndContainer*>(child);
+		Rect child_region = child_container.region;
+		_child_wnds.erase(child_container.list_index);
+		Invalidate(child_region);
 	}
 	void RemoveChild(uint row) {
 		row_height.erase(row_height.begin() + row);

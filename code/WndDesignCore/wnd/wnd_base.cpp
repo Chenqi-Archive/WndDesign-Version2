@@ -1,6 +1,6 @@
 #include "wnd_base.h"
 #include "redraw_queue.h"
-#include "WndObject.h"
+#include "WndObjectBase.h"
 #include "../layer/layer.h"
 #include "../layer/background_types.h"
 #include "../geometry/geometry_helper.h"
@@ -10,12 +10,12 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
+WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObjectBase& object) {
 	return std::make_unique<WndBase>(object);
 }
 
 
-WndBase::WndBase(WndObject& object) :
+WndBase::WndBase(WndObjectBase& object) :
 	_object(object),
 	_parent(nullptr), 
 	_index_on_parent(),

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/core.h"
 #include "wnd/WndObject.h"
-#include "figure/figure_types.h"
 #include "message/message.h"
+#include "figure/figure_types.h"
+#include "figure/figure_queue.h"
 #include "style/style_helper.h"
 
 #include <vector>

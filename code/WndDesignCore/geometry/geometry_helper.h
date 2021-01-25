@@ -20,9 +20,13 @@ inline const Point BoundPointInRegion(const Point& point, const Rect& rect) {
 	);
 }
 
-inline float Distance(const Point& a, const Point& b) {
+inline uint SquareDistance(const Point& a, const Point& b) {
 	auto square = [](int x) -> uint {return static_cast<uint>(x * x); };
-	return static_cast<float>(sqrt(square(a.x - b.x) + square(a.y - b.y)));
+	return square(a.x - b.x) + square(a.y - b.y);
+}
+
+inline float Distance(const Point& a, const Point& b) {
+	return static_cast<float>(sqrt(SquareDistance(a, b)));
 }
 
 inline float Distance(const Point& point, const Rect& rect) {

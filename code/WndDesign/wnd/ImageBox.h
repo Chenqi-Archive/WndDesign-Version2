@@ -12,10 +12,15 @@ private:
 	WndObject::UnregisterChild;
 };
 
+
 class ImageBox : public FinalWnd {
-	void f() {
-		RegisterChild();
-	}
+public:
+	struct Style : FinalWnd::Style {
+		
+	};
+private:
+
+
 };
 
 

@@ -6,6 +6,12 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+shared_ptr<Background> GetNullBackground() {
+	static shared_ptr<Background> null_background(new SolidColorBackground(ColorSet::White));
+	return null_background;
+}
+
+
 void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
 	Rectangle rectangle(region.size, BlendColorWithOpacity(color, opacity));
 	rectangle.DrawOn(target, offset);

@@ -161,11 +161,13 @@
     <ClCompile Include="figure\text_block.cpp" />
     <ClCompile Include="figure\text_style.cpp" />
     <ClCompile Include="style\style_helper.cpp" />
+    <ClCompile Include="system\cursor.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
     <ClCompile Include="system\directx\dwrite_api.cpp" />
     <ClCompile Include="system\directx\wic_api.cpp" />
     <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
+    <ClCompile Include="wnd\WndObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\core.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="figure\background_types.h" />
     <ClInclude Include="figure\color.h" />
     <ClInclude Include="figure\figure_base.h" />
+    <ClInclude Include="figure\figure_queue.h" />
     <ClInclude Include="figure\figure_types.h" />
     <ClInclude Include="figure\geometry_figure.h" />
     <ClInclude Include="figure\image.h" />
@@ -190,6 +193,7 @@
     <ClInclude Include="style\style_helper.h" />
     <ClInclude Include="style\wnd_style.h" />
     <ClInclude Include="style\value_tag.h" />
+    <ClInclude Include="system\cursor.h" />
     <ClInclude Include="system\directx\d2d_api.h" />
     <ClInclude Include="system\directx\directx_helper.h" />
     <ClInclude Include="system\directx\dwrite_api.h" />
@@ -198,10 +202,12 @@
     <ClInclude Include="system\win32_aero_snap.h" />
     <ClInclude Include="wnd\Button.h" />
     <ClInclude Include="wnd\EditBox.h" />
+    <ClInclude Include="wnd\FlowLayout.h" />
     <ClInclude Include="wnd\ImageBox.h" />
-    <ClInclude Include="wnd\ListView.h" />
-    <ClInclude Include="wnd\OverlapView.h" />
+    <ClInclude Include="wnd\ListLayout.h" />
+    <ClInclude Include="wnd\OverlapLayout.h" />
     <ClInclude Include="WndDesign.h" />
+    <ClInclude Include="wnd\TableLayout.h" />
     <ClInclude Include="wnd\TextBox.h" />
     <ClInclude Include="wnd\WndObject.h" />
   </ItemGroup>

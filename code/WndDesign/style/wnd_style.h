@@ -11,19 +11,18 @@ BEGIN_NAMESPACE(WndDesign)
 struct WndStyle {
 
 	// The size of the window (may be in fixed size or relative to parent window).
-	struct SizeStyle {
+	struct LengthStyle {
 	public:
-		struct SizeTag { ValueTag width; ValueTag height; };
-	public:
-		SizeTag _normal = { length_auto, length_auto };
-		SizeTag _min = { px(length_min), px(length_min) };
-		SizeTag _max = { px(length_max), px(length_max) };
-	public:
-		constexpr void setFixed(ValueTag width, ValueTag height) { _normal = _min = _max = { width, height }; }
-		constexpr SizeStyle& normal(ValueTag width, ValueTag height) { _normal = { width, height }; return *this; }
-		constexpr SizeStyle& min(ValueTag width, ValueTag height) { _min = { width, height }; return *this; }
-		constexpr SizeStyle& max(ValueTag width, ValueTag height) { _max = { width, height }; return *this; }
-	}size;
+		ValueTag _normal = length_auto;
+		ValueTag _min = px(length_min);
+		ValueTag _max = px(length_max);
+		constexpr void setFixed(ValueTag length) { _normal = _min = _max = length; }
+		constexpr LengthStyle& normal(ValueTag normal) { _normal = normal; return *this; }
+		constexpr LengthStyle& min(ValueTag min) { _min = min; return *this; }
+		constexpr LengthStyle& max(ValueTag max) { _max = max; return *this; }
+	};
+	LengthStyle width;
+	LengthStyle height;
 
 
 	// The position of the window, or the margin between the window and the parent window's client region.

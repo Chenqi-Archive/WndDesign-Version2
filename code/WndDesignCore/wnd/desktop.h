@@ -72,10 +72,10 @@ public:
 	virtual void OnChildRegionChange(WndObject& child) override;
 
 	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
-		SetChildData(child, reinterpret_cast<Data>(&frame));
+		SetChildData(child, &frame);
 	}
 	static DesktopWndFrame& GetChildFrame(WndObject& child) {
-		return *reinterpret_cast<DesktopWndFrame*>(GetChildData(child));
+		return *GetChildData<DesktopWndFrame*>(child);
 	}
 
 	void AddChild(WndBase& child, WndObject& child_object);

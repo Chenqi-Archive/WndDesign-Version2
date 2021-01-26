@@ -13,11 +13,13 @@ using namespace std;
 class ListLayout : public WndObject {
 public:
 	struct Style : public WndObject::Style {
-		struct HeightStyle {
-
-		}height;
-
-
+		struct GridStyle {
+			ValueTag height = height_auto;
+			ValueTag max_height = height_auto;
+			ValueTag min_height = height_auto;
+			uint gridline_width = 3;
+			Color gridline_color = ColorSet::Black;
+		}grid;
 	};
 
 private:
@@ -25,18 +27,15 @@ private:
 		reference_wrapper<WndObject> wnd;
 		uint y;
 		uint height;
+		ValueTag height_tag;
 	};
-	vector<uint> _rows;
-
-	const Size GetSizeAsParent() {
-		return GetSize();
-	}
+	vector<RowContainer> _rows;
 
 public:
 	void AddChild(WndObject& child, uint row) {
 		RegisterChild(child);
 		SetChildData(child, row);
-		uint child_height = child.CalculateRegion(GetSizeAsParent()).size.height;
+		Rect child_region = GetChildRegion(child, GetSize());
 		BoundNumberBetweenInterval(child_height, { min_height, max_height });
 		row_height.insert(row_height.begin() + row, { child_height });
 		// calculate row position

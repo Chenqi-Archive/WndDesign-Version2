@@ -1,6 +1,6 @@
 #include "wnd_base.h"
 #include "redraw_queue.h"
-#include "WndObjectBase.h"
+#include "WndObject.h"
 #include "../layer/layer.h"
 #include "../layer/background_types.h"
 #include "../geometry/geometry_helper.h"

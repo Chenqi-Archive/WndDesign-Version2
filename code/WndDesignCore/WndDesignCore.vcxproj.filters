@@ -132,7 +132,7 @@
     <ClInclude Include="system\win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\WndObjectBase.h">
+    <ClInclude Include="wnd\WndObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

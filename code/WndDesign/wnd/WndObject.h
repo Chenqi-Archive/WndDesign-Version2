@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../WndDesignCore/wnd/WndObjectBase.h"
+#include "../../WndDesignCore/wnd/WndObject.h"
 #include "../style/wnd_style.h"
 
 

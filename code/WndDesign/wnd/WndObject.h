@@ -6,8 +6,8 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-
-class WndObject : public WndObjectBase {
+/*
+class WndObject : public WndObject {
 public:
 	using Style = WndStyle;
 
@@ -31,6 +31,6 @@ protected:
 	virtual const wstring GetTitle() const override;
 
 };
-
+*/
 
 END_NAMESPACE(WndDesign)

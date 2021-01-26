@@ -26,7 +26,7 @@ private:
 	}
 
 public:
-	void AddChild(WndObjectBase& child) {    // z-index
+	void AddChild(WndObject& child) {    // z-index
 		RegisterChild(child);
 		Rect child_region = child.CalculateRegion(GetSizeAsParent());
 		SetChildRegion(child, child_region);
@@ -35,7 +35,7 @@ public:
 		SetChildData<ChildWndContainer*>(child, &child_container);
 		Invalidate(child_region);
 	}
-	virtual void OnChildDetach(WndObjectBase& child) override {
+	virtual void OnChildDetach(WndObject& child) override {
 		ChildWndContainer& child_container = *GetChildData<ChildWndContainer*>(child);
 		Rect child_region = child_container.region;
 		_child_wnds.erase(child_container.list_index);
@@ -52,7 +52,7 @@ private:
 	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) override {}
 
 private:
-	virtual void OnChildRegionChange(WndObjectBase& child) override {
+	virtual void OnChildRegionChange(WndObject& child) override {
 		child.CalculateRegion(GetSizeAsParent())
 	}
 	virtual const Rect CalculateRegionOnParent(Size parent_size) { return region_empty; }
@@ -63,7 +63,7 @@ private:
 
 private:
 	virtual bool Handler(Msg msg, Para para) override { return true; }
-	virtual const WndObjectBase& HitTestChild(Point point) const override { return *this; }
+	virtual const WndObject& HitTestChild(Point point) const override { return *this; }
 	virtual bool HitTest(Point point) const override { return true; }
 };
 

@@ -9,7 +9,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObjectBase& wnd_object, HANDLE hwnd) :
+DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd) :
 	_wnd(wnd), _wnd_object(wnd_object), _hwnd(hwnd), _resource(_hwnd) {
 	// Store the pointer of the attached frame as the user data.
 	Win32::SetWndUserData(_hwnd, this);
@@ -99,25 +99,25 @@ const Rect DesktopObjectImpl::CalculateRegionOnParent(Size parent_size) {
 	return Rect(point_zero, GetDesktopSize());
 }
 
-void DesktopObjectImpl::AddChild(WndObjectBase& child) {
+void DesktopObjectImpl::AddChild(WndObject& child) {
 	RegisterChild(child);
 	// DesktopBase will call AddChild again with child's WndBase information.
 }
 
-void DesktopObjectImpl::OnChildDetach(WndObjectBase& child) {
+void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	HANDLE hwnd = frame._hwnd;
 	_child_wnds.erase(frame._desktop_index);
 	Win32::DestroyWnd(hwnd);
 }
 
-void DesktopObjectImpl::OnChildRegionChange(WndObjectBase& child) {
+void DesktopObjectImpl::OnChildRegionChange(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Rect child_region = child.CalculateRegion(GetSize());
 	Win32::MoveWnd(frame._hwnd, child_region);
 }
 
-void DesktopObjectImpl::AddChild(WndBase& child, WndObjectBase& child_object) {
+void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 	Rect child_region = child_object.CalculateRegion(GetSize());
 	HANDLE hwnd = Win32::CreateWnd(child_region, child_object.GetTitle());
 	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
@@ -138,7 +138,7 @@ void DesktopObjectImpl::Terminate() {
 	}
 }
 
-std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertPointToDesktopWndPoint(WndObjectBase& wnd, Point point) const {
+std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const {
 	auto child = &wnd;
 	auto parent = wnd.GetParent();
 	while (parent != this) {

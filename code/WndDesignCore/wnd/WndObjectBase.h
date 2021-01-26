@@ -13,30 +13,30 @@ using std::pair;
 using std::wstring;
 
 
-class WndObjectBase {
+class WndObject {
 private:
 	friend class WndBase;
 	friend class DesktopObject;
 	unique_ptr<IWndBase> wnd;
 
 private:
-	WndObjectBase(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)) {}
+	WndObject(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)) {}
 protected:
-	WndObjectBase() : wnd(IWndBase::Create(*this)) {}
-	~WndObjectBase() {}
+	WndObject() : wnd(IWndBase::Create(*this)) {}
+	~WndObject() {}
 
 	//// child and parent window relation ////
 public:
-	ref_ptr<WndObjectBase> GetParent() const { return wnd->GetParent(); }
+	ref_ptr<WndObject> GetParent() const { return wnd->GetParent(); }
 	bool HasParent() const { return GetParent() != nullptr; }
-	bool IsMyChild(WndObjectBase& child) const { return child.GetParent() == this; }
+	bool IsMyChild(WndObject& child) const { return child.GetParent() == this; }
 protected:
-	void RegisterChild(WndObjectBase& child) { wnd->AddChild(*child.wnd); }
-	void UnregisterChild(WndObjectBase& child) { wnd->RemoveChild(*child.wnd); }
+	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); }
+	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); }
 public:
-	void RemoveChild(WndObjectBase& child) { OnChildDetach(child); UnregisterChild(child); }
+	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
 private:
-	virtual void OnChildDetach(WndObjectBase& child) {}
+	virtual void OnChildDetach(WndObject& child) {}
 
 	//// data used by parent window ////
 protected:
@@ -79,15 +79,15 @@ protected:
 	void RegionChanged() { if (auto parent = GetParent(); parent != nullptr) { parent->OnChildRegionChange(*this); } }
 protected:
 	/* called by parent window to get and set the child window's region */
-	static void SetChildRegion(WndObjectBase& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
-	static const Rect GetChildRegion(WndObjectBase& child, Size parent_size) {
+	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
+	static const Rect GetChildRegion(WndObject& child, Size parent_size) {
 		Rect region_on_parent = child.CalculateRegionOnParent(parent_size);
 		Rect accessible_region = child.CalculateAccessibleRegion(parent_size, region_on_parent.size);
 		child.SetAccessibleRegion(accessible_region);
 		return region_on_parent;
 	}
 private:
-	virtual void OnChildRegionChange(WndObjectBase& child) {}
+	virtual void OnChildRegionChange(WndObject& child) {}
 	virtual const Rect CalculateRegionOnParent(Size parent_size) { return region_empty; }
 	virtual const Rect CalculateAccessibleRegion(Size parent_size, Size display_region_size) { return Rect(point_zero, display_region_size); }
 
@@ -116,20 +116,20 @@ public:
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
 private:
 	virtual bool Handler(Msg msg, Para para) { return true; }
-	virtual const WndObjectBase& HitTestChild(Point point) const { return *this; }
+	virtual const WndObject& HitTestChild(Point point) const { return *this; }
 	virtual bool HitTest(Point point) const { return true; }
 };
 
 
-class DesktopObject : protected WndObjectBase {
+class DesktopObject : protected WndObject {
 protected:
-	DesktopObject(unique_ptr<IWndBase> desktop) : WndObjectBase(std::move(desktop)) {}
+	DesktopObject(unique_ptr<IWndBase> desktop) : WndObject(std::move(desktop)) {}
 	~DesktopObject() {}
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
-	virtual void OnChildRegionChange(WndObjectBase& child) override pure;
-	virtual void AddChild(WndObjectBase& child) pure;
+	virtual void OnChildRegionChange(WndObject& child) override pure;
+	virtual void AddChild(WndObject& child) pure;
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;
 };

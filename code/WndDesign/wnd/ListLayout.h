@@ -22,7 +22,7 @@ public:
 
 private:
 	struct RowContainer {
-		reference_wrapper<WndObjectBase> wnd;
+		reference_wrapper<WndObject> wnd;
 		uint y;
 		uint height;
 	};
@@ -51,7 +51,7 @@ public:
 		uint row = GetChildData(child);
 		RemoveChild(row);
 	}
-	virtual void OnChildDetach(WndObjectBase& child) override {
+	virtual void OnChildDetach(WndObject& child) override {
 		ChildWndContainer& child_container = *GetChildData<ChildWndContainer*>(child);
 		Rect child_region = child_container.region;
 		_child_wnds.erase(child_container.list_index);

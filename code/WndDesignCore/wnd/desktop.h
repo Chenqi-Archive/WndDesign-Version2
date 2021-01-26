@@ -13,7 +13,7 @@ using std::pair;
 class DesktopWndFrame : public Uncopyable{
 private:
 	WndBase& _wnd;
-	WndObjectBase& _wnd_object;
+	WndObject& _wnd_object;
 	HANDLE _hwnd;
 	WindowResource _resource;
 private:
@@ -21,7 +21,7 @@ private:
 	list<DesktopWndFrame>::iterator _desktop_index;
 
 public:
-	DesktopWndFrame(WndBase& wnd, WndObjectBase& wnd_object, HANDLE hwnd);
+	DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd);
 	~DesktopWndFrame();
 
 private:
@@ -67,27 +67,27 @@ public:
 
 	virtual const Rect CalculateRegionOnParent(Size parent_size);
 
-	virtual void AddChild(WndObjectBase& child) override;
-	virtual void OnChildDetach(WndObjectBase& child) override;
-	virtual void OnChildRegionChange(WndObjectBase& child) override;
+	virtual void AddChild(WndObject& child) override;
+	virtual void OnChildDetach(WndObject& child) override;
+	virtual void OnChildRegionChange(WndObject& child) override;
 
-	static void SetChildFrame(WndObjectBase& child, DesktopWndFrame& frame) {
+	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
 		SetChildData(child, reinterpret_cast<Data>(&frame));
 	}
-	static DesktopWndFrame& GetChildFrame(WndObjectBase& child) {
+	static DesktopWndFrame& GetChildFrame(WndObject& child) {
 		return *reinterpret_cast<DesktopWndFrame*>(GetChildData(child));
 	}
 
-	void AddChild(WndBase& child, WndObjectBase& child_object);
+	void AddChild(WndBase& child, WndObject& child_object);
 
-	void UpdateChildInvalidRegion(WndObjectBase& child) { GetChildFrame(child).UpdateInvalidRegion(); }
-	void SetChildCapture(WndObjectBase& child) { GetChildFrame(child).SetCapture(); }
-	void SetChildFocus(WndObjectBase& child) { GetChildFrame(child).SetFocus(); }
+	void UpdateChildInvalidRegion(WndObject& child) { GetChildFrame(child).UpdateInvalidRegion(); }
+	void SetChildCapture(WndObject& child) { GetChildFrame(child).SetCapture(); }
+	void SetChildFocus(WndObject& child) { GetChildFrame(child).SetFocus(); }
 
 	virtual void MessageLoop() override;
 	virtual void Terminate() override;
 
-	std::pair<HANDLE, const Point> ConvertPointToDesktopWndPoint(WndObjectBase& wnd, Point point) const;
+	std::pair<HANDLE, const Point> ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const;
 };
 
 

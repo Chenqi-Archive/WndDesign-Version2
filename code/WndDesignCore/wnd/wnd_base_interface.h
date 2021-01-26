@@ -9,18 +9,18 @@ BEGIN_NAMESPACE(WndDesign)
 
 using std::unique_ptr;
 
-class WndObjectBase;
+class WndObject;
 class FigureQueue;
 struct Background;
 
 
 struct ABSTRACT_BASE IWndBase {
-	WNDDESIGNCORE_API static unique_ptr<IWndBase> Create(WndObjectBase& object);
+	WNDDESIGNCORE_API static unique_ptr<IWndBase> Create(WndObject& object);
 
 	virtual ~IWndBase() pure {}
 
 	//// child and parent window relation ////
-	virtual ref_ptr<WndObjectBase> GetParent() const pure;
+	virtual ref_ptr<WndObject> GetParent() const pure;
 	virtual void AddChild(IWndBase& child) pure;
 	virtual void RemoveChild(IWndBase& child) pure;
 

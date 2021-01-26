@@ -10,12 +10,12 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObjectBase& object) {
+WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
 	return std::make_unique<WndBase>(object);
 }
 
 
-WndBase::WndBase(WndObjectBase& object) :
+WndBase::WndBase(WndObject& object) :
 	_object(object),
 	_parent(nullptr), 
 	_index_on_parent(),

@@ -40,7 +40,6 @@ private:
 	list<ref_ptr<WndBase>>::iterator _index_on_parent;
 public:
 	bool HasParent() const { return _parent != nullptr; }
-	virtual ref_ptr<WndObject> GetParent() const override { return HasParent() ? &_parent->_object : nullptr; }
 private:
 	/* called by new parent window */
 	void SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent);

@@ -18,21 +18,22 @@ private:
 	friend class WndBase;
 	friend class DesktopObject;
 	unique_ptr<IWndBase> wnd;
+	ref_ptr<WndObject> parent;
 
 private:
-	WndObject(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)) {}
+	WndObject(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)), parent(nullptr) {}
 protected:
-	WndObject() : wnd(IWndBase::Create(*this)) {}
+	WndObject() : wnd(IWndBase::Create(*this)), parent(nullptr) {}
 	~WndObject() {}
 
 	//// child and parent window relation ////
 public:
-	ref_ptr<WndObject> GetParent() const { return wnd->GetParent(); }
+	ref_ptr<WndObject> GetParent() const { return parent; }
 	bool HasParent() const { return GetParent() != nullptr; }
 	bool IsMyChild(WndObject& child) const { return child.GetParent() == this; }
 protected:
-	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); }
-	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); }
+	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); child.parent = this; }
+	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); child.parent = nullptr; }
 public:
 	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
 private:

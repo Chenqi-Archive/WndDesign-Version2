@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{e3e0471b-901b-4d43-9579-277659a428b0}</ProjectGuid>
-    <RootNamespace>WndDesign</RootNamespace>
+    <ProjectGuid>{37e5500d-a539-4ef4-b712-f80db528e2d2}</ProjectGuid>
+    <RootNamespace>TestDocMng</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -94,13 +94,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -110,13 +109,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -126,13 +124,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -142,81 +139,32 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="figure\background_types.cpp" />
-    <ClCompile Include="figure\figure_types.cpp" />
-    <ClCompile Include="figure\image.cpp" />
-    <ClCompile Include="figure\text_layout.cpp" />
-    <ClCompile Include="style\text_style.cpp" />
-    <ClCompile Include="style\style_helper.cpp" />
-    <ClCompile Include="system\cursor.cpp" />
-    <ClCompile Include="system\directx\d2d_api.cpp" />
-    <ClCompile Include="system\directx\dwrite_api.cpp" />
-    <ClCompile Include="system\directx\wic_api.cpp" />
-    <ClCompile Include="system\win32_aero_snap.cpp" />
-    <ClCompile Include="system\WinMain.cpp" />
-    <ClCompile Include="wnd\WndObject.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWnd.cpp" />
+    <ClCompile Include="MainWndFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common\core.h" />
-    <ClInclude Include="common\reversion_wrapper.h" />
-    <ClInclude Include="common\uncopyable.h" />
-    <ClInclude Include="figure\background_base.h" />
-    <ClInclude Include="figure\background_types.h" />
-    <ClInclude Include="figure\color.h" />
-    <ClInclude Include="figure\figure_base.h" />
-    <ClInclude Include="figure\figure_queue.h" />
-    <ClInclude Include="figure\figure_types.h" />
-    <ClInclude Include="figure\geometry_figure.h" />
-    <ClInclude Include="figure\image.h" />
-    <ClInclude Include="figure\text_layout.h" />
-    <ClInclude Include="style\text_style.h" />
-    <ClInclude Include="geometry\geometry.h" />
-    <ClInclude Include="geometry\geometry_helper.h" />
-    <ClInclude Include="geometry\interval.h" />
-    <ClInclude Include="geometry\rect_point_iterator.h" />
-    <ClInclude Include="message\message.h" />
-    <ClInclude Include="message\mouse_msg_tracker.h" />
-    <ClInclude Include="style\border_helper.h" />
-    <ClInclude Include="style\style_helper.h" />
-    <ClInclude Include="style\wnd_style.h" />
-    <ClInclude Include="style\value_tag.h" />
-    <ClInclude Include="system\cursor.h" />
-    <ClInclude Include="system\directx\d2d_api.h" />
-    <ClInclude Include="system\directx\directx_helper.h" />
-    <ClInclude Include="system\directx\dwrite_api.h" />
-    <ClInclude Include="system\directx\wic_api.h" />
-    <ClInclude Include="system\win32.h" />
-    <ClInclude Include="system\win32_aero_snap.h" />
-    <ClInclude Include="wnd\Button.h" />
-    <ClInclude Include="wnd\EditBox.h" />
-    <ClInclude Include="wnd\FinalWnd.h" />
-    <ClInclude Include="wnd\FlowLayout.h" />
-    <ClInclude Include="wnd\ImageBox.h" />
-    <ClInclude Include="wnd\ListLayout.h" />
-    <ClInclude Include="wnd\OverlapLayout.h" />
+    <ClInclude Include="DocTable.h" />
+    <ClInclude Include="DocTableFrame.h" />
+    <ClInclude Include="MainWnd.h" />
+    <ClInclude Include="MainWndFrame.h" />
+    <ClInclude Include="SearchBox.h" />
+    <ClInclude Include="TagBox.h" />
+    <ClInclude Include="TagBoxFrame.h" />
+    <ClInclude Include="TagItem.h" />
     <ClInclude Include="WndDesign.h" />
-    <ClInclude Include="common\reference_wrapper.h" />
-    <ClInclude Include="wnd\ScrollFrame.h" />
-    <ClInclude Include="wnd\TabLayout.h" />
-    <ClInclude Include="wnd\Wnd.h" />
-    <ClInclude Include="wnd\WndFrame.h" />
-    <ClInclude Include="wnd\SplitLayout.h" />
-    <ClInclude Include="wnd\TableLayout.h" />
-    <ClInclude Include="wnd\TextBox.h" />
-    <ClInclude Include="wnd\WndObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

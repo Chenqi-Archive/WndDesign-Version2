@@ -1,6 +1,6 @@
 #pragma once
 
-#include "text_style.h"
+#include "../style/text_style.h"
 #include "figure_base.h"
 
 #include <array>
@@ -15,15 +15,15 @@ using std::vector;
 class TextLayoutResource;  // Wrapper for IDWriteTextLayout.
 
 
-// Text format for a single paragraph.
-class TextBlock {
+// Text layout for a single paragraph.
+class TextLayout {
 private:
 	unique_ptr<TextLayoutResource> layout;
 	const wstring& text; 
 	TextStyle default_style;
 
 public:
-	TextBlock(const wstring& text, TextStyle default_style = {}) : text(text) {}
+	TextLayout(const wstring& text, TextStyle default_style = {}) : text(text) {}
 
 	TextLayoutResource& LayoutResource() const { return *layout; }
 	const TextStyle& DefaultStyle() const { return default_style; }
@@ -34,7 +34,6 @@ public:
 	///////////////////////////////////////////////////////////
 	////                       Style                       ////
 	///////////////////////////////////////////////////////////
-#pragma message("Put in helper")
 private:
 	class TextStyleIntervalList {
 		struct TextStyleInterval {
@@ -71,10 +70,10 @@ public:
 };
 
 
-struct TextBlockFigure : Figure {
-	const TextBlock& text_block;
+struct TextLayoutFigure : Figure {
+	const TextLayout& text_layout;
 
-	TextBlockFigure(const TextBlock& text_block) : text_block(text_block) {}
+	TextLayoutFigure(const TextLayout& text_layout) : text_layout(text_layout) {}
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override; // defined in figure_types.cpp
 };
 

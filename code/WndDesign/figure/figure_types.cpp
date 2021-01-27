@@ -117,14 +117,14 @@ void ImageFigure::DrawOn(RenderTarget& target, Vector offset) const {
 
 
 //////////////////////////////////////////////////////////
-////                   text_block.h                   ////
+////                   text_layout.h                   ////
 //////////////////////////////////////////////////////////
 
-void TextBlockFigure::DrawOn(RenderTarget& target, Vector offset) const {
+void TextLayoutFigure::DrawOn(RenderTarget& target, Vector offset) const {
 	target.DrawTextLayout(
 		Point2POINT(point_zero + offset),
-		&text_block.LayoutResource().DWriteTextLayout(),
-		&GetSolidColorBrush(text_block.DefaultStyle().color),
+		&text_layout.LayoutResource().DWriteTextLayout(),
+		&GetSolidColorBrush(text_layout.DefaultStyle().color),
 		D2D1_DRAW_TEXT_OPTIONS_CLIP | D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT
 	);
 }

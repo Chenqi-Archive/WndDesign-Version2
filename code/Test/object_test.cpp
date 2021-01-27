@@ -1,3 +1,5 @@
+/*
+
 #include "../WndDesign/WndDesign.h"
 #include "../WndDesign/system/win32_aero_snap.h"
 
@@ -54,3 +56,5 @@ int main() {
 	desktop.MessageLoop();
 	return 0;
 }
+
+*/

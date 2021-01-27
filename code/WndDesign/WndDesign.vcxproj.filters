@@ -21,12 +21,6 @@
     <ClCompile Include="figure\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="figure\text_block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="figure\text_style.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="system\directx\wic_api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -54,18 +48,18 @@
     <ClCompile Include="wnd\WndObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="style\text_style.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="figure\text_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="figure\image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="figure\text_block.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="figure\text_style.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system\directx\wic_api.h">
@@ -174,6 +168,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wnd\TableLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\SplitLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\FinalWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\ScrollFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\WndFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\TabLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\text_style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="figure\text_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\reference_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

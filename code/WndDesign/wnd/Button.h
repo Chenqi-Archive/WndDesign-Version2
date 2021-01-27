@@ -1,13 +1,13 @@
 #pragma once
 
-#include "WndObject.h"
+#include "TextBox.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class Button : public WndObject {
-	struct Style : WndObject::Style {
+class Button : public TextBox {
+	struct Style : TextBox::Style {
 		BackgroundStyle background_hover;
 		BackgroundStyle background_click;
 		Style() {

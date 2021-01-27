@@ -56,24 +56,26 @@ struct WndStyle {
 	}border;
 
 
-	// The accessible region of the window, relative to the region on parent.
-	// The region is used for calculating the size of child windows, and is the same as the display region by default.
+	// The accessible region of the window, relative to the window's display size, 
+	//   and is the same as the display size by default.
+	// The region might auto fit child windows, or be used for calculating child windows' size.
 	struct RegionStyle {
 	public:
 		ValueTag _left = 0pct;
 		ValueTag _top = 0pct;
 		ValueTag _width = 100pct;
 		ValueTag _height = 100pct;
-
 		bool _width_auto_resize = false;
 		bool _height_auto_resize = false;
+	#error may combine the auto resize style into ValueTag
+	#error may also contain the min and max region config.
 	public:
 		constexpr void set(ValueTag left, ValueTag top, ValueTag width, ValueTag height) {
 			_left = left; _top = top; _width = width; _height = height;
 		}
 		constexpr void setInfinite() { set(position_min_tag, position_min_tag, length_max_tag, length_max_tag); }
-		constexpr SizeStyle& widthAutoResize(bool width_auto_resize = true) { _width_auto_resize = width_auto_resize; return *this; }
-		constexpr SizeStyle& heightAutoResize(bool height_auto_resize = true) { _height_auto_resize = height_auto_resize; return *this; }
+		constexpr RegionStyle& width_auto_resize(bool width_auto_resize = true) { _width_auto_resize = width_auto_resize; return *this; }
+		constexpr RegionStyle& height_auto_resize(bool height_auto_resize = true) { _height_auto_resize = height_auto_resize; return *this; }
 	}region;
 
 
@@ -91,16 +93,6 @@ struct WndStyle {
 		}
 		const Background& get() const { return *_background_resource; }
 	}background;
-
-
-	// The title of the window. (May not be used)
-	struct TitleStyle {
-	public:
-		wstring _title;
-	public:
-		void set(const wstring& title) { _title = title; }
-	}title;
-
 };
 
 

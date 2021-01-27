@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../common/core.h"
-#include "../../figure/text_style.h"
+#include "../../style/text_style.h"
 
 
 struct IDWriteTextLayout;

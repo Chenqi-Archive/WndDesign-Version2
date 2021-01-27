@@ -1,13 +1,22 @@
 #pragma once
 
-#include "WndObject.h"
+#include "FinalWnd.h"
+#include "../figure/text_layout.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class TextBox : public WndObject {
+class TextBox : public FinalWnd {
+public:
+	using Style = TextBoxStyle;
 
+private:
+	TextLayout _layout;
+	
+
+public:
+	TextBox(const wstring& text) {}
 };
 
 

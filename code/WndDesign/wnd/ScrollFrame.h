@@ -1,12 +1,14 @@
 #pragma once
 
-#include "WndObject.h"
+#include "WndFrame.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class FlowLayout : public WndObject {
+class ScrollFrame : public WndFrame {
+
+
 
 };
 

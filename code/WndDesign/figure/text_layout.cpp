@@ -1,4 +1,4 @@
-#include "text_block.h"
+#include "text_layout.h"
 #include "../system/directx/directx_helper.h"
 #include "../system/directx/dwrite_api.h"
 
@@ -27,8 +27,8 @@ inline IntervalRelation TestIntervalRelation(Interval a, Interval b) {
 	assert(0); return IntervalRelation::Right;
 }
 
-list<TextBlock::TextStyleIntervalList::TextStyleInterval>::iterator 
-TextBlock::TextStyleIntervalList::ClearStyle(Interval interval) {
+list<TextLayout::TextStyleIntervalList::TextStyleInterval>::iterator 
+TextLayout::TextStyleIntervalList::ClearStyle(Interval interval) {
 	auto it = styles.begin();
 	while (it != styles.end()) {
 		switch (TestIntervalRelation(it->interval, interval)) {
@@ -62,7 +62,7 @@ TextBlock::TextStyleIntervalList::ClearStyle(Interval interval) {
 	return it;
 }
 
-void TextBlock::TextStyleIntervalList::SetStyle(Interval interval, const TextStyleBase& style) {
+void TextLayout::TextStyleIntervalList::SetStyle(Interval interval, const TextStyleBase& style) {
 	auto it = ClearStyle(interval);
 	auto it_prev = it;
 	bool extended = false;
@@ -90,7 +90,7 @@ void TextBlock::TextStyleIntervalList::SetStyle(Interval interval, const TextSty
 	}
 }
 
-void TextBlock::TextStyleIntervalList::ExtendStyle(Interval interval) {
+void TextLayout::TextStyleIntervalList::ExtendStyle(Interval interval) {
 	auto it = styles.begin();
 	while (it != styles.end()) {
 		if (it->interval.right() < interval.left()) { it++; continue; }
@@ -109,7 +109,7 @@ void TextBlock::TextStyleIntervalList::ExtendStyle(Interval interval) {
 	}
 }
 
-void TextBlock::TextStyleIntervalList::ShrinkStyle(Interval interval) {
+void TextLayout::TextStyleIntervalList::ShrinkStyle(Interval interval) {
 	auto it = ClearStyle(interval);
 	auto it_prev = it;
 	for (auto it_right = it; it_right != styles.end(); ++it_right) {
@@ -124,38 +124,38 @@ void TextBlock::TextStyleIntervalList::ShrinkStyle(Interval interval) {
 	}
 }
 
-void TextBlock::TextStyleIntervalList::ApplyTo(TextLayout& layout) const {
+void TextLayout::TextStyleIntervalList::ApplyTo(TextLayout& layout) const {
 	for (auto& style : styles) { style.style->ApplyTo(layout, style.interval); }
 }
 
 
-inline void TextBlock::_SetStyle(uint begin, uint length, const TextStyleBase& style) {
+inline void TextLayout::_SetStyle(uint begin, uint length, const TextStyleBase& style) {
 	styles[style.GetTypeID()].SetStyle(Interval(begin, length), style);
 }
 
-inline void TextBlock::_ClearStyle(uint begin, uint length) {
+inline void TextLayout::_ClearStyle(uint begin, uint length) {
 	for (auto& style : styles) { style.ClearStyle(Interval(begin, length)); }
 }
 
-inline void TextBlock::_ExtendStyle(uint begin, uint length) {
+inline void TextLayout::_ExtendStyle(uint begin, uint length) {
 	for (auto& style : styles) { style.ExtendStyle(Interval(begin, length)); }
 }
 
-inline void TextBlock::_ShrinkStyle(uint begin, uint length) {
+inline void TextLayout::_ShrinkStyle(uint begin, uint length) {
 	for (auto& style : styles) { style.ShrinkStyle(Interval(begin, length)); }
 }
 
-inline void TextBlock::_ApplyAllStyles() {
+inline void TextLayout::_ApplyAllStyles() {
 	for (auto& style : styles) { style.ApplyTo(static_cast<TextLayout&>(layout->DWriteTextLayout())); }
 }
 
 
-void TextBlock::SetStyle(uint begin, uint length, const TextStyleBase& style) {
+void TextLayout::SetStyle(uint begin, uint length, const TextStyleBase& style) {
 	_SetStyle(begin, length, style);
 	style.ApplyTo(static_cast<TextLayout&>(layout->DWriteTextLayout()), Interval(begin, length));
 }
 
-void TextBlock::ClearStyle(uint begin, uint length) {
+void TextLayout::ClearStyle(uint begin, uint length) {
 	_ClearStyle(begin, length);
 
 	// Simply recreate the layout.
@@ -163,7 +163,7 @@ void TextBlock::ClearStyle(uint begin, uint length) {
 	_ApplyAllStyles();
 }
 
-void TextBlock::TextInsertedResetStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
+void TextLayout::TextInsertedResetStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
 	_ExtendStyle(begin, length);
 	_ClearStyle(begin, length);
 	for (auto& style : styles) { _SetStyle(begin, length, *style); }
@@ -172,7 +172,7 @@ void TextBlock::TextInsertedResetStyle(uint begin, uint length, const vector<uni
 	_ApplyAllStyles();
 }
 
-void TextBlock::TextInsertedMergeStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
+void TextLayout::TextInsertedMergeStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
 	_ExtendStyle(begin, length);
 	for (auto& style : styles) { _SetStyle(begin, length, *style); }
 
@@ -180,14 +180,14 @@ void TextBlock::TextInsertedMergeStyle(uint begin, uint length, const vector<uni
 	_ApplyAllStyles();
 }
 
-void TextBlock::TextInsertedWithoutStyle(uint begin, uint length) {
+void TextLayout::TextInsertedWithoutStyle(uint begin, uint length) {
 	_ExtendStyle(begin, length);
 
 	layout->TextChanged(text);
 	_ApplyAllStyles();
 }
 
-void TextBlock::TextDeleted(uint begin, uint length) {
+void TextLayout::TextDeleted(uint begin, uint length) {
 	_ShrinkStyle(begin, length);
 
 	layout->TextChanged(text);

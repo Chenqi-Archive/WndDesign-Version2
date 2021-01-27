@@ -94,9 +94,8 @@ private:
 
 	//// other window styles ////
 public:
-	// used for desktop window.
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { return { size_min, size_max }; }
-	virtual const wstring GetTitle() const { return wstring(); }
+	virtual const wstring& GetTitle() const { return L""; }
 	
 	//// painting and composition ////
 public:
@@ -116,9 +115,9 @@ public:
 	void ReleaseCapture() { wnd->ReleaseCapture(); }
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
 private:
-	virtual bool Handler(Msg msg, Para para) { return true; }
 	virtual const WndObject& HitTestChild(Point point) const { return *this; }
 	virtual bool HitTest(Point point) const { return true; }
+	virtual bool Handler(Msg msg, Para para) { return true; }
 };
 
 

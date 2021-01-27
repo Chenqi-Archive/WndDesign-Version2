@@ -1,18 +1,19 @@
 #pragma once
 
-#include "WndObject.h"
+#include "Wnd.h"
+#include "../common/reference_wrapper.h"
 
 #include <vector>
 
 
 BEGIN_NAMESPACE(WndDesign)
 
-using namespace std;
+using std::vector;
 
 
-class ListLayout : public WndObject {
+class ListLayout : public Wnd {
 public:
-	struct Style : public WndObject::Style {
+	struct Style : public Wnd::Style {
 		struct GridStyle {
 			ValueTag height = height_auto;
 			ValueTag max_height = height_auto;
@@ -61,6 +62,15 @@ public:
 		// calculate row position.
 		// set child region
 		// invalidate
+	}
+
+private:
+	struct HitTestInfo {
+
+	};
+
+	const HitTestInfo HitTestPoint(Point point) {
+
 	}
 };
 

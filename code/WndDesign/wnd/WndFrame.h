@@ -31,6 +31,12 @@ public:
 		return _child->cal
 	}
 
+private:
+	WndObject::AllocateLayer;  // frame should never allocate layer for performance
+
+
+#error the similarity with DesktopWndFrame! (transparent border)
+#error in fact frame can be placed in Core
 };
 
 

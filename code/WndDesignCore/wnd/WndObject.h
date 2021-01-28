@@ -81,6 +81,7 @@ protected:
 protected:
 	/* called by parent window to get and set the child window's region */
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
+#error rename it to UpdateChildRegion
 	static const Rect GetChildRegion(WndObject& child, Size parent_size) {
 		Rect region_on_parent = child.CalculateRegionOnParent(parent_size);
 		Rect accessible_region = child.CalculateAccessibleRegion(parent_size, region_on_parent.size);
@@ -100,6 +101,7 @@ public:
 	//// painting and composition ////
 public:
 	void SetBackground(const Background& background) { wnd->SetBackground(background); }
+#pragma message(Remark"May support user-defined layer cache policy.")
 	void AllocateLayer() { wnd->AllocateLayer(); }
 	void Invalidate(Rect region) { wnd->Invalidate(region); }
 protected:

@@ -74,6 +74,7 @@ struct TextLayoutFigure : Figure {
 	const TextLayout& text_layout;
 
 	TextLayoutFigure(const TextLayout& text_layout) : text_layout(text_layout) {}
+	virtual const Rect GetRegion() const override;
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override; // defined in figure_types.cpp
 };
 

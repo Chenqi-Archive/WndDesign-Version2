@@ -28,7 +28,16 @@ protected:
 	virtual const Rect CalculateRegionOnParent(Size parent_size) override;
 	virtual void OnSizeChange(Rect accessible_region) override;
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
-	virtual const wstring GetTitle() const override;
+	virtual const wstring& GetTitle() const override;
+
+
+	// Store the frame.
+private:
+	unique_ptr<WndFrame> _frame;
+public:
+	// usage : parent.AddChild(me.AllocateFrame());
+	WndFrame& AllocateFrame(unique_ptr<WndFrame> frame = std::make_unique<WndFrame>());
+	WndFrame& GetFrame() const;
 };
 
 

@@ -205,6 +205,7 @@
     <ClInclude Include="wnd\FinalWnd.h" />
     <ClInclude Include="wnd\FlowLayout.h" />
     <ClInclude Include="wnd\ImageBox.h" />
+    <ClInclude Include="wnd\LightWnd.h" />
     <ClInclude Include="wnd\ListLayout.h" />
     <ClInclude Include="wnd\OverlapLayout.h" />
     <ClInclude Include="WndDesign.h" />

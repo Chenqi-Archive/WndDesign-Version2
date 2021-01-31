@@ -30,6 +30,14 @@ protected:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
 	virtual const wstring& GetTitle() const override;
 
+	struct NonClientRegion {
+		ushort left;
+		ushort top;
+		ushort right;
+		ushort bottom;
+	};
+	const NonClientRegion CalculateNonClientRegion();
+
 
 	// Store the frame.
 private:

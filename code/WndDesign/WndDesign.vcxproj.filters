@@ -45,13 +45,13 @@
     <ClCompile Include="system\cursor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wnd\WndObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="style\text_style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="figure\text_layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\Wnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

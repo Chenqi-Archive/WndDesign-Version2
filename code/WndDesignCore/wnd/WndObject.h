@@ -67,6 +67,7 @@ public:
 	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
 	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real vector shifted
 	const Rect GetRegionOnParnet() const { return wnd->GetRegionOnParent(); }
+#error Use OffsetFromParent
 	const Point ConvertPointToParentPoint(Point point) const { return point + (GetRegionOnParnet().point - point_zero); }
 private:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }

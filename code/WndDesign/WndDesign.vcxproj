@@ -167,7 +167,7 @@
     <ClCompile Include="system\directx\wic_api.cpp" />
     <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
-    <ClCompile Include="wnd\WndObject.cpp" />
+    <ClCompile Include="wnd\Wnd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\core.h" />

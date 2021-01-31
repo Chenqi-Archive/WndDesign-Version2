@@ -3,6 +3,7 @@
 #include "value_tag.h"
 #include "../figure/color.h"
 #include "../figure/background_types.h"
+#include "../system/cursor.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -19,8 +20,8 @@ struct WndStyle {
 	struct LengthStyle {
 	public:
 		ValueTag _normal = length_auto;
-		ValueTag _min = px(length_min);
-		ValueTag _max = px(length_max);
+		ValueTag _min = length_min_tag;
+		ValueTag _max = length_max_tag;
 		constexpr LengthStyle& normal(ValueTag normal) { _normal = normal; return *this; }
 		constexpr LengthStyle& min(ValueTag min) { _min = min; return *this; }
 		constexpr LengthStyle& max(ValueTag max) { _max = max; return *this; }
@@ -37,80 +38,89 @@ struct WndStyle {
 		ValueTag _left = position_auto;
 		ValueTag _top = position_auto;
 		ValueTag _right = position_auto;
-		ValueTag _down = position_auto;
+		ValueTag _bottom = position_auto;
 	public:
 		constexpr PositionStyle& left(ValueTag left) { _left = left; return *this; }
 		constexpr PositionStyle& top(ValueTag top) { _top = top; return *this; }
 		constexpr PositionStyle& right(ValueTag right) { _right = right; return *this; }
-		constexpr PositionStyle& down(ValueTag down) { _down = down; return *this; }
-		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag down) { _left = left; _top = top; _right = right; _down = down; }
-		constexpr void setAll(ValueTag all) { _left = _top = _right = _down = all; }
+		constexpr PositionStyle& bottom(ValueTag bottom) { _bottom = bottom; return *this; }
+		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
+		constexpr void setAll(ValueTag all) { _left = _top = _right = _bottom = all; }
 		constexpr PositionStyle& setHorizontalCenter() { _left = _right = position_center; return *this; }
-		constexpr PositionStyle& setVerticalCenter() { _top = _down = position_center; return *this; }
+		constexpr PositionStyle& setVerticalCenter() { _top = _bottom = position_center; return *this; }
 	}position;
 
 
 	////
-	//// styles related with client region
+	//// styles related with non-client region
 	//// 
-	//// (border, padding and scroll bar determines the client region that is relative to the region on parent window)
-	//// (client region is maintained by WndFrame and is not aware by the inner window layout)
+	//// (border, scroll bar and padding determines the non-client region that is relative to the display region)
 
 	// The border of the window.
 	struct BorderStyle {
 	public:
-		float _width = 0;
+		uint _width = 0;
 		Color _color = ColorSet::Black;
 		uint _radius = 0;
 	public:
-		constexpr BorderStyle& width(float width) { _width = width; return *this; }
+		constexpr BorderStyle& width(uint width) { _width = width; return *this; }
 		constexpr BorderStyle& color(Color color) { _color = color; return *this; }
 		constexpr BorderStyle& radius(Color color) { _color = color; return *this; }
 	}border;
 
 
+	// The scroll bar size of the window. The real scroll bar can be customized by user.
+	// Note that scroll bar will only be drawn when client size is larger displayed-client size.
+	struct ScrollBarStyle {
+	public:
+		uchar _left = 0;
+		uchar _top = 0;
+		uchar _right = 20;
+		uchar _bottom = 20;
+	public:
+		constexpr ScrollBarStyle& left(uchar left) { _left = left; return *this; }
+		constexpr ScrollBarStyle& top(uchar top) { _top = top; return *this; }
+		constexpr ScrollBarStyle& right(uchar right) { _right = right; return *this; }
+		constexpr ScrollBarStyle& bottom(uchar bottom) { _bottom = bottom; return *this; }
+		constexpr void set(uchar left, uchar top, uchar right, uchar bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
+	}scroll_bar;
+
+
 	// The padding of the window.
-	// (calculated relative to the size of parent window, and is extended from the inner side of the border)
-#error Wait, the padding should be extended from the accessible region, also remind of the background
+	// (relative to display region, and is extended from the inner side of the border and scroll bar)
 	struct PaddingStyle {
 	public:
 		ValueTag _left = 0px;
 		ValueTag _top = 0px;
 		ValueTag _right = 0px;
-		ValueTag _down = 0px;
+		ValueTag _bottom = 0px;
 	public:
 		constexpr PaddingStyle& left(ValueTag left) { _left = left; return *this; }
 		constexpr PaddingStyle& top(ValueTag top) { _top = top; return *this; }
 		constexpr PaddingStyle& right(ValueTag right) { _right = right; return *this; }
-		constexpr PaddingStyle& down(ValueTag down) { _down = down; return *this; }
+		constexpr PaddingStyle& bottom(ValueTag bottom) { _bottom = bottom; return *this; }
 	}padding;
 
 
-	// The scroll bar can be customized by user.
-
-
 	////
-	//// styles related with accessible region
+	//// styles related with client region
 	//// 
-	//// (region can be relative to client region and determine the size of child windows, or auto fit the size 
-	////    of child windows or contents, and the actual accessible region must be larger than client region)
-	//// (if the region overflows the client region, scroll bar can be drawn)
+	//// (client region is relative to displayed-client-region, which is calculated by display region 
+	////    subtracts non-client region and determine the size of child windows, or auto fit the size of 
+	////    child windows or contents, and the actual accessible region must be larger than client region)
+	//// (if accessible region overflows the display region, scroll bar can be drawn)
 
-	// The accessible region of the window.
-	struct RegionStyle {
+	// The client region of the window.
+	struct ClientStyle {
 	public:
 		ValueTag _left = 0px;
 		ValueTag _top = 0px;
 		ValueTag _right = 0px;
-		ValueTag _down = 0px;
-		bool _vertical_scroll_bar = true;
-		bool _horizontal_scroll_bar = true;
+		ValueTag _bottom = 0px;
 	public:
-		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag down) { _left = left; _top = top; _right = right; _down = down; }
+		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
 		constexpr void setInfinite() { set(position_min_tag, position_min_tag, position_max_tag, position_max_tag); }
-		constexpr RegionStyle& vertical_scroll_bar(bool vertical_scroll_bar = true) { _vertical_scroll_bar = vertical_scroll_bar; return *this; }
-		constexpr RegionStyle& horizontal_scroll_bar(bool horizontal_scroll_bar = true) { _horizontal_scroll_bar = horizontal_scroll_bar; return *this; }
-	}region;
+	}client;
 
 
 	////
@@ -132,7 +142,20 @@ struct WndStyle {
 		const Background& get() const { return *_background_resource; }
 	}background;
 
-#error style might contain allocated resources like background, use virutal destructor!
+	
+	// cursor style.
+	struct CursorStyle {
+	public:
+		Cursor _cursor;
+	public:
+		void set(Cursor cursor) { _cursor = cursor; }
+	}cursor;
+
+
+	// title 
+
+
+	virtual ~WndStyle() {}
 };
 
 

@@ -115,10 +115,12 @@ struct WndStyle {
 	public:
 		ValueTag _left = 0px;
 		ValueTag _top = 0px;
-		ValueTag _right = 0px;
-		ValueTag _bottom = 0px;
+		ValueTag _width = 100pct;
+		ValueTag _height = 100pct;
 	public:
-		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
+		constexpr void set(ValueTag left, ValueTag top, ValueTag width, ValueTag height) {
+			_left = left; _top = top; _width = width; _height = height;
+		}
 		constexpr void setInfinite() { set(position_min_tag, position_min_tag, position_max_tag, position_max_tag); }
 	}client;
 
@@ -146,13 +148,19 @@ struct WndStyle {
 	// cursor style.
 	struct CursorStyle {
 	public:
-		Cursor _cursor;
+		Cursor _cursor = Cursor::Default;
 	public:
 		void set(Cursor cursor) { _cursor = cursor; }
 	}cursor;
 
 
-	// title 
+	// title style.
+	struct TitleStyle {
+	public:
+		wstring _title = wstring();
+	public:
+		void set(const wstring& title) { _title = title; }
+	}title;
 
 
 	virtual ~WndStyle() {}

@@ -182,6 +182,7 @@
     <ClInclude Include="figure\geometry_figure.h" />
     <ClInclude Include="figure\image.h" />
     <ClInclude Include="figure\text_layout.h" />
+    <ClInclude Include="geometry\margin.h" />
     <ClInclude Include="style\text_style.h" />
     <ClInclude Include="geometry\geometry.h" />
     <ClInclude Include="geometry\geometry_helper.h" />
@@ -210,10 +211,9 @@
     <ClInclude Include="wnd\OverlapLayout.h" />
     <ClInclude Include="WndDesign.h" />
     <ClInclude Include="common\reference_wrapper.h" />
-    <ClInclude Include="wnd\ScrollFrame.h" />
+    <ClInclude Include="wnd\reflow_queue.h" />
     <ClInclude Include="wnd\TabLayout.h" />
     <ClInclude Include="wnd\Wnd.h" />
-    <ClInclude Include="wnd\WndFrame.h" />
     <ClInclude Include="wnd\SplitLayout.h" />
     <ClInclude Include="wnd\TableLayout.h" />
     <ClInclude Include="wnd\TextBox.h" />

@@ -85,6 +85,8 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 }
 
 void WndBase::SetDepth(uint depth) {
+#pragma message(Remark"Could also skip this when new depth is smaller than current depth, \
+which also satisfies that parent_depth < child_depth. (but this may cause depth overflow)")
 	if (_depth == depth) { return; }
 
 	if (depth != -1 && depth > max_wnd_depth) { 
@@ -137,6 +139,7 @@ void WndBase::SetRegionOnParent(Rect region_on_parent) {
 
 void WndBase::AllocateLayer() {
 	if (HasLayer()) { return; }
+#pragma message(Remark"May support user-defined layer cache policy.")
 	_layer = std::make_unique<Layer>();
 	_layer->ResetTileSize(_accessible_region.size);
 	ResetVisibleRegion();
@@ -234,8 +237,10 @@ void WndBase::UpdateInvalidRegion() {
 }
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
-	// Convert parent invalid region to my invalid region.
 	parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
+
+	// Composite client region.
+	// Convert parent invalid region to my invalid region.
 	Vector coordinate_offset = OffsetFromParent();
 	Rect invalid_region = parent_invalid_region + coordinate_offset;
 	if (HasLayer()) {
@@ -248,6 +253,9 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
 		figure_queue.EndGroup(group_index);
 	}
+
+	// Composite non-client region.
+	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - (_region_on_parent.point - point_zero));
 }
 
 void WndBase::ChildLoseCapture() {
@@ -305,6 +313,7 @@ void WndBase::DispatchMessage(Msg msg, Para para) {
 		MouseMsg mouse_msg = GetMouseMsg(para);
 		ref_ptr<WndBase> child = _capture_child;
 		if (child == nullptr) { child = static_cast<WndBase*>(_object.HitTestChild(mouse_msg.point).wnd.get()); }
+	#error the point is not relative to the accessible region.
 		if (child == this) { return HandleMessage(msg, para); }
 		if (child != _last_tracked_child) {
 			ChildLoseTrack();

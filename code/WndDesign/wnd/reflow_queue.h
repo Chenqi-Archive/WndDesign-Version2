@@ -1,14 +1,12 @@
 #pragma once
 
-#include "WndFrame.h"
+#include "../common/core.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class ScrollFrame : public WndFrame {
-
-
+class ReflowQueue {
 
 };
 

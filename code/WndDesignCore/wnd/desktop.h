@@ -25,11 +25,8 @@ public:
 	~DesktopWndFrame();
 
 private:
-	list<ref_ptr<WndBase>>::iterator _redraw_queue_index;
-public:
-	bool HasRedrawQueueIndex() const { return _redraw_queue_index._Ptr != nullptr; }
-	const list<ref_ptr<WndBase>>::iterator GetRedrawQueueIndex() const { return _redraw_queue_index; }
-	void SetRedrawQueueIndex(list<ref_ptr<WndBase>>::iterator index = list<ref_ptr<WndBase>>::iterator()) { _redraw_queue_index = index; }
+	friend class RedrawQueue;
+	list_iterator<ref_ptr<WndBase>> _redraw_queue_index;
 private:
 	void JoinRedrawQueue();
 	void LeaveRedrawQueue();

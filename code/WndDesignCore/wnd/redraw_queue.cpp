@@ -16,8 +16,8 @@ RedrawQueue::RedrawQueue() : _queue(max_wnd_depth + 1), _next_depth(0) {}
 void RedrawQueue::AddWnd(WndBase& wnd) {
 	uint depth = wnd.GetDepth(); 
 	assert(0 < depth && depth <= max_wnd_depth);
-	assert(!wnd.HasRedrawQueueIndex());
-	wnd.SetRedrawQueueIndex(_queue[depth].insert(_queue[depth].begin(), &wnd));
+	assert(!wnd._redraw_queue_index.valid());
+	wnd._redraw_queue_index = _queue[depth].insert(_queue[depth].begin(), &wnd);
 	if (depth > _next_depth) { _next_depth = depth; }
 }
 
@@ -25,18 +25,18 @@ void RedrawQueue::RemoveWnd(WndBase& wnd) {
 	if (has_begun_commit) { throw std::logic_error("window removed when committing redraw queue"); }
 	uint depth = wnd.GetDepth();
 	assert(0 < depth && depth <= max_wnd_depth);
-	assert(wnd.HasRedrawQueueIndex());
-	_queue[depth].erase(wnd.GetRedrawQueueIndex());
-	wnd.SetRedrawQueueIndex();
+	assert(wnd._redraw_queue_index.valid());
+	_queue[depth].erase(wnd._redraw_queue_index);
+	wnd._redraw_queue_index = {};
 }
 
 void RedrawQueue::AddDesktopWnd(DesktopWndFrame& frame) {
-	frame.SetRedrawQueueIndex(_queue[0].insert(_queue[0].begin(), reinterpret_cast<ref_ptr<WndBase>>(&frame)));
+	frame._redraw_queue_index = _queue[0].insert(_queue[0].begin(), reinterpret_cast<ref_ptr<WndBase>>(&frame));
 }
 
 void RedrawQueue::RemoveDesktopWnd(DesktopWndFrame& frame) {
-	_queue[0].erase(frame.GetRedrawQueueIndex());
-	frame.SetRedrawQueueIndex();
+	_queue[0].erase(frame._redraw_queue_index);
+	frame._redraw_queue_index = {};
 }
 
 void RedrawQueue::Commit() {

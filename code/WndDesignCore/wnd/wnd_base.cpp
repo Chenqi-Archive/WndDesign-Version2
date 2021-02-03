@@ -196,13 +196,13 @@ void WndBase::Invalidate(Rect region) {
 }
 
 void WndBase::JoinRedrawQueue() {
-	if (_depth != -1 && !HasRedrawQueueIndex()) {
+	if (_depth != -1 && !_redraw_queue_index.valid()) {
 		RedrawQueue::Get().AddWnd(*this);
 	}
 }
 
 void WndBase::LeaveRedrawQueue() {
-	if (HasRedrawQueueIndex()) {
+	if (_redraw_queue_index.valid()) {
 		RedrawQueue::Get().RemoveWnd(*this);
 	}
 }

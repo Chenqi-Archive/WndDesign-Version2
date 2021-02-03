@@ -21,11 +21,11 @@ DesktopWndFrame::~DesktopWndFrame() {
 }
 
 void DesktopWndFrame::JoinRedrawQueue() { 
-	if (!HasRedrawQueueIndex()) { RedrawQueue::Get().AddDesktopWnd(*this); } 
+	if (!_redraw_queue_index.valid()) { RedrawQueue::Get().AddDesktopWnd(*this); } 
 }
 
 void DesktopWndFrame::LeaveRedrawQueue() { 
-	if (HasRedrawQueueIndex()) { RedrawQueue::Get().RemoveDesktopWnd(*this); } 
+	if (_redraw_queue_index.valid()) { RedrawQueue::Get().RemoveDesktopWnd(*this); } 
 }
 
 void DesktopWndFrame::UpdateInvalidRegion() {

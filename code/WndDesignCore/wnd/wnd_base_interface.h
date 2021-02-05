@@ -13,6 +13,8 @@ class WndObject;
 class FigureQueue;
 struct Background;
 
+inline static const uint max_wnd_depth = 63;  // depth (valid) <= 63
+
 
 struct ABSTRACT_BASE IWndBase {
 	WNDDESIGNCORE_API static unique_ptr<IWndBase> Create(WndObject& object);
@@ -30,6 +32,10 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void SetAccessibleRegion(Rect accessible_region) pure;
 	virtual const Vector SetDisplayOffset(Point display_offset) pure;
 	virtual void SetRegionOnParent(Rect region_on_parent) pure;
+
+	//// layout update ////
+	virtual void JoinReflowQueue() pure;
+	virtual void LeaveReflowQueue() pure;
 
 	//// painting and composition ////
 	virtual void SetBackground(const Background& background) pure;

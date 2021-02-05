@@ -47,13 +47,11 @@ protected:
 private:
 	Data data = 0;
 protected:
-	template<class T>
-	static void SetChildData(WndObject& child, T data) { 
+	template<class T> static void SetChildData(WndObject& child, T data) { 
 		static_assert(sizeof(Data) == sizeof(T));
 		child.data = reinterpret_cast<Data>(data);
 	}
-	template<class T>
-	static T GetChildData(WndObject& child) {
+	template<class T> static T GetChildData(WndObject& child) {
 		static_assert(sizeof(Data) == sizeof(T));
 		return reinterpret_cast<T>(child.data);
 	}
@@ -63,17 +61,13 @@ protected:
 public:
 	const Rect GetAccessibleRegion() const { return wnd->GetAccessibleRegion(); }
 	const Rect GetDisplayRegion() const { return wnd->GetDisplayRegion(); }
-	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
-//public:  // not needed yet
-//	const Size GetSize() const { return GetAccessibleRegion().size; }
-//	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
-//	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real vector shifted
+	const Size GetSize() const { return GetAccessibleRegion().size; }
+	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
-	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
-	static const Rect GetChildRegion(WndObject& child) { return child.wnd->GetRegionOnParent(); }
+	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
+	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real offset shifted
 private:
-#error are they needed?
 	virtual void OnSizeChange(Rect accessible_region) {}
 	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrolling
 	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) {}  // for lazy-loading
@@ -81,16 +75,34 @@ private:
 
 	//// layout update ////
 protected:
-	void LayoutChanged() { if (HasParent()) { GetParent()->OnChildLayoutChange(*this); } }
+	void JoinReflowQueue() { wnd->JoinReflowQueue(); }
+	void LeaveReflowQueue() { wnd->LeaveReflowQueue(); }
+protected:
+	void UpdateRegionOnParent() { if (HasParent()) { GetParent()->OnChildRegionUpdate(*this); } else { LeaveReflowQueue(); } }
+	static const Rect UpdateChildRegion(WndObject& child, Size parent_size) { return child.UpdateRegionOnParent(parent_size); }
+	static void SetChildRegionStyle(WndObject& child, Rect parent_specified_region) { child.SetRegionStyle(parent_specified_region); }
+	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
+	static const Rect GetChildRegion(WndObject& child) { child.wnd->GetRegionOnParent(); }
 private:
-	virtual void OnChildLayoutChange(WndObject& child) {}
-	virtual const Rect UpdateLayout(Size parent_size) { return region_empty; }
+	friend class ReflowQueue;
+	virtual bool HasInvalidLayout() const { return false; }
+	virtual bool MayRegionOnParentChange() { return false; }
+	virtual void ChildRegionMayChange(WndObject& child) {}
+	virtual void UpdateLayout() {}
+private:
+	virtual void OnChildRegionUpdate(WndObject& child) {}
+	virtual void SetRegionStyle(Rect parent_specified_region) {}
+	virtual const Rect UpdateRegionOnParent(Size parent_size) { return region_empty; }
 
 
 	//// other window styles ////
+protected:
+	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
 public:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { return { size_min, size_max }; }
 	virtual const wstring& GetTitle() const { return L""; }
+private:
+	virtual void OnChildTitleChange(WndObject& child) {}
 	
 
 	//// painting and composition ////

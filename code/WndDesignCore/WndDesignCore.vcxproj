@@ -205,6 +205,7 @@
     <ClInclude Include="system\win32_helper.h" />
     <ClInclude Include="system\win32_ime_input.h" />
     <ClInclude Include="wnd\desktop.h" />
+    <ClInclude Include="wnd\reflow_queue.h" />
     <ClInclude Include="wnd\WndObject.h" />
     <ClInclude Include="wnd\redraw_queue.h" />
     <ClInclude Include="wnd\wnd_base.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="system\win32_ime_input.cpp" />
     <ClCompile Include="wnd\desktop.cpp" />
     <ClCompile Include="wnd\redraw_queue.cpp" />
+    <ClCompile Include="wnd\reflow_queue.cpp" />
     <ClCompile Include="wnd\wnd_base.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

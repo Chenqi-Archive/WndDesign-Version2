@@ -194,9 +194,6 @@
     <ClInclude Include="wnd\LightWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\reflow_queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="geometry\margin.h">
       <Filter>Header Files</Filter>
     </ClInclude>

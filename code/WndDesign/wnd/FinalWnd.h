@@ -1,13 +1,13 @@
 #pragma once
 
-#include "WndObject.h"
+#include "Wnd.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-// Final window base class that does not contain any child window.
-class FinalWnd : public WndObject {
+// Final window base class that does not contain any child window, inherited by TextBox and ImageBox.
+class FinalWnd : public Wnd {
 private:
 	WndObject::IsMyChild;
 	WndObject::RegisterChild;
@@ -20,6 +20,9 @@ private:
 	WndObject::SetChildRegion;
 	virtual void OnChildRegionChange(WndObject& child) override final {}
 	virtual const WndObject& HitTestChild(Point point) const override final { return *this; }
+public:
+	FinalWnd(unique_ptr<Style> style) : Wnd(std::move(style)) {}
+	~FinalWnd() {}
 };
 
 

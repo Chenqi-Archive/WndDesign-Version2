@@ -10,23 +10,37 @@ BEGIN_NAMESPACE(WndDesign)
 
 class TextBox : public FinalWnd {
 public:
-	using Style = TextBoxStyle;
-
-private:
-	TextLayout _layout;
+	using Style = FinalWnd::Style;
 	
 
 public:
-	TextBox(const wstring& text) {}
+	TextBox(unique_ptr<Style> style, wstring& text) : FinalWnd(std::move(style)), _layout(text) {}
+	~TextBox();
+
+
+private:
+	TextLayout _layout;
+
+public:
+	void TextUpdated() {
+		
+		ChildLayoutChanged();
+	}
+
 
 protected:
-	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override {
 		figure_queue.Append(point_zero, new TextLayoutFigure(_layout));
 	}
 
 	struct HitTestInfo {
 
 	};
+
+
+	const HitTestInfo HitTestPoint(Point point) {
+
+	}
 };
 
 

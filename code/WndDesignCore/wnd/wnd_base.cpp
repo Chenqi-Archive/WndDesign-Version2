@@ -1,4 +1,5 @@
 #include "wnd_base.h"
+#include "reflow_queue.h"
 #include "redraw_queue.h"
 #include "WndObject.h"
 #include "../layer/layer.h"
@@ -39,6 +40,7 @@ WndBase::WndBase(WndObject& object) :
 }
 
 WndBase::~WndBase() {
+	LeaveReflowQueue();
 	LeaveRedrawQueue();
 	DetachFromParent();
 }
@@ -46,6 +48,7 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
+	// Join redraw queue if has invalid region, so that the window will be painted.
 	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
 }
 
@@ -103,6 +106,8 @@ which also satisfies that parent_depth < child_depth. (but this may cause depth 
 
 	// Join redraw queue, if invalid region is not empty && depth != -1(checked in JoinRedrawQueue) .
 	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
+	// Join reflow queue if has invalid layout.
+	if (_object.HasInvalidLayout()) { JoinReflowQueue(); }
 }
 
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
@@ -135,6 +140,18 @@ void WndBase::SetRegionOnParent(Rect region_on_parent) {
 	ResetVisibleRegion();
 	if (!display_region_changed) { return; }
 	_object.OnDisplayRegionChange(_accessible_region, display_region);
+}
+
+void WndBase::JoinReflowQueue() {
+	if (_depth != -1 && !_reflow_queue_index.valid()) {
+		GetReflowQueue().AddWnd(*this);
+	}
+}
+
+void WndBase::LeaveReflowQueue() {
+	if (_reflow_queue_index.valid()) {
+		GetReflowQueue().RemoveWnd(*this);
+	}
 }
 
 void WndBase::AllocateLayer() {
@@ -197,13 +214,13 @@ void WndBase::Invalidate(Rect region) {
 
 void WndBase::JoinRedrawQueue() {
 	if (_depth != -1 && !_redraw_queue_index.valid()) {
-		RedrawQueue::Get().AddWnd(*this);
+		GetRedrawQueue().AddWnd(*this);
 	}
 }
 
 void WndBase::LeaveRedrawQueue() {
 	if (_redraw_queue_index.valid()) {
-		RedrawQueue::Get().RemoveWnd(*this);
+		GetRedrawQueue().RemoveWnd(*this);
 	}
 }
 
@@ -255,6 +272,7 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 	}
 
 	// Composite non-client region.
+#error convert coordinates
 	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - (_region_on_parent.point - point_zero));
 }
 

@@ -88,6 +88,15 @@ public:
 	const Vector OffsetFromParent() const { return _display_offset - _region_on_parent.point; }
 
 
+	//// reflow queue ////
+private:
+	friend class ReflowQueue;
+	list_iterator<ref_ptr<WndBase>> _reflow_queue_index;
+private:
+	virtual void JoinReflowQueue() override;
+	virtual void LeaveReflowQueue() override;
+
+
 	//// background ////
 private:
 	reference_wrapper<const Background> _background;
@@ -114,8 +123,6 @@ private:
 	///////////////////////////////////////////////////////////
 
 	//// window depth ////
-public:
-	inline static const uint max_wnd_depth = 63;  // depth (valid) <= 63
 private:
 	// Depth is used to determine the redraw queue priority. 
 	// For desktop, depth is 0; for desktop window, depth is 1;

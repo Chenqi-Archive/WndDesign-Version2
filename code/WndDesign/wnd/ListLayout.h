@@ -29,6 +29,12 @@ public:
 	~ListLayout();
 
 
+	//// layout update ////
+private:
+	virtual void OnChildRegionUpdate(WndObject& child) override {}
+
+
+
 	//// row operation ////
 private:
 	struct RowContainer {

@@ -63,6 +63,7 @@ public:
 	const Rect GetDisplayRegion() const { return wnd->GetDisplayRegion(); }
 	const Size GetSize() const { return GetAccessibleRegion().size; }
 	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
+	const Size GetDisplaySize() const { return GetDisplayRegion().size; }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
 	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
@@ -110,7 +111,10 @@ protected:
 	void SetBackground(const Background& background) { wnd->SetBackground(background); }
 	void AllocateLayer() { wnd->AllocateLayer(); }
 	void Invalidate(Rect region) { wnd->Invalidate(region); }
-public:
+	void NonClientInvalidate(Rect invalid_non_client_region) {
+		if (HasParent()) { GetParent()->InvalidateChild(*this, invalid_non_client_region); }
+	}
+private:
 	void InvalidateChild(WndObject& child, Rect child_invalid_region) {
 		Rect child_region = GetChildRegion(child);
 		Invalidate(child_region.Intersect(child_invalid_region + (child_region.point - point_zero)));
@@ -142,7 +146,7 @@ protected:
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
-	virtual void OnChildRegionChange(WndObject& child) override pure;
+	virtual void OnChildRegionUpdate(WndObject& child) override pure;
 	virtual void AddChild(WndObject& child) pure;
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;

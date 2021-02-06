@@ -1,6 +1,7 @@
 #pragma once
 
 #include "value_tag.h"
+#include "scrollbar.h"
 #include "../figure/color.h"
 #include "../figure/background_types.h"
 #include "../system/cursor.h"
@@ -69,20 +70,11 @@ struct WndStyle {
 	}border;
 
 
-	// The scroll bar size of the window. The real scroll bar can be customized by user.
-	// Note that scroll bar will only be drawn when client size is larger displayed-client size.
 	struct ScrollbarStyle {
 	public:
-		uchar _left = 0;
-		uchar _top = 0;
-		uchar _right = 20;
-		uchar _bottom = 20;
+		shared_ptr<Scrollbar> _scrollbar_resource = GetDefaultScrollbar();
 	public:
-		constexpr ScrollbarStyle& left(uchar left) { _left = left; return *this; }
-		constexpr ScrollbarStyle& top(uchar top) { _top = top; return *this; }
-		constexpr ScrollbarStyle& right(uchar right) { _right = right; return *this; }
-		constexpr ScrollbarStyle& bottom(uchar bottom) { _bottom = bottom; return *this; }
-		constexpr void set(uchar left, uchar top, uchar right, uchar bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
+		void set(shared_ptr<Scrollbar> scrollbar_resource) { _scrollbar_resource = scrollbar_resource; }
 	}scrollbar;
 
 

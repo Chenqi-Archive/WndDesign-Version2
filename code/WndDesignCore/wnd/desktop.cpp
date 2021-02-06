@@ -111,9 +111,9 @@ void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 	Win32::DestroyWnd(hwnd);
 }
 
-void DesktopObjectImpl::OnChildRegionChange(WndObject& child) {
+void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
-	Rect child_region = child.CalculateRegion(GetSize());
+	Rect child_region = UpdateChildRegion(child, GetSize());
 	Win32::MoveWnd(frame._hwnd, child_region);
 }
 

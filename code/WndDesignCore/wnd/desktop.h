@@ -66,7 +66,7 @@ public:
 
 	virtual void AddChild(WndObject& child) override;
 	virtual void OnChildDetach(WndObject& child) override;
-	virtual void OnChildRegionChange(WndObject& child) override;
+	virtual void OnChildRegionUpdate(WndObject& child) override;
 
 	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
 		SetChildData(child, &frame);

@@ -36,9 +36,6 @@
     <ClCompile Include="system\directx\d2d_api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="style\style_helper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="system\win32_aero_snap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -195,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="geometry\margin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\scrollbar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

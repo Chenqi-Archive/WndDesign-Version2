@@ -21,9 +21,6 @@ BEGIN_NAMESPACE(WndDesign)
 
 DesktopObject& desktop = DesktopObject::Get();
 
-END_NAMESPACE(WndDesign)
-
-
 vector<wstring> GetCommandLineArgs() {
 	int argc;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -34,6 +31,8 @@ vector<wstring> GetCommandLineArgs() {
 	LocalFree(argv);
 	return args;
 }
+
+END_NAMESPACE(WndDesign)
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {

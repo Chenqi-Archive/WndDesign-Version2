@@ -1,30 +1,15 @@
 #pragma once
 
-#include "../../common/core.h"
-#include "../../style/text_style.h"
+#include "../../style/text_block_style.h"
 
 
-struct IDWriteTextLayout;
-struct IDWriteTextFormat;
+struct IDWriteFactory;
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class TextLayoutResource {
-private:
-	IDWriteTextFormat* format;
-	IDWriteTextLayout* layout;
-
-public:
-	TextLayoutResource(const TextStyle& default_style);
-	~TextLayoutResource();
-	void TextChanged(const wstring& text);
-	IDWriteTextLayout& DWriteTextLayout() const { 
-		assert(layout != nullptr);
-		return *layout; 
-	}
-};
+IDWriteFactory& GetDWriteFactory();
 
 
 END_NAMESPACE(WndDesign)

@@ -35,8 +35,7 @@ inline void SafeRelease(Interface** ppInterfaceToRelease) {
 }
 
 
-class RenderTarget : public ID2D1DeviceContext {};  // alias for ID2D1DeviceContext
-class TextLayout : public IDWriteTextLayout {};  // alias for IDWriteTextLayout
+struct RenderTarget : public ID2D1DeviceContext {};  // alias for ID2D1DeviceContext
 
 
 inline const D2D1_RECT_F Rect2RECT(Rect rect) {

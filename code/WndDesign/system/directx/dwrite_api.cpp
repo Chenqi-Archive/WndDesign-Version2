@@ -6,8 +6,8 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-
 BEGIN_NAMESPACE(Anonymous)
+
 
 class DWriteFactory {
 private:
@@ -35,38 +35,11 @@ IDWriteFactory& DWriteFactory::Get() {
 	return *factory.factory;
 }
 
-IDWriteFactory& DWriteFactory() { return  DWriteFactory::Get(); }
 
 END_NAMESPACE(Anonymous)
 
 
-TextLayoutResource::TextLayoutResource(const TextStyle& default_style) : format(nullptr), layout(nullptr) {
-	hr = DWriteFactory().CreateTextFormat(
-		default_style.font,
-		nullptr,
-		default_style.bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
-		default_style.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
-		DWRITE_FONT_STRETCH_NORMAL,
-		default_style.size,
-		nullptr,
-		&format
-	);
-}
-
-TextLayoutResource::~TextLayoutResource() {
-	SafeRelease(&format);
-	SafeRelease(&layout);
-}
-
-void TextLayoutResource::TextChanged(const wstring& text) {
-	SafeRelease(&layout);
-	hr = DWriteFactory().CreateTextLayout(
-		text.c_str(), static_cast<UINT>(text.length()),
-		format,
-		0, 0,
-		&layout
-	);
-}
+IDWriteFactory& GetDWriteFactory() { return  DWriteFactory::Get(); }
 
 
 END_NAMESPACE(WndDesign)

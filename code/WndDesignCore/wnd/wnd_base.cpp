@@ -48,8 +48,7 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
-	// Join redraw queue if has invalid region, so that the window will be painted.
-	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
+	_object.OnAttachToParent();
 }
 
 void WndBase::ClearParent() { 

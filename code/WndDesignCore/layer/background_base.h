@@ -8,7 +8,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 // Background abstract base class.
 // Background is an infinitly large "figure" that can be drawn on target.
-struct Background {
+struct ABSTRACT_BASE Background {
 	// Drawn directly to the layer.
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const pure;
 

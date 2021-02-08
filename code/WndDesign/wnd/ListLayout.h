@@ -26,13 +26,23 @@ public:
 
 public:
 	ListLayout(unique_ptr<Style> style) : Wnd(std::move(style)) {}
-	~ListLayout();
+	~ListLayout() {}
 
 
-	//// layout update ////
+	//// style ////
+protected:
+	Style& GetStyle() { return static_cast<Style&>(Wnd::GetStyle()); }
+	const Style& GetStyle() const { return static_cast<const Style&>(Wnd::GetStyle()); }
+
 private:
-	virtual void OnChildRegionUpdate(WndObject& child) override {}
+	Size _default_grid_size;
+	uint _min_grid_height, _max_grid_height;
+private:
+	const Size GetDefaultGridSize() { return _default_grid_size; }
+	bool UpdateDefaultGridSize(Size grid_size, uint min_grid_height, uint max_grid_height) {
 
+		return _default_grid_size == grid_size ? false : (_default_grid_size = grid_size, true);
+	}
 
 
 	//// row operation ////
@@ -41,38 +51,23 @@ private:
 		uint y = 0;
 		uint height = 0;
 		ref_ptr<WndObject> wnd = nullptr;
+	public:
+		void Invalidate() { height = -1; }
+		bool IsInvalid() const { return height == -1; }
 	};
 	vector<RowContainer> _rows;
 
 public:
 	constexpr static uint row_end = -1;
 
-private:
-	void EraseEmptyRows(uint row_begin, uint row_count) {
-		_rows.erase(_rows.begin() + row_begin, _rows.begin() + row_begin + row_count);
-	}
 public:
 	uint GetRowNumber() const { return (uint)_rows.size(); }
-	void SetRowNumber(uint row_number) {
-		uint current_row_number = GetRowNumber();
-		if (row_number > current_row_number) {
-			return InsertRow(current_row_number, row_number - current_row_number);
-		}
-		if (row_number < current_row_number) {
-			return DeleteRow(row_number, current_row_number - row_number);
-		}
-		// if (row_number == current_row_number) { return; }
-	}
-	void InsertRow(uint row_begin, uint row_count = 1) {
-		if (row_count == 0) { return; }
-		_rows.insert(_rows.begin() + row_begin, row_count, RowContainer());
-		ChildLayoutChanged();
-	}
-	void DeleteRow(uint row_begin, uint row_count = 1) {
-		if (row_count == 0) { return; }
-		RemoveChild(row_begin, row_count);
-		EraseEmptyRows(row_begin, row_count);
-	}
+	void SetRowNumber(uint row_number);
+	void InsertRow(uint row_begin, uint row_count = 1);
+private:
+	void EraseEmptyRow(uint row_begin, uint row_count);
+public:
+	void EraseRow(uint row_begin, uint row_count = 1);
 
 
 	//// child windows ////
@@ -83,32 +78,33 @@ private:
 	static uint GetChildData(WndObject& child) {
 		return WndObject::GetChildData<ulonglong>(child);
 	}
+
 public:
-	void SetChild(WndObject& child, uint row) {
-		RegisterChild(child);
-		if (row >= GetRowNumber()) { return AppendChild(child); }
-		RemoveChild(row);
-		_rows[row].wnd = &child;
-		SetChildData(child, row);
-		ChildLayoutChanged();
-	}
-	void AddChild(WndObject& child, uint row = row_end) {
-		InsertRow(row);
-		SetChild(child, row);
-	}
-	void AppendChild(WndObject& child) { AddChild(child); }
-	void RemoveChild(uint row_begin, uint row_count = 1) {
+	void SetChild(WndObject& child, uint row);
+	void RemoveChild(uint row_begin, uint row_count = 1);
+	void InsertChild(WndObject& child, uint row = row_end);
+	void AppendChild(WndObject& child) { InsertChild(child); }
+	void EraseChild(uint row_begin, uint row_count = 1) { EraseRow(row_begin, row_count); }
+
+private:
+	virtual void OnChildDetach(WndObject& child) override;
 
 
-		ChildLayoutChanged();
-	}
-	virtual void OnChildDetach(WndObject& child) override {
-		uint row = GetChildData(child);
-		assert(row < GetRowNumber());
-		_rows.
-		Rect child_region = child_container.region;
-		_child_wnds.erase(child_container.list_index);
-	}
+	//// layout update ////
+private:
+	uint _invalid_layout_row_begin = -1;
+private:
+	void ContentLayoutChanged(uint row_begin = 0);
+	uint GetContentHeight() const;
+private:
+	virtual void ChildRegionMayChange(WndObject& child) override;
+	virtual const Rect UpdateContentLayout(Size client_size);
+	virtual void OnChildRegionUpdate(WndObject& child) override;
+
+
+	//// painting and composition ////
+private:
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const;
 
 
 	//// message handling ////

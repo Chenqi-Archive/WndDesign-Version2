@@ -18,6 +18,9 @@ private:
 	WndObject::GetChildData;
 	WndObject::GetChildRegion;
 	WndObject::SetChildRegion;
+	virtual void ChildRegionMayChange(WndObject& child) override final {}
+	virtual void OnChildRegionUpdate(WndObject& child) override final {}
+
 	virtual void OnChildRegionChange(WndObject& child) override final {}
 	virtual const WndObject& HitTestChild(Point point) const override final { return *this; }
 public:

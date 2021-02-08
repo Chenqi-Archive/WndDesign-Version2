@@ -40,6 +40,7 @@ private:
 public:
 	const Vector GetClientOffset() const {return Vector(_margin.left, _margin.top);}
 	const Rect GetClientRegion() const { return _client_region; }
+	const Size GetClientSize() const { return _client_region.size; }
 	const Size GetDisplayedClientSize() const { return ShrinkSizeByMargin(GetDisplaySize(), _margin); }
 
 	void SetClientRegion(Rect client_region) {_client_region = client_region;}
@@ -85,6 +86,7 @@ protected:
 	void ContentLayoutChanged() { LayoutChanged(LayoutRegion::ContentLayout); }
 
 private:
+	virtual void OnAttachToParent() override { RegionOnParentChanged(); }
 	/* called by reflow queue for the first time to check if parent's layout may be influenced */
 	// returns true if region_on_parent may change, and reflow queue will add parent window in.
 	virtual bool MayRegionOnParentChange() override;
@@ -110,7 +112,7 @@ protected:
 
 	//// painting and composition ////
 protected:
-	void CompositeChild(WndObject& child, FigureQueue& figure_queue, Rect invalid_client_region) {
+	void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect invalid_client_region) const {
 		WndObject::CompositeChild(child, figure_queue, invalid_client_region + GetClientOffset());
 	}
 	void Invalidate(Rect invalid_client_region) {

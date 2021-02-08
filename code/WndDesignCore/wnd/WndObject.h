@@ -38,6 +38,7 @@ protected:
 public:
 	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
 private:
+	virtual void OnAttachToParent() {}
 	virtual void OnChildDetach(WndObject& child) {}
 
 
@@ -91,8 +92,8 @@ private:
 	virtual void ChildRegionMayChange(WndObject& child) {}
 	virtual void UpdateLayout() {}
 private:
-	virtual void OnChildRegionUpdate(WndObject& child) {}
 	virtual void SetRegionStyle(Rect parent_specified_region) {}
+	virtual void OnChildRegionUpdate(WndObject& child) {}
 	virtual const Rect UpdateRegionOnParent(Size parent_size) { return region_empty; }
 
 
@@ -120,7 +121,7 @@ private:
 		Invalidate(child_region.Intersect(child_invalid_region + (child_region.point - point_zero)));
 	}
 protected:
-	static void CompositeChild(WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) { child.wnd->Composite(figure_queue, parent_invalid_region); }
+	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) { child.wnd->Composite(figure_queue, parent_invalid_region); }
 private:
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {}
@@ -133,8 +134,10 @@ public:
 	void ReleaseCapture() { wnd->ReleaseCapture(); }
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
 private:
+	virtual bool HitTest(Rect accessible_region, Point point) const { return true; }
+	virtual bool NonClientHitTest(Size display_size, Point point) const { return false; }
 	virtual const WndObject& HitTestChild(Point point) const { return *this; }
-	virtual bool HitTest(Point point) const { return true; }
+	virtual bool NonClientHandler(Msg msg, para) { return true; }
 	virtual bool Handler(Msg msg, Para para) { return true; }
 };
 

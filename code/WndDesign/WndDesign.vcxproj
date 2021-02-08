@@ -158,7 +158,7 @@
     <ClCompile Include="figure\background_types.cpp" />
     <ClCompile Include="figure\figure_types.cpp" />
     <ClCompile Include="figure\image.cpp" />
-    <ClCompile Include="figure\text_layout.cpp" />
+    <ClCompile Include="figure\text_block.cpp" />
     <ClCompile Include="style\text_style.cpp" />
     <ClCompile Include="system\cursor.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
@@ -166,6 +166,9 @@
     <ClCompile Include="system\directx\wic_api.cpp" />
     <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
+    <ClCompile Include="wnd\ListLayout.cpp" />
+    <ClCompile Include="wnd\OverlapLayout.cpp" />
+    <ClCompile Include="wnd\TextBox.cpp" />
     <ClCompile Include="wnd\Wnd.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,9 +183,10 @@
     <ClInclude Include="figure\figure_types.h" />
     <ClInclude Include="figure\geometry_figure.h" />
     <ClInclude Include="figure\image.h" />
-    <ClInclude Include="figure\text_layout.h" />
+    <ClInclude Include="figure\text_block.h" />
     <ClInclude Include="geometry\margin.h" />
     <ClInclude Include="style\scrollbar.h" />
+    <ClInclude Include="style\text_block_style.h" />
     <ClInclude Include="style\text_style.h" />
     <ClInclude Include="geometry\geometry.h" />
     <ClInclude Include="geometry\geometry_helper.h" />

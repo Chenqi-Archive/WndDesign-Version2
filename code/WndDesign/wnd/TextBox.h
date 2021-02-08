@@ -1,8 +1,7 @@
 #pragma once
 
 #include "FinalWnd.h"
-#include "../figure/text_layout.h"
-#include "../style/text_style.h"
+#include "../figure/text_block.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -10,37 +9,37 @@ BEGIN_NAMESPACE(WndDesign)
 
 class TextBox : public FinalWnd {
 public:
-	using Style = FinalWnd::Style;
+	struct Style : FinalWnd::Style, TextBlockStyle {};
 	
-
 public:
-	TextBox(unique_ptr<Style> style, wstring& text) : FinalWnd(std::move(style)), _layout(text) {}
-	~TextBox();
+	TextBox(unique_ptr<Style> style, wstring& text) :FinalWnd(std::move(style)), _text_block(text, *style) {}
+	~TextBox() {}
 
 
-private:
-	TextLayout _layout;
-
-public:
-	void TextUpdated() {
-		
-		ChildLayoutChanged();
-	}
-
-
+	//// style ////
 protected:
-	virtual void OnClientPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override {
-		figure_queue.Append(point_zero, new TextLayoutFigure(_layout));
-	}
-
-	struct HitTestInfo {
-
-	};
+	Style& GetStyle() { return static_cast<Style&>(Wnd::GetStyle()); }
+	const Style& GetStyle() const { return static_cast<const Style&>(Wnd::GetStyle()); }
 
 
-	const HitTestInfo HitTestPoint(Point point) {
+	//// layout update ////
+private:
+	TextBlock _text_block;
+public:
+	TextBlock& GetTextBlock() { return _text_block; }
+	void TextUpdated() { ContentLayoutChanged(); }
+private:
+	virtual const Rect UpdateContentLayout(Size client_size);
 
-	}
+
+	//// painting and composition ////
+protected:
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override;
+
+
+	//// message handling ////
+public:
+
 };
 
 

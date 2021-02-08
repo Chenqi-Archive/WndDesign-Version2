@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WndObject.h"
+#include "Wnd.h"
 
 #include <list>
 
@@ -10,61 +10,53 @@ BEGIN_NAMESPACE(WndDesign)
 using std::list;
 
 
-class OverlapLayout : public WndObject {
+class OverlapLayout : public Wnd {
+public:
+	using Style = Wnd::Style;
+
+public:
+	OverlapLayout(unique_ptr<Style> style) : Wnd(std::move(style)) {}
+	~OverlapLayout() {}
+
+
+	//// child windows ////
 private:
 	struct ChildWndContainer {
 		WndObject& wnd;
-		Rect region; 
+		Rect region;
+		//uint z_index;
 		list<ChildWndContainer>::iterator list_index;
 	};
+
 	// frontmost(begin) ---> endmost(end)
-	list<ChildWndContainer> _child_wnds;  // or use spatial index instead.
+	list<ChildWndContainer> _child_wnds;  // or use spatial index instead
 
 private:
-	const Size GetClientSize() {
-
+	static void SetChildData(WndObject& child, ChildWndContainer& child_container) {
+		WndObject::SetChildData<ChildWndContainer*>(child, &child_container);
+	}
+	static ChildWndContainer& GetChildData(WndObject& child) {
+		return *WndObject::GetChildData<ChildWndContainer*>(child);
 	}
 
 public:
-	void AddChild(WndObject& child) {    // z-index
-		RegisterChild(child);
-		Rect child_region = child.CalculateRegion(GetSizeAsParent());
-		SetChildRegion(child, child_region);
-		ChildWndContainer& child_container = _child_wnds.emplace_front(ChildWndContainer{ child, child_region });
-		child_container.list_index = _child_wnds.begin();
-		SetChildData<ChildWndContainer*>(child, &child_container);
-		Invalidate(child_region);
-	}
-	virtual void OnChildDetach(WndObject& child) override {
-		ChildWndContainer& child_container = *GetChildData<ChildWndContainer*>(child);
-		Rect child_region = child_container.region;
-		_child_wnds.erase(child_container.list_index);
-		Invalidate(child_region);
-	}
+	void AddChild(WndObject& child);
+	virtual void OnChildDetach(WndObject& child) override;
 
+
+	//// layout update ////
 private:
-	virtual void OnSizeChange(Rect accessible_region) override {
+	virtual void OnChildRegionUpdate(WndObject& child) override;
+	virtual const Rect UpdateContentLayout(Size client_size);
 
 
-		Invalidate(accessible_region)
-	}
-	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) override {}
-	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) override {}
-
+	//// painting and composition ////
 private:
-	virtual void OnChildRegionChange(WndObject& child) override {
-		child.CalculateRegion(GetSizeAsParent())
-	}
-	virtual const Rect CalculateRegionOnParent(Size parent_size) { return region_empty; }
-	virtual const Rect CalculateAccessibleRegion(Size parent_size, Size display_region_size) { return Rect(point_zero, display_region_size); }
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const;
 
-private:
-	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
 
+	//// message handling ////
 private:
-	virtual bool Handler(Msg msg, Para para) override { return true; }
-	virtual const WndObject& HitTestChild(Point point) const override { return *this; }
-	virtual bool HitTest(Point point) const override { return true; }
 };
 
 

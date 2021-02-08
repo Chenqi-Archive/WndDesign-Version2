@@ -42,13 +42,22 @@
     <ClCompile Include="system\cursor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wnd\Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\OverlapLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\ListLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="style\text_style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="figure\text_layout.cpp">
+    <ClCompile Include="wnd\TextBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wnd\Wnd.cpp">
+    <ClCompile Include="figure\text_block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -176,12 +185,6 @@
     <ClInclude Include="wnd\TabLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="style\text_style.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="figure\text_layout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="wnd\Wnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -195,6 +198,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="style\scrollbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\text_style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="figure\text_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style\text_block_style.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

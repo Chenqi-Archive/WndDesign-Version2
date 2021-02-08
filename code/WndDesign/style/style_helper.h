@@ -13,16 +13,16 @@ struct StyleCalculator : public WndStyle {
 private:
 	StyleCalculator() = delete;
 
-private:
+public:
 	static inline const std::invalid_argument style_parse_exception = std::invalid_argument("style parse error");
 
 	// style dependency identification
-private:
+public:
 	static bool IsLengthRelative(const LengthStyle& length) {
 		return length._normal.IsPercent() || length._min.IsPercent() || length._max.IsPercent();
 	}
 	static bool IsLengthAuto(const LengthStyle& length) {
-		return length._normal.IsAuto();
+		return length._normal.IsAuto(); /* && length._min != length._max */
 	}
 	static bool IsPositionRelative(const PositionStyle& position) {
 		return position._left.IsPercent() || position._top.IsPercent() || position._right.IsPercent() || position._bottom.IsPercent();
@@ -64,7 +64,7 @@ public:
 	}
 
 	// region calculation
-private:
+public:
 	static const Size CalculateSizeFromTag(ValueTag width, ValueTag height, Size parent_size) {
 		width.ConvertToPixel(parent_size.width); height.ConvertToPixel(parent_size.height);
 		return Size(width.AsUnsigned(), height.AsUnsigned());
@@ -73,14 +73,14 @@ public:
 	const std::pair<Size, Size> CalculateMinMaxDisplaySize(Size parent_size) const {
 		return { CalculateSizeFromTag(width._min, height._min, parent_size), CalculateSizeFromTag(width._max, height._max, parent_size) };
 	}
-private:
+public:
 	static const LengthStyle ConvertLengthToPixel(LengthStyle length, uint parent_length) {
 		length._normal.ConvertToPixel(parent_length);
 		length._min.ConvertToPixel(parent_length);
 		length._max.ConvertToPixel(parent_length);
 		return length;
 	}
-	static const ValueTag BoundLengthBetween(ValueTag& normal_length, ValueTag min_length, ValueTag max_length) {
+	static const ValueTag BoundLengthBetween(ValueTag normal_length, ValueTag min_length, ValueTag max_length) {
 		if (normal_length.AsUnsigned() < min_length.AsUnsigned()) { normal_length.Set(min_length.AsUnsigned()); }
 		if (normal_length.AsUnsigned() > max_length.AsUnsigned()) { normal_length.Set(max_length.AsUnsigned()); }
 		return normal_length;
@@ -103,7 +103,7 @@ private:
 				normal_length.Set(position_high.AsSigned() - position_low.AsSigned());
 			}
 		}
-		BoundLengthBetween(normal_length, min_length, max_length);
+		normal_length = BoundLengthBetween(normal_length, min_length, max_length);
 		if (position_low.IsAuto() || position_low.IsCenter()) {
 			if (position_low.IsCenter()) {
 				position_low.Set((static_cast<int>(parent_length) - normal_length.AsSigned()) / 2);
@@ -168,9 +168,9 @@ public:
 };
 
 
-inline const StyleCalculator& GetStyleCalculator(WndStyle& style) {
+inline const StyleCalculator& GetStyleCalculator(const WndStyle& style) {
 	static_assert(sizeof(StyleCalculator) == sizeof(WndStyle));
-	return static_cast<StyleCalculator&>(style);
+	return static_cast<const StyleCalculator&>(style);
 }
 
 

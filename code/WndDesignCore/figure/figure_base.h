@@ -9,7 +9,7 @@ class RenderTarget;  // An alias for ID2D1DeviceContext.
 
 
 // The Figure abstract base class.
-struct Figure {
+struct ABSTRACT_BASE Figure {
 	// Get bounding region of the figure.
 	virtual const Rect GetRegion() const pure;
 

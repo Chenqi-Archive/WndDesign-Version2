@@ -25,7 +25,7 @@ protected:
 	const Style& GetStyle() const { return *_style; }
 protected:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
-	virtual const wstring& GetTitle() const override;
+	virtual const wstring GetTitle() const override;
 private:
 	/* called by parent window when region is specified by parent window */
 	virtual void SetRegionStyle(Rect parent_specified_region) override;

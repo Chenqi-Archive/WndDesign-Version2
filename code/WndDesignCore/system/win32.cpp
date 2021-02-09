@@ -7,7 +7,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 // May use a Union-Find to quickly get the cooresponding window.
 WNDDESIGNCORE_API std::pair<HANDLE, const Point> ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) {
-	return static_cast<DesktopObjectImpl&>(DesktopObject::Get()).ConvertPointToDesktopWndPoint(wnd, point);
+	return static_cast<DesktopObjectImpl&>(DesktopObject::Get()).ConvertNonClientPointToDesktopPoint(wnd, point);
 }
 
 

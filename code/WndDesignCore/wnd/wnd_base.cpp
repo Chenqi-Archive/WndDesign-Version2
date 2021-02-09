@@ -5,7 +5,6 @@
 #include "../layer/layer.h"
 #include "../layer/background_types.h"
 #include "../geometry/geometry_helper.h"
-#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -49,7 +48,6 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
-	_object.OnAttachToParent();
 }
 
 void WndBase::ClearParent() { 
@@ -87,8 +85,6 @@ void WndBase::SetDepth(uint depth) {
 
 void WndBase::AddChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
-	if (child._parent == this) { return; }
-
 	_child_wnds.push_front(&child);
 	child.SetParent(this, _child_wnds.begin());
 	child.SetDepth(GetChildDepth());
@@ -96,12 +92,10 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
-	if (child._parent != this) { return; }
 	_child_wnds.erase(child._index_on_parent);
 	child.ClearParent();
-	// Child's depth will be reset at UpdateInvalidRegion, because the child window may soon be added as a child.
+	// Child's depth will be reset at UpdateInvalidRegion() or UpdateLayout().
 	// Child's visible region remains unchanged until attached to a parent window next time.
-
 	if (_capture_child == &child) { _capture_child = nullptr; }
 	if (_focus_child == &child) { _focus_child = nullptr; }
 	if (_last_tracked_child == &child) { ChildLoseTrack(); }
@@ -110,12 +104,8 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
 	if (_accessible_region == accessible_region) { return; }
 	_accessible_region = accessible_region;
-	if (HasLayer()) { 
-		_layer->ResetTileSize(_accessible_region.size); 
-		// If tile size changed, cached region has been cleared, 
-		//   and will be reset when SetDisplayRegion is called next.
-	}
-	_object.OnSizeChange(_accessible_region);
+	if (HasLayer()) { _layer->ResetTileSize(_accessible_region.size); }
+	ResetVisibleRegion();
 }
 
 const Vector WndBase::SetDisplayOffset(Point display_offset) {
@@ -165,7 +155,7 @@ void WndBase::UpdateInvalidLayout() {
 
 void WndBase::AllocateLayer() {
 	if (HasLayer()) { return; }
-#pragma message(Remark"May support user-defined layer cache policy.")
+#pragma message(Remark"May support user-defined layer tiling policy.")
 	_layer = std::make_unique<Layer>();
 	_layer->ResetTileSize(_accessible_region.size);
 	ResetVisibleRegion();
@@ -182,8 +172,8 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 
 	if (HasLayer()) {
 		Rect old_cached_region = _layer->GetCachedRegion();
+	#pragma message(Remark"May support user-defined layer caching policy")
 		if (!old_cached_region.Contains(_visible_region)) {
-		#pragma message(Remark"It's arbitrary to decide when to reset cached region.")
 			_layer->SetCachedRegion(_accessible_region, _visible_region);
 			// Invalidate new cached region.
 			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion().Intersect(_accessible_region));
@@ -192,14 +182,13 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 				_invalid_region.Union(new_cached_region);
 				JoinRedrawQueue();
 			}
+			// For object's lazy loading.
+			_object.OnCachedRegionChange(_accessible_region, GetCachedRegion());
 		}
 	}
 
 	// Set visible region for child windows.
 	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
-
-	// For object's lazy loading.
-	_object.OnCachedRegionChange(_accessible_region, GetCachedRegion());
 }
 
 void WndBase::JoinRedrawQueue() {
@@ -288,14 +277,22 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 
 void WndBase::ChildLoseCapture() {
 	if (_capture_child != nullptr) {
-		_capture_child == this ? HandleMessage(Msg::LoseCapture, nullmsg) : _capture_child->ChildLoseCapture();
+		if (_capture_child == this) { 
+			HandleMessage(Msg::LoseCapture, nullmsg); 
+		} else { 
+			_capture_child->ChildLoseCapture();
+		}
 		_capture_child = nullptr;
 	}
 }
 
 void WndBase::ChildLoseFocus() {
 	if (_focus_child != nullptr) {
-		_focus_child == this ? HandleMessage(Msg::LoseFocus, nullmsg) : _focus_child->ChildLoseFocus();
+		if (_focus_child == this) {
+			HandleMessage(Msg::LoseFocus, nullmsg);
+		} else {
+			_focus_child->ChildLoseFocus();
+		}
 		_focus_child = nullptr;
 	}
 }

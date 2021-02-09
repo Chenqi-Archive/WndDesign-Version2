@@ -8,6 +8,9 @@ BEGIN_NAMESPACE(WndDesign)
 
 // Final window base class that does not contain any child window, inherited by TextBox and ImageBox.
 class FinalWnd : public Wnd {
+public:
+	FinalWnd(unique_ptr<Style> style) : Wnd(std::move(style)) {}
+	~FinalWnd() {}
 private:
 	WndObject::IsMyChild;
 	WndObject::RegisterChild;
@@ -16,16 +19,16 @@ private:
 	virtual void OnChildDetach(WndObject& child) override final {}
 	WndObject::SetChildData;
 	WndObject::GetChildData;
-	WndObject::GetChildRegion;
+	WndObject::UpdateChildRegion;
+	WndObject::SetChildRegionStyle;
 	WndObject::SetChildRegion;
+	WndObject::GetChildRegion;
 	virtual void ChildRegionMayChange(WndObject& child) override final {}
 	virtual void OnChildRegionUpdate(WndObject& child) override final {}
-
-	virtual void OnChildRegionChange(WndObject& child) override final {}
-	virtual const WndObject& HitTestChild(Point point) const override final { return *this; }
-public:
-	FinalWnd(unique_ptr<Style> style) : Wnd(std::move(style)) {}
-	~FinalWnd() {}
+	virtual void OnChildTitleChange(WndObject& child) override final {}
+	WndObject::CompositeChild;
+	WndObject::HitTestChild;
+	WndObject::SendChildMessage;
 };
 
 

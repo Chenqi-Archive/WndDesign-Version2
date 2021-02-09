@@ -1,6 +1,5 @@
 #include "desktop.h"
 #include "redraw_queue.h"
-#include "../layer/figure_queue.h"
 #include "../layer/background_types.h"
 #include "../system/win32_api.h"
 #include "../system/metrics.h"
@@ -90,18 +89,14 @@ WNDDESIGNCORE_API DesktopObject& DesktopObject::Get() {
     return desktop_object;
 }
 
-DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
-	// Initialize the size of desktop.
-	CalculateRegion(size_min);
-}
+DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {}
 
-const Rect DesktopObjectImpl::CalculateRegionOnParent(Size parent_size) {
-	return Rect(point_zero, GetDesktopSize());
-}
-
-void DesktopObjectImpl::AddChild(WndObject& child) {
-	RegisterChild(child);
-	// DesktopBase will call AddChild again with child's WndBase information.
+void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
+	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle());
+	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
+	frame._desktop_index = _child_wnds.begin();
+	SetChildFrame(child_object, frame);
+	frame.Invalidate(region_infinite);
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
@@ -115,16 +110,12 @@ void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Rect child_region = UpdateChildRegion(child, GetSize());
 	Win32::MoveWnd(frame._hwnd, child_region);
+	SetChildRegion(child, child_region);
 }
 
-void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
-	Rect child_region = child_object.CalculateRegion(GetSize());
-	HANDLE hwnd = Win32::CreateWnd(child_region, child_object.GetTitle());
-	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
-	frame._desktop_index = _child_wnds.begin();
-	SetChildRegion(child_object, child_region);
-	SetChildFrame(child_object, frame);
-	frame.Invalidate(region_infinite);
+void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {
+	DesktopWndFrame& frame = GetChildFrame(child);
+	Win32::SetWndTitle(frame._hwnd, child.GetTitle());
 }
 
 void DesktopObjectImpl::MessageLoop() {
@@ -132,22 +123,23 @@ void DesktopObjectImpl::MessageLoop() {
 }
 
 void DesktopObjectImpl::Terminate() {
-#pragma message(Remark"Use PostQuitMessage() instead.")
+#pragma message(Remark"May use PostQuitMessage() instead.")
 	while (!_child_wnds.empty()) {
 		RemoveChild(_child_wnds.back()._wnd_object);
 	}
 }
 
-std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const {
+std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertNonClientPointToDesktopPoint(WndObject& wnd, Point point) const {
 	auto child = &wnd;
 	auto parent = wnd.GetParent();
 	while (parent != this) {
 		if (parent == nullptr) { 
 			return std::make_pair(nullptr, point_zero); 
 		}
-		point = child->ConvertPointToParentPoint(point);
+		point = child->ConvertNonClientPointToParentPoint(point);
+		point = parent->ConvertPointToNonClientPoint(point);
 		child = parent;
-		parent = child->GetParent();
+		parent = parent->GetParent();
 	}
 	DesktopWndFrame& frame = GetChildFrame(*child);
 	return std::make_pair(frame._hwnd, point);
@@ -155,6 +147,7 @@ std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertPointToDesktopWndPoint(
 
 
 DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {
+	SetAccessibleRegion(Rect(point_zero, GetDesktopSize()));
 	SetDepth(0);
 }
 

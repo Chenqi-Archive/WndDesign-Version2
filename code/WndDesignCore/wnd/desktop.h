@@ -62,12 +62,6 @@ public:
 	DesktopObjectImpl();
 	~DesktopObjectImpl() {}
 
-	virtual const Rect CalculateRegionOnParent(Size parent_size);
-
-	virtual void AddChild(WndObject& child) override;
-	virtual void OnChildDetach(WndObject& child) override;
-	virtual void OnChildRegionUpdate(WndObject& child) override;
-
 	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
 		SetChildData(child, &frame);
 	}
@@ -77,6 +71,10 @@ public:
 
 	void AddChild(WndBase& child, WndObject& child_object);
 
+	virtual void OnChildDetach(WndObject& child) override;
+	virtual void OnChildRegionUpdate(WndObject& child) override;
+	virtual void OnChildTitleChange(WndObject& child) override;
+
 	void UpdateChildInvalidRegion(WndObject& child) { GetChildFrame(child).UpdateInvalidRegion(); }
 	void SetChildCapture(WndObject& child) { GetChildFrame(child).SetCapture(); }
 	void SetChildFocus(WndObject& child) { GetChildFrame(child).SetFocus(); }
@@ -84,7 +82,7 @@ public:
 	virtual void MessageLoop() override;
 	virtual void Terminate() override;
 
-	std::pair<HANDLE, const Point> ConvertPointToDesktopWndPoint(WndObject& wnd, Point point) const;
+	std::pair<HANDLE, const Point> ConvertNonClientPointToDesktopPoint(WndObject& wnd, Point point) const;
 };
 
 

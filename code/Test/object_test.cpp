@@ -1,6 +1,6 @@
 #include "../WndDesign/WndDesign.h"
 #include "../WndDesign/wnd/ListLayout.h"
-#include "../WndDesign/wnd/TextBox.h"
+#include "../WndDesign/wnd/EditBox.h"
 
 
 using namespace WndDesign;
@@ -30,9 +30,9 @@ public:
 	MainWnd() : ListLayout(std::make_unique<Style>()) {}
 };
 
-class TextArea : public TextBox {
+class TextArea : public EditBox {
 private:
-	struct Style : TextBox::Style {
+	struct Style : EditBox::Style {
 		Style() {
 			width.max(100pct);
 			height.max(500px);
@@ -43,13 +43,13 @@ private:
 		}
 	};
 public:
-	TextArea(const wstring& text): TextBox(std::make_unique<Style>(), text) {}
+	TextArea(): EditBox(std::make_unique<Style>(), L"Type something here.") {}
 };
 
 
 int main() {
 	MainWnd main_wnd;
-	TextArea text_area1(L"test1"), text_area2(L"test2"), text_area3(L"test3");
+	TextArea text_area1, text_area2, text_area3;
 	main_wnd.AppendChild(text_area1);
 	main_wnd.AppendChild(text_area2);
 	main_wnd.AppendChild(text_area3);

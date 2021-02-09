@@ -225,6 +225,10 @@ void MoveWnd(HANDLE hWnd, Rect region) {
     MoveWindow((HWND)hWnd, region.point.x, region.point.y, region.size.width, region.size.height, false);
 }
 
+void SetWndTitle(HANDLE hWnd, const wstring& title) {
+    SetWindowTextW((HWND)hWnd, title.c_str());
+}
+
 void SetCapture(HANDLE hWnd) {
     ::SetCapture((HWND)hWnd);
 }

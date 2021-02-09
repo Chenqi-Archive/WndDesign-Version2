@@ -27,6 +27,7 @@ void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
 		Invalidate(child_container.region);
 		Invalidate(child_region);
 		child_container.region = child_region;
+		SetChildRegion(child, child_region); // UpdateChildRegion must be followed by SetChildRegion
 	}
 }
 
@@ -39,6 +40,7 @@ const Rect OverlapLayout::UpdateContentLayout(Size client_size) {
 				Invalidate(child_container.region);
 				Invalidate(child_region);
 				child_container.region = child_region;
+				SetChildRegion(child_container.wnd, child_region);
 			}
 		}
 	}

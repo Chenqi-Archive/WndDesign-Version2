@@ -19,6 +19,7 @@ void DestroyWnd(HANDLE hWnd);
 void SetWndUserData(HANDLE hWnd, void* data);
 
 void MoveWnd(HANDLE hWnd, Rect region);
+void SetWndTitle(HANDLE hWnd, const wstring& title);
 
 void SetCapture(HANDLE hWnd);
 void ReleaseCapture();

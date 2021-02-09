@@ -2,7 +2,8 @@
 
 #include "wnd_base_interface.h"
 #include "../common/uncopyable.h"
-#include "../message/msg_base.h"
+#include "../message/message.h"
+#include "../layer/figure_queue.h"
 
 #include <string>
 
@@ -33,8 +34,14 @@ public:
 	bool HasParent() const { return GetParent() != nullptr; }
 	bool IsMyChild(WndObject& child) const { return child.GetParent() == this; }
 protected:
-	void RegisterChild(WndObject& child) { wnd->AddChild(*child.wnd); child.parent = this; }
-	void UnregisterChild(WndObject& child) { wnd->RemoveChild(*child.wnd); child.parent = nullptr; }
+	void RegisterChild(WndObject& child) { 
+		assert(child.GetParent() != this);
+		wnd->AddChild(*child.wnd); child.parent = this; child.OnAttachToParent(); 
+	}
+	void UnregisterChild(WndObject& child) { 
+		assert(child.GetParent() == this);
+		wnd->RemoveChild(*child.wnd); child.parent = nullptr;
+	}
 public:
 	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
 private:
@@ -65,12 +72,14 @@ public:
 	const Size GetSize() const { return GetAccessibleRegion().size; }
 	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
 	const Size GetDisplaySize() const { return GetDisplayRegion().size; }
+public:
+	const Point ConvertPointToNonClientPoint(Point point) const { return point - (GetDisplayOffset() - point_zero); }
+	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (wnd->GetRegionOnParent().point - point_zero); }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
 	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
 	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real offset shifted
 private:
-	virtual void OnSizeChange(Rect accessible_region) {}
 	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrolling
 	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) {}  // for lazy-loading
 
@@ -101,7 +110,7 @@ protected:
 	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
 public:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { return { size_min, size_max }; }
-	virtual const wstring& GetTitle() const { return L""; }
+	virtual const wstring GetTitle() const { return L""; }
 private:
 	virtual void OnChildTitleChange(WndObject& child) {}
 	
@@ -155,15 +164,19 @@ protected:
 };
 
 
-class DesktopObject : protected WndObject {
+class ABSTRACT_BASE DesktopObject : protected WndObject {
 protected:
 	DesktopObject(unique_ptr<IWndBase> desktop) : WndObject(std::move(desktop)) {}
 	~DesktopObject() {}
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
-	virtual void OnChildRegionUpdate(WndObject& child) override pure;
-	virtual void AddChild(WndObject& child) pure;
+	void AddChild(WndObject& child) { RegisterChild(child); }
+
+	virtual void OnChildDetach(WndObject& child) override pure {}
+	virtual void OnChildRegionUpdate(WndObject& child) override pure {}
+	virtual void OnChildTitleChange(WndObject& child) override pure {}
+
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;
 };

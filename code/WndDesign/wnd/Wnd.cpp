@@ -21,7 +21,7 @@ const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 	return style.CalculateMinMaxDisplaySize(parent_size);
 }
 
-const wstring& Wnd::GetTitle() const {
+const wstring Wnd::GetTitle() const {
 	return GetStyle().title._title;
 }
 

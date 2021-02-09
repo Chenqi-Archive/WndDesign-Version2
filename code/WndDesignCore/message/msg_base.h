@@ -12,10 +12,10 @@ enum class Msg : uint;   // see definition in message.h
 // Empty base class for message parameter.
 struct _MsgPara {};
 
-inline static const _MsgPara nullmsg;
+inline static _MsgPara nullmsg;
 
 // Usage: void Handler(Msg msg, Para para) {...}
-using Para = const _MsgPara&;
+using Para = _MsgPara&;
 
 
 END_NAMESPACE(WndDesign)

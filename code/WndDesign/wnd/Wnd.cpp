@@ -1,7 +1,8 @@
 #include "Wnd.h"
-#include "../figure/figure_queue.h"
 #include "../geometry/geometry_helper.h"
 #include "../style/style_helper.h"
+#include "../figure/figure_queue.h"
+#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -47,12 +48,18 @@ void Wnd::UpdateLayout() {
 	}
 	if (_invalid_layout.margin) {
 		assert(!style.IsRegionOnParentAuto());
-		UpdateMarginAndClientRegion(GetDisplaySize());
+		Size display_size = GetDisplaySize();
+		UpdateMarginAndClientRegion(display_size);
+		bool scrollbar_margin_changed = UpdateScrollbar();
+		if (scrollbar_margin_changed) {
+			UpdateMarginAndClientRegion(display_size);
+			UpdateScrollbar();
+		}
 	}
 	if (_invalid_layout.client_region) {
 		assert(!style.IsMarginAuto() && !style.IsRegionOnParentAuto());
 		UpdateClientRegion(ShrinkSizeByMargin(GetDisplaySize(), _margin));
-		_invalid_layout.client_region = false;
+		UpdateScrollbar();
 	}
 	if (_invalid_layout.content_layout) {
 		assert(!style.IsClientRegionAuto());
@@ -131,9 +138,26 @@ void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid
 	}
 }
 
-void Wnd::HitTest(Point point) {
-	// Hit test scrollbar.
+bool Wnd::NonClientHitTest(Size display_size, Point point) const { 
+	const StyleCalculator& style = GetStyleCalculator(GetStyle());
+	return style.IsPointInside(display_size, point);
+}
 
+bool Wnd::NonClientHandler(Msg msg, Para para) {
+	// Hit test border and scrollbar.
+
+	return WndObject::NonClientHandler(msg, para);
+}
+
+bool Wnd::Handler(Msg msg, Para para) {
+	if (IsMouseMsg(msg)) {
+		MouseMsg& mouse_msg = GetMouseMsg(para);
+		mouse_msg.point = mouse_msg.point - GetClientOffset();
+	}
+	if (msg == Msg::MouseEnter) {
+		SetCursor(GetStyle().cursor._cursor);
+	}
+	return ClientHandler(msg, para);
 }
 
 

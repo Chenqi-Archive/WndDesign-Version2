@@ -147,6 +147,9 @@ public:
 	const RoundedRectangle GetBorder(Size display_size) const { 
 		return RoundedRectangle(display_size, border._radius, border._width, border._color); 
 	}
+	bool IsPointInside(Size display_size, Point point) const {
+		return PointInRoundedRectangle(display_size, border._radius, point);
+	}
 	const Margin CalculateBorderMargin() const {
 		return { border._width, border._width, border._width, border._width };
 	}

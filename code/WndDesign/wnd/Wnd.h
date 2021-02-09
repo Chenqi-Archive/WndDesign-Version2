@@ -120,9 +120,12 @@ private:
 
 	//// message handling ////
 private:
-	virtual void HitTest(Point point);
 
-
+private:
+	virtual bool NonClientHitTest(Size display_size, Point point) const;
+	virtual bool NonClientHandler(Msg msg, Para para) override;
+	virtual bool Handler(Msg msg, Para para) override final;
+	virtual bool ClientHandler(Msg msg, Para para) { return true; }
 };
 
 

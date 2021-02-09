@@ -185,8 +185,9 @@ public:
 	virtual void ReleaseCapture() override;
 	virtual void ReleaseFocus() override;
 private:
-	void HandleMessage(Msg msg, Para para);
-	void DispatchMessage(Msg msg, Para para);
+	virtual bool SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) override;
+	bool HandleMessage(Msg msg, Para para);
+	bool DispatchMessage(Msg msg, Para para);
 };
 
 

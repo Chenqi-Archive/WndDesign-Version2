@@ -187,6 +187,7 @@
     <ClInclude Include="figure\text_block.h" />
     <ClInclude Include="geometry\margin.h" />
     <ClInclude Include="message\msg_base.h" />
+    <ClInclude Include="style\border.h" />
     <ClInclude Include="style\scrollbar.h" />
     <ClInclude Include="style\text_block_style.h" />
     <ClInclude Include="style\text_style.h" />

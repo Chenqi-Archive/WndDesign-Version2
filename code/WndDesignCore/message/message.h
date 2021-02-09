@@ -21,6 +21,8 @@ enum class Msg : uint {
 	LeftUp,					// MouseMsg&
 	RightDown,				// MouseMsg&
 	RightUp,				// MouseMsg&
+	MiddleDown,				// MouseMsg&
+	MiddleUp,				// MouseMsg&
 	MouseMove,				// MouseMsg&
 	MouseWheel,				// MouseMsg&
 	MouseWheelHorizontal,	// MouseMsg&
@@ -48,9 +50,9 @@ enum class Msg : uint {
 							// Visible character key messages are expected to be handled in Msg::Char,
 							//   while control key messages be handled in Msg::KeyDown.
 	
-	ImeCompositionBegin,	// nullmsg				 (Remember the caret position when starts composition)
-	ImeComposition,			// const ImeComposition* (Replace the composition string every time composition updates) 
-	ImeCompositionEnd,		// const ImeComposition* (Commit the result string and reset caret position)
+	ImeCompositionBegin,	// nullmsg			  (Remember the caret position when starts composition)
+	ImeComposition,			// ImeCompositionMsg& (Replace the composition string every time composition updates) 
+	ImeCompositionEnd,		// ImeCompositionMsg& (Commit the result string and reset caret position)
 	
 	_KEYBOARD_MSG_END,
 
@@ -58,7 +60,7 @@ enum class Msg : uint {
 	//// supplement keyboard message ////
 	_SUPPLEMENT_KEYBOARD_MESSAGE_BEGIN,
 
-	LoseFocus,				// nullptr
+	LoseFocus,				// nullmsg
 
 	_SUPPLEMENT_KEYBOARD_MSG_END,
 

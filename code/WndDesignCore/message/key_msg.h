@@ -131,12 +131,12 @@ struct CharMsg : _MsgPara {
 };
 
 
-inline const KeyMsg& GetKeyMsg(Para para) {
-	return static_cast<const KeyMsg&>(para);
+inline KeyMsg& GetKeyMsg(Para para) {
+	return static_cast<KeyMsg&>(para);
 }
 
 inline wchar GetCharMsg(Para para) {
-	return static_cast<const CharMsg&>(para).ch;
+	return static_cast<CharMsg&>(para).ch;
 }
 
 // Filter out control characters.

@@ -20,8 +20,11 @@ inline const Point BoundPointInRegion(const Point& point, const Rect& rect) {
 	);
 }
 
+inline uint square(int x) {
+	return static_cast<uint>(x * x); 
+};
+
 inline uint SquareDistance(const Point& a, const Point& b) {
-	auto square = [](int x) -> uint {return static_cast<uint>(x * x); };
 	return square(a.x - b.x) + square(a.y - b.y);
 }
 

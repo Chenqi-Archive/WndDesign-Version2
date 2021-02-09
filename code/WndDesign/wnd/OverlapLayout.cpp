@@ -1,6 +1,7 @@
 #include "OverlapLayout.h"
 #include "../common/reversion_wrapper.h"
 #include "../figure/figure_queue.h"
+#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -46,10 +47,36 @@ const Rect OverlapLayout::UpdateContentLayout(Size client_size) {
 
 void OverlapLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {
 	for (auto& child_container : reverse(_child_wnds)) {
-		if (!child_container.region.Intersect(invalid_client_region).IsEmpty()) {
-			CompositeChild(child_container.wnd, figure_queue, invalid_client_region);
+		Rect invalid_child_region = child_container.region.Intersect(invalid_client_region);
+		if (!invalid_child_region.IsEmpty()) {
+			CompositeChild(child_container.wnd, figure_queue, invalid_child_region);
 		}
 	}
+}
+
+bool OverlapLayout::ClientHandler(Msg msg, Para para) {
+	if (IsMouseMsg(msg)) {
+		MouseMsg mouse_msg = GetMouseMsg(para);
+		ref_ptr<WndObject> child = nullptr;
+		Point point; 
+		for (auto& child_container : _child_wnds) {
+			point = mouse_msg.point;
+			if (child_container.region.Contains(point)) {
+				point = point - (child_container.region.point - point_zero);
+				if (HitTestChild(child_container.wnd, point)) {
+					child = &child_container.wnd;
+					break;
+				}
+			}
+		}
+		if (child != nullptr) {
+			mouse_msg.point = point;
+			if (SendChildMessage(*child, msg, mouse_msg)) {
+				return true;
+			}
+		}
+	}
+	return false; 
 }
 
 

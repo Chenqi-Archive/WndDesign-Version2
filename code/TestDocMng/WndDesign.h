@@ -6,8 +6,6 @@
 #include "../WndDesign/wnd/TableLayout.h"
 #include "../WndDesign/wnd/FlowLayout.h"
 #include "../WndDesign/wnd/EditBox.h"
-#include "../WndDesign/wnd/WndFrame.h"
-#include "../WndDesign/wnd/ScrollFrame.h"
 
 
 using namespace WndDesign;

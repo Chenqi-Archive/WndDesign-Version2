@@ -14,7 +14,7 @@ struct ImeCompositionMsg : _MsgPara {
 
 
 inline const ImeComposition& GetImeCompositionMsg(Para para) {
-	return static_cast<const ImeCompositionMsg&>(para).ime_composition;
+	return static_cast<ImeCompositionMsg&>(para).ime_composition;
 }
 
 

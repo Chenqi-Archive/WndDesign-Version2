@@ -215,5 +215,8 @@
     <ClInclude Include="message\msg_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="style\border.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

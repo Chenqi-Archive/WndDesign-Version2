@@ -25,8 +25,8 @@ struct MouseMsg : _MsgPara{  // 12 bytes
 };
 
 
-inline const MouseMsg& GetMouseMsg(Para para) {
-	return static_cast<const MouseMsg&>(para);
+inline MouseMsg& GetMouseMsg(Para para) {
+	return static_cast<MouseMsg&>(para);
 }
 
 

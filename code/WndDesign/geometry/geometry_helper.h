@@ -39,4 +39,18 @@ inline const Rect ExtendRegionByMargin(Rect region, Margin margin) {
 }
 
 
+inline bool PointInRoundedRectangle(Size size, uint radius, Point point) {
+	if ((uint)point.x >= size.width || (uint)point.y >= size.height) { return false; }
+	if (uint max_radius = min(size.width, size.height) / 2; radius > max_radius) { radius = max_radius; }
+	int x1 = (int)(radius), x2 = (int)(size.width - radius);
+	int	y1 = (int)(radius), y2 = (int)(size.height - radius);
+	int x = point.x, y = point.y;
+	if (x < x1 && y < y1) { return square(x - x1) + square(y - y1) <= square(radius) ? true : false; }
+	if (x < x1 && y > y2) { return square(x - x1) + square(y - y2) <= square(radius) ? true : false; }
+	if (x > x2 && y < y1) { return square(x - x2) + square(y - y1) <= square(radius) ? true : false; }
+	if (x > x2 && y > y2) { return square(x - x2) + square(y - y2) <= square(radius) ? true : false; }
+	return true;
+}
+
+
 END_NAMESPACE(WndDesign)

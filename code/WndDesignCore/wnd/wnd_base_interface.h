@@ -48,6 +48,7 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void SetFocus() pure;
 	virtual void ReleaseCapture() pure;
 	virtual void ReleaseFocus() pure;
+	virtual bool SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) pure;
 };
 
 

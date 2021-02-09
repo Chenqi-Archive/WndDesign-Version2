@@ -56,7 +56,8 @@ private:
 
 
 	//// message handling ////
-private:
+protected:
+	virtual bool ClientHandler(Msg msg, Para para) override;
 };
 
 

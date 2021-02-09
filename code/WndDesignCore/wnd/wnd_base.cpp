@@ -262,7 +262,7 @@ void WndBase::UpdateInvalidRegion() {
 }
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
-	parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
+	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent); // intersection has been done by parent
 
 	// Composite client region.
 	// Convert parent invalid region to my invalid region.
@@ -273,15 +273,17 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 		figure_queue.Append(parent_invalid_region.point, new LayerFigure(*_layer, _background, invalid_region, {}));
 	} else {
 		// figure in my coordinates - coordinate_offset = figure in parent's coordinates.
-		uint group_index = figure_queue.BeginGroup(vector_zero - coordinate_offset, invalid_region);
+		uint group_begin = figure_queue.BeginGroup(coordinate_offset, invalid_region);
 		figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_region, false));
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
-		figure_queue.EndGroup(group_index);
+		figure_queue.EndGroup(group_begin);
 	}
 
 	// Composite non-client region.
-#error convert coordinates
-	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - (_region_on_parent.point - point_zero));
+	Vector display_region_offset = _region_on_parent.point - point_zero;
+	uint group_begin = figure_queue.BeginGroup(display_region_offset, parent_invalid_region - display_region_offset);
+	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - display_region_offset);
+	figure_queue.EndGroup(group_begin);
 }
 
 void WndBase::ChildLoseCapture() {
@@ -329,25 +331,31 @@ void WndBase::ReleaseFocus() {
 	if (HasParent()) { _parent->ReleaseFocus(); } 
 }
 
-void WndBase::HandleMessage(Msg msg, Para para) {
-#pragma message(Remark"May use the return value to implement message bubbling.")
-	_object.Handler(msg, para);
-}
-
-void WndBase::DispatchMessage(Msg msg, Para para) {
+bool WndBase::SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) {
+	WndBase* child = &static_cast<WndBase&>(child_wnd);
 	if (IsMouseMsg(msg)) {
-		MouseMsg mouse_msg = GetMouseMsg(para);
-		ref_ptr<WndBase> child = _capture_child;
-		if (child == nullptr) { child = static_cast<WndBase*>(_object.HitTestChild(mouse_msg.point).wnd.get()); }
-	#error the point is not relative to the accessible region.
-		if (child == this) { return HandleMessage(msg, para); }
 		if (child != _last_tracked_child) {
 			ChildLoseTrack();
 			_last_tracked_child = child;
 			child->HandleMessage(Msg::MouseEnter, nullmsg);
 		}
+		MouseMsg& mouse_msg = GetMouseMsg(para);
 		mouse_msg.point = mouse_msg.point + child->OffsetFromParent();
-		return child->DispatchMessage(msg, mouse_msg);
+	}
+	return child->DispatchMessage(msg, para);
+}
+
+bool WndBase::HandleMessage(Msg msg, Para para) {
+	return _object.NonClientHandler(msg, para);
+}
+
+bool WndBase::DispatchMessage(Msg msg, Para para) {
+	if (IsMouseMsg(msg)) {
+		ref_ptr<WndBase> child = _capture_child;
+		if (child == nullptr || child == this) { 
+			return HandleMessage(msg, para);
+		}
+		return SendChildMessage(*child, msg, para);
 	}
 	if (IsKeyboardMsg(msg) && _focus_child != nullptr && _focus_child != this) {
 		return _focus_child->DispatchMessage(msg, para);

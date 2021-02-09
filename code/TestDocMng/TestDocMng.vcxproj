@@ -153,16 +153,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWnd.cpp" />
-    <ClCompile Include="MainWndFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DocTable.h" />
-    <ClInclude Include="DocTableFrame.h" />
     <ClInclude Include="MainWnd.h" />
-    <ClInclude Include="MainWndFrame.h" />
     <ClInclude Include="SearchBox.h" />
     <ClInclude Include="TagBox.h" />
-    <ClInclude Include="TagBoxFrame.h" />
     <ClInclude Include="TagItem.h" />
     <ClInclude Include="WndDesign.h" />
   </ItemGroup>

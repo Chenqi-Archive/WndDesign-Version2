@@ -120,7 +120,9 @@ private:
 		Invalidate(child_region.Intersect(child_invalid_region + (child_region.point - point_zero)));
 	}
 protected:
-	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) { child.wnd->Composite(figure_queue, parent_invalid_region); }
+	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) { 
+		child.wnd->Composite(figure_queue, parent_invalid_region); 
+	}
 private:
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {}
@@ -132,11 +134,23 @@ public:
 	void SetFocus() { wnd->SetFocus(); }
 	void ReleaseCapture() { wnd->ReleaseCapture(); }
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
-public:
-	virtual bool HitTest(Rect accessible_region, Point point) const { return true; }
-	virtual bool NonClientHitTest(Size display_size, Point point) const { return false; }
-	virtual const WndObject& HitTestChild(Point point) const { return *this; }
-	virtual bool NonClientHandler(Msg msg, para) { return true; }
+protected:
+	static bool HitTestChild(const WndObject& child, Point point) { 
+		return child.NonClientHitTest(child.GetDisplaySize(), point); 
+	}
+	bool SendChildMessage(WndObject& child, Msg msg, Para para) { 
+		return wnd->SendChildMessage(*child.wnd, msg, para);
+	}
+private:
+	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
+protected:
+	virtual bool NonClientHandler(Msg msg, Para para) {
+		if (IsMouseMsg(msg)) {
+			MouseMsg& mouse_msg = GetMouseMsg(para);
+			mouse_msg.point = mouse_msg.point + (GetDisplayOffset() - point_zero);
+		}
+		return Handler(msg, para);
+	}
 	virtual bool Handler(Msg msg, Para para) { return true; }
 };
 

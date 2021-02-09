@@ -3,6 +3,7 @@
 #include "wnd_style.h"
 #include "../geometry/interval.h"
 #include "../geometry/geometry_helper.h"
+#include "../figure/figure_types.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -34,7 +35,7 @@ public:
 		return padding._left.IsPercent() || padding._top.IsPercent() || padding._right.IsPercent() || padding._bottom.IsPercent();
 	}
 	static bool IsScrollbarAuto(const ScrollbarStyle& scrollbar) {
-		return scrollbar._scrollbar_resource->HasMargin();
+		return scrollbar._scrollbar_resource->IsAuto();
 	}
 	static bool IsClientRelative(const ClientStyle& client) {
 		return client._left.IsPercent() || client._top.IsPercent() || client._width.IsPercent() || client._height.IsPercent();
@@ -43,12 +44,18 @@ public:
 		return client._width.IsAuto() || client._height.IsAuto();
 	}
 public:
+	bool IsRegionHorizontalAuto() const {
+		return IsLengthAuto(width) && IsPositionAuto(position._left, position._right);
+	}
+	bool IsRegionVerticalAuto() const {
+		return IsLengthAuto(height) && IsPositionAuto(position._top, position._bottom);
+	}
+public:
 	bool IsRegionOnParentRelative() const {
 		return IsLengthRelative(width) || IsLengthRelative(height) || IsPositionRelative(position);
 	}
 	bool IsRegionOnParentAuto() const {
-		return (IsLengthAuto(width) && IsPositionAuto(position._left, position._right)) ||
-			(IsLengthAuto(height) && IsPositionAuto(position._top, position._bottom));
+		return IsRegionHorizontalAuto() || IsRegionVerticalAuto();
 	}
 	bool IsMarginRelative() const {
 		return IsPaddingRelative(padding);
@@ -125,25 +132,34 @@ public:
 			CalculateLength(height, position._top, position._bottom, parent_size.height)
 		);
 	}
-	const Margin GetScrollBarMargin() const {
-		return scrollbar._scrollbar_resource->GetMargin();
+	bool HasScrollbar() const { 
+		return scrollbar._scrollbar_resource->IsVisible(); 
 	}
-	bool UpdateScrollBar(Rect displayed_client_region_with_padding, Rect client_region_with_padding) const {
+	bool UpdateScrollbar(Rect displayed_client_region_with_padding, Rect client_region_with_padding) const {
 		return scrollbar._scrollbar_resource->Update(displayed_client_region_with_padding, client_region_with_padding);
 	}
-	const Margin CalculateMarginWithoutPadding(Margin margin_scrollbar) const {
-		return {
-			border._width + margin_scrollbar.left, border._width + margin_scrollbar.top,
-			border._width + margin_scrollbar.right, border._width + margin_scrollbar.bottom,
-		};
+	const Margin GetScrollbarMargin() const {
+		return scrollbar._scrollbar_resource->GetMargin();
 	}
-	const Margin CalculateMargin(Size display_size, Margin margin_without_padding) const {
+	bool HasBorder() const { 
+		return border._width > 0 && border._color != color_transparent; 
+	}
+	const RoundedRectangle GetBorder(Size display_size) const { 
+		return RoundedRectangle(display_size, border._radius, border._width, border._color); 
+	}
+	const Margin CalculateBorderMargin() const {
+		return { border._width, border._width, border._width, border._width };
+	}
+	const Rect GetDisplayRegionWithoutBorder(Size display_size) const {
+		return ShrinkRegionByMargin(Rect(point_zero, display_size), CalculateBorderMargin());
+	}
+	const Margin CalculatePaddingMargin(Size display_size) const {
 		PaddingStyle padding = this->padding;
-		padding._left.ConvertToPixel(display_size.width); margin_without_padding.left += padding._left.AsSigned();
-		padding._top.ConvertToPixel(display_size.height); margin_without_padding.top += padding._top.AsSigned();
-		padding._right.ConvertToPixel(display_size.width); margin_without_padding.right += padding._right.AsSigned();
-		padding._bottom.ConvertToPixel(display_size.height); margin_without_padding.bottom += padding._bottom.AsSigned();
-		return margin_without_padding;
+		padding._left.ConvertToPixel(display_size.width);  
+		padding._top.ConvertToPixel(display_size.height);  
+		padding._right.ConvertToPixel(display_size.width); 
+		padding._bottom.ConvertToPixel(display_size.height);
+		return { padding._left.AsSigned(), padding._top.AsSigned(), padding._right.AsSigned(), padding._bottom.AsSigned() };
 	}
 	const Rect CalculateClientRegion(Size displayed_client_size) const {
 		ClientStyle client = this->client;
@@ -154,8 +170,8 @@ public:
 		return Rect(client._left.AsSigned(), client._top.AsSigned(), client._width.AsUnsigned(), client._height.AsUnsigned());
 	}
 	const Size AutoResizeRegionOnParentToDisplaySize(Size region_on_parent_size, Size display_size) const {
-		if (IsLengthAuto(width) && IsPositionAuto(position._left, position._right)) { region_on_parent_size.width = display_size.width; }
-		if (IsLengthAuto(height) && IsPositionAuto(position._top, position._bottom)) { region_on_parent_size.height = display_size.height; }
+		if (IsRegionHorizontalAuto()) { region_on_parent_size.width = BoundLengthBetween(px(display_size.width), width._min, width._max).AsUnsigned(); }
+		if (IsRegionVerticalAuto()) { region_on_parent_size.height = BoundLengthBetween(px(display_size.height), height._min, height._max).AsUnsigned(); }
 		return region_on_parent_size;
 	}
 	const Rect AutoResizeClientRegionToContent(Rect client_region, Rect content_region) const {

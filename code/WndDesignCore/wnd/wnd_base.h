@@ -50,6 +50,20 @@ private:
 	void DetachFromParent();
 
 
+	//// window depth ////
+	// Depth is used to determine the redraw queue priority. 
+	// For Desktop, depth is 0; for desktop window and its descendants, depth is 1, 2, 3, ...
+	//   and for windows who are not descendant of Desktop, depth is -1.
+private:
+	uint _depth;
+private:
+	bool IsDepthValid() const { return _depth != -1; }
+	uint GetChildDepth() const { return _depth == -1 ? -1 : _depth + 1; }
+public:
+	void SetDepth(uint depth);
+	uint GetDepth() const { return _depth; }
+
+
 	///////////////////////////////////////////////////////////
 	////                   Child Windows                   ////
 	///////////////////////////////////////////////////////////
@@ -97,6 +111,16 @@ private:
 	virtual void LeaveReflowQueue() override;
 
 
+	//// invalid layout ////
+public:
+	void MayRegionOnParentChange();
+	void UpdateInvalidLayout();
+
+
+	///////////////////////////////////////////////////////////
+	////                    Composition                    ////
+	///////////////////////////////////////////////////////////
+
 	//// background ////
 private:
 	reference_wrapper<const Background> _background;
@@ -116,24 +140,6 @@ private:
 	virtual const Rect GetCachedRegion() const;
 	void ResetVisibleRegion() { SetVisibleRegion(HasParent() ? _parent->GetCachedRegion() : region_empty); }
 	void SetVisibleRegion(Rect parent_cached_region);
-
-
-	///////////////////////////////////////////////////////////
-	////                    Composition                    ////
-	///////////////////////////////////////////////////////////
-
-	//// window depth ////
-private:
-	// Depth is used to determine the redraw queue priority. 
-	// For desktop, depth is 0; for desktop window, depth is 1;
-	//   and for detached window and its child windows, depth is -1.
-	uint _depth;
-private:
-	bool HasDepth() const { return _depth != -1; }
-	uint GetChildDepth() const { return _depth == -1 ? -1 : _depth + 1; }
-public:
-	void SetDepth(uint depth);
-	uint GetDepth() const { return _depth; }
 
 
 	//// redraw queue ////

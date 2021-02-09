@@ -12,7 +12,7 @@ public:
 	struct Style : FinalWnd::Style, TextBlockStyle {};
 	
 public:
-	TextBox(unique_ptr<Style> style, wstring& text) :FinalWnd(std::move(style)), _text_block(text, *style) {}
+	TextBox(unique_ptr<Style> style, const wstring& text) :FinalWnd(std::move(style)), _text(text), _text_block(_text, *style) {}
 	~TextBox() {}
 
 
@@ -20,6 +20,13 @@ public:
 protected:
 	Style& GetStyle() { return static_cast<Style&>(Wnd::GetStyle()); }
 	const Style& GetStyle() const { return static_cast<const Style&>(Wnd::GetStyle()); }
+
+
+	//// text ////
+private:
+	wstring _text;
+public:
+	wstring& GetText() { return _text; }
 
 
 	//// layout update ////

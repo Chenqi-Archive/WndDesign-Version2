@@ -7,11 +7,11 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-inline const Margin MarginNeg(Margin margin) {
+inline const Margin operator-(Margin margin) {
 	return  { -margin.left, -margin.top, -margin.right, -margin.bottom };
 }
 
-inline const Margin MarginAdd(Margin a, Margin b) {
+inline const Margin operator+(Margin a, Margin b) {
 	return {a.left + b.left, a.top + b.top, a.right + b.right, a.bottom + b.bottom };
 }
 
@@ -24,7 +24,7 @@ inline const Size ShrinkSizeByMargin(Size size, Margin margin) {
 }
 
 inline const Size ExtendSizeByMargin(Size size, Margin margin) {
-	return ShrinkSizeByMargin(size, MarginNeg(margin));
+	return ShrinkSizeByMargin(size, -margin);
 }
 
 inline const Rect ShrinkRegionByMargin(Rect region, Margin margin) {
@@ -35,7 +35,7 @@ inline const Rect ShrinkRegionByMargin(Rect region, Margin margin) {
 }
 
 inline const Rect ExtendRegionByMargin(Rect region, Margin margin) {
-	return ShrinkRegionByMargin(region, MarginNeg(margin));
+	return ShrinkRegionByMargin(region, -margin);
 }
 
 

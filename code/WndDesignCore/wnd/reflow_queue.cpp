@@ -1,6 +1,5 @@
 #include "reflow_queue.h"
 #include "wnd_base.h"
-#include "WndObject.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -28,19 +27,16 @@ void ReflowQueue::Commit() {
 	// Traverse for the first time from back to front, notify parent window if region may change.
 	for (uint next_depth = _next_depth; next_depth > 0; next_depth--) {
 		for (auto wnd : _queue[next_depth]) {
-			WndObject& wnd_object = wnd->_object;
-			if (wnd_object.MayRegionOnParentChange() && wnd_object.HasParent()) {
-				wnd_object.GetParent()->ChildRegionMayChange(wnd_object);
-			}
+			wnd->MayRegionOnParentChange();
 		}
 	}
 
 	// Traverse and update for the second time.
 	for (uint next_depth = 1; next_depth <= _next_depth; next_depth++) {
 		while (!_queue[next_depth].empty()) {
-			WndObject& wnd_object = _queue[next_depth].front()->_object;
-			wnd_object.UpdateLayout();
-			wnd_object.LeaveReflowQueue();
+			WndBase& wnd = *_queue[next_depth].front();
+			wnd.UpdateInvalidLayout();
+			wnd.LeaveReflowQueue();
 		}
 	}
 

@@ -33,21 +33,13 @@ private:
 
 	//// non-client and client region ////
 private:
-	Margin _margin_scrollbar;
-	Margin _margin_without_padding;  // used for client hit-test and scrollbar drawing
+	Margin _margin_without_padding;
 	Margin _margin;
 	Rect _client_region;
 public:
 	const Vector GetClientOffset() const {return Vector(_margin.left, _margin.top);}
 	const Rect GetClientRegion() const { return _client_region; }
 	const Size GetClientSize() const { return _client_region.size; }
-	const Size GetDisplayedClientSize() const { return ShrinkSizeByMargin(GetDisplaySize(), _margin); }
-
-	void SetClientRegion(Rect client_region) {_client_region = client_region;}
-	void SetMargin(Margin margin_without_padding, Margin margin) {
-		_margin_without_padding = margin_without_padding;
-		_margin = margin;
-	}
 
 
 	//// layout update ////
@@ -95,9 +87,10 @@ private:
 	/* called by parent window when parent is updating */
 	virtual const Rect UpdateRegionOnParent(Size parent_size) override;
 
+	bool UpdateScrollbar();
 	const Size UpdateMarginAndClientRegion(Size display_size);
-	const Rect UpdateClientRegion(Size displayed_client_size);
-	virtual const Rect UpdateContentLayout(Size client_size);
+	void UpdateClientRegion(Size displayed_client_size);
+	virtual const Rect UpdateContentLayout(Size client_size) { return Rect(point_zero, client_size); }
 
 
 	// child windows

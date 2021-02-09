@@ -13,7 +13,7 @@ using std::pair;
 using std::wstring;
 
 
-class WndObject {
+class WndObject : Uncopyable {
 private:
 	friend class WndBase;
 	unique_ptr<IWndBase> wnd;
@@ -86,7 +86,6 @@ protected:
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
 	static const Rect GetChildRegion(WndObject& child) { child.wnd->GetRegionOnParent(); }
 private:
-	friend class ReflowQueue;
 	virtual bool HasInvalidLayout() const { return false; }
 	virtual bool MayRegionOnParentChange() { return false; }
 	virtual void ChildRegionMayChange(WndObject& child) {}
@@ -133,7 +132,7 @@ public:
 	void SetFocus() { wnd->SetFocus(); }
 	void ReleaseCapture() { wnd->ReleaseCapture(); }
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
-private:
+public:
 	virtual bool HitTest(Rect accessible_region, Point point) const { return true; }
 	virtual bool NonClientHitTest(Size display_size, Point point) const { return false; }
 	virtual const WndObject& HitTestChild(Point point) const { return *this; }

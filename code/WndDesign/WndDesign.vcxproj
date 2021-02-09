@@ -159,6 +159,7 @@
     <ClCompile Include="figure\figure_types.cpp" />
     <ClCompile Include="figure\image.cpp" />
     <ClCompile Include="figure\text_block.cpp" />
+    <ClCompile Include="style\scrollbar.cpp" />
     <ClCompile Include="style\text_style.cpp" />
     <ClCompile Include="system\cursor.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="figure\image.h" />
     <ClInclude Include="figure\text_block.h" />
     <ClInclude Include="geometry\margin.h" />
+    <ClInclude Include="message\msg_base.h" />
     <ClInclude Include="style\scrollbar.h" />
     <ClInclude Include="style\text_block_style.h" />
     <ClInclude Include="style\text_style.h" />

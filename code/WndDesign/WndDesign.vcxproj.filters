@@ -60,6 +60,9 @@
     <ClCompile Include="figure\text_block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="style\scrollbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -207,6 +210,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="style\text_block_style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message\msg_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -55,7 +55,8 @@ struct WndStyle {
 	////
 	//// styles related with non-client region
 	//// 
-	//// (border, scroll bar and padding determines the non-client region that is relative to the display region)
+	//// (border, scrollbar and padding determines the non-client region that is relative to the display region)
+	//// (scrollbar should be manually set in Wnd)
 
 	// The border of the window.
 	struct BorderStyle {
@@ -70,11 +71,12 @@ struct WndStyle {
 	}border;
 
 
+	// The scrollbar reference.
 	struct ScrollbarStyle {
 	public:
-		shared_ptr<Scrollbar> _scrollbar_resource = GetDefaultScrollbar();
+		unique_ptr<Scrollbar> _scrollbar_resource = CreateDefaultScrollbar();
 	public:
-		void set(shared_ptr<Scrollbar> scrollbar_resource) { _scrollbar_resource = scrollbar_resource; }
+		void set(unique_ptr<Scrollbar> scrollbar_resource) { _scrollbar_resource = std::move(scrollbar_resource); }
 	}scrollbar;
 
 
@@ -91,6 +93,8 @@ struct WndStyle {
 		constexpr PaddingStyle& top(ValueTag top) { _top = top; return *this; }
 		constexpr PaddingStyle& right(ValueTag right) { _right = right; return *this; }
 		constexpr PaddingStyle& bottom(ValueTag bottom) { _bottom = bottom; return *this; }
+		constexpr void set(ValueTag left, ValueTag top, ValueTag right, ValueTag bottom) { _left = left; _top = top; _right = right; _bottom = bottom; }
+		constexpr void setAll(ValueTag all) { _left = _top = _right = _bottom = all; }
 	}padding;
 
 

@@ -41,79 +41,76 @@ bool Wnd::MayRegionOnParentChange() {
 }
 
 void Wnd::UpdateLayout() {
-#ifdef _DEBUG
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
-#endif
 	if (_invalid_layout.region_on_parent) {
 		WndObject::UpdateRegionOnParent();
-		_invalid_layout.region_on_parent = false;
-		return;
 	}
 	if (_invalid_layout.margin) {
 		assert(!style.IsRegionOnParentAuto());
-		UpdateMargin(GetDisplaySize());
-		_invalid_layout.margin = false;
-		/* fall through to update client region */
+		UpdateMarginAndClientRegion(GetDisplaySize());
 	}
 	if (_invalid_layout.client_region) {
 		assert(!style.IsMarginAuto() && !style.IsRegionOnParentAuto());
-		UpdateClientRegion(GetDisplayedClientSize());
+		UpdateClientRegion(ShrinkSizeByMargin(GetDisplaySize(), _margin));
 		_invalid_layout.client_region = false;
-		return;
 	}
 	if (_invalid_layout.content_layout) {
 		assert(!style.IsClientRegionAuto());
 		UpdateContentLayout(GetClientRegion().size);
 		_invalid_layout.content_layout = false;
-		return;
 	}
-	assert(false);
 }
 
 const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect region_on_parent = style.CalculateRegionOnParent(parent_size);
-	if (_invalid_layout.margin || region_on_parent.size != GetDisplaySize() || style.IsRegionOnParentAuto()) {
+	bool is_region_on_parent_auto = style.IsRegionOnParentAuto();
+	if (_invalid_layout.margin || region_on_parent.size != GetDisplaySize() || is_region_on_parent_auto) {
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
-		if (style.IsRegionOnParentAuto()) {
+		if (is_region_on_parent_auto) {
 			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(region_on_parent.size, display_size);
 		}
-		UpdateMarginAndClientRegion(region_on_parent.size); // the second time, for updating scrollbar
+		bool scrollbar_margin_changed = UpdateScrollbar();
+		if (scrollbar_margin_changed) {
+			UpdateMarginAndClientRegion(region_on_parent.size);
+			UpdateScrollbar();
+		}
 	}
-	LeaveReflowQueue();
+	_invalid_layout.region_on_parent = false;
 	return region_on_parent;
+}
+
+bool Wnd::UpdateScrollbar() {
+	return GetStyleCalculator(GetStyle()).UpdateScrollbar(
+		ShrinkRegionByMargin(GetAccessibleRegion(), _margin_without_padding),
+		ShrinkRegionByMargin(GetDisplayRegion(), _margin_without_padding)
+	);
 }
 
 const Size Wnd::UpdateMarginAndClientRegion(Size display_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
-	Margin margin_scrollbar = style.GetScrollBarMargin();
-	Margin margin_without_padding = style.CalculateMarginWithoutPadding(margin_scrollbar);
-	Margin margin = style.CalculateMargin(display_size, margin_without_padding);
-	Size displayed_client_size = ShrinkSizeByMargin(display_size, margin);
-	Rect client_region = UpdateClientRegion(displayed_client_size);
-	Rect accessible_region = ExtendRegionByMargin(client_region, margin);
-	display_size = ExtendSizeByMargin(client_region.size, margin);
-	SetAccessibleRegion(accessible_region);
-	SetClientRegion(client_region);
-	SetMargin(margin_without_padding, margin);
+	_margin_without_padding = style.CalculateBorderMargin() + style.GetScrollbarMargin();
+	_margin = style.CalculatePaddingMargin(display_size) + _margin_without_padding;
+	_invalid_layout.margin = false;
+	UpdateClientRegion(ShrinkSizeByMargin(display_size, _margin));
+	display_size = ExtendSizeByMargin(_client_region.size, _margin);
 	return display_size;
 }
 
-const Rect Wnd::UpdateClientRegion(Size displayed_client_size) {
+void Wnd::UpdateClientRegion(Size displayed_client_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect client_region = style.CalculateClientRegion(displayed_client_size);
-	if (_invalid_layout.content_layout == true || client_region.size != GetClientRegion().size || style.IsClientRegionAuto()) {
-		Rect content_region = UpdateContentLayout(client_region.size);
-		if (style.IsClientRegionAuto()) {
-			client_region = style.AutoResizeClientRegionToContent(client_region, content_region);
-		}
+	bool is_client_auto = style.IsClientRegionAuto();
+	if (_invalid_layout.content_layout == true || client_region.size != GetClientRegion().size || is_client_auto) {
 		_invalid_layout.content_layout = false;
+		Rect content_region = UpdateContentLayout(client_region.size);
+		if (is_client_auto) { 
+			client_region = style.AutoResizeClientRegionToContent(client_region, content_region); 
+		}
 	}
-	return client_region;
-}
-
-const Rect Wnd::UpdateContentLayout(Size client_size) { 
-	return Rect(point_zero, client_size); 
+	_client_region = client_region + GetClientOffset(); // offset client region so that accessible region's origin will be at (0,0)
+	SetAccessibleRegion(ExtendRegionByMargin(_client_region, _margin));
+	_invalid_layout.client_region = false;
 }
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
@@ -122,11 +119,21 @@ void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invali
 
 void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
 	// Draw border and scroll bar.
-	const WndStyle::BorderStyle& border = GetStyle().border;
-	if (border._width > 0 && border._color != color_transparent) {
-		figure_queue.Append(point_zero, new RoundedRectangle(display_size, border._radius, border._width, border._color));
+	const StyleCalculator& style = GetStyleCalculator(GetStyle());
+	Rect display_region_without_border = style.GetDisplayRegionWithoutBorder(display_size);
+	if (style.HasBorder() && !display_region_without_border.Contains(invalid_display_region)) {
+		figure_queue.Append(point_zero, new RoundedRectangle(style.GetBorder(display_size)));
 	}
-	GetStyle().scrollbar._scrollbar_resource->OnPaint(figure_queue, display_size, invalid_display_region);
+	if (style.HasScrollbar()) {
+		uint group_begin = figure_queue.BeginGroup(display_region_without_border.point - point_zero, display_region_without_border);
+		style.scrollbar._scrollbar_resource->OnPaint(figure_queue, display_region_without_border.size);
+		figure_queue.EndGroup(group_begin);
+	}
+}
+
+void Wnd::HitTest(Point point) {
+	// Hit test scrollbar.
+
 }
 
 

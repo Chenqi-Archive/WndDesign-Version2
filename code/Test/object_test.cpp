@@ -1,7 +1,7 @@
-/*
-
 #include "../WndDesign/WndDesign.h"
-#include "../WndDesign/system/win32_aero_snap.h"
+#include "../WndDesign/wnd/ListLayout.h"
+#include "../WndDesign/wnd/TextBox.h"
+
 
 using namespace WndDesign;
 
@@ -13,48 +13,47 @@ using namespace WndDesign;
 #endif // _DEBUG
 
 
-class MainWnd : public WndObject , public WndStyle {
-public:
-	MainWnd() {
-		size.normal(800px, 500px).max(100pct, 100pct);
-		position.setHorizontalCenter().setVerticalCenter();
-		border.width(5.0).color(ColorSet::DarkGreen);
-		background.setColor(ColorSet::LightGray);
-		SetBackground(*background._background_resource);
-	}
-	virtual const Rect CalculateRegionOnParent(Size parent_size) override { 
-		return CalculateRectFromStyle(*this, parent_size); 
-	}
-	virtual void OnSizeChange(Rect accessible_region) override {
-		// change size or position style according to accessible region.
-		// also when region on parent changed.
-	}
-	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override {
-		return CalculateMinMaxSizeFromStyle(*this, parent_size); 
-	}
-	virtual const wstring GetTitle() const override { 
-		return L"MainWnd"; 
-	}
-	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override {
-		Point center = accessible_region.Center();
-		figure_queue.Append(center - Vector(50, 50), new Rectangle(Size(100, 100), ColorSet::Firebrick));
-		figure_queue.Append(center, new Ellipse(50, 50, 5.0, ColorSet::Moccasin, ColorSet::LemonChiffon));
-		figure_queue.Append(point_zero, new Rectangle(accessible_region.size, border._width, border._color));
-	}
-	virtual bool Handler(Msg msg, Para para) override {
-		if (msg == Msg::LeftDown) {
-			AeroSnapDraggingEffect(*this, GetMouseMsg(para).point);
+class MainWnd : public ListLayout {
+private:
+	struct Style : ListLayout::Style {
+		Style() {
+			width.max(70pct);
+			height.max(70pct);
+			position.setHorizontalCenter().setVerticalCenter();
+			border.width(5.0).color(ColorSet::DarkGreen);
+			background.setColor(ColorSet::LightGray);
+			title.set(L"ListLayout Test");
+			grid_height.min(100px).max(300px);
 		}
-		return true; 
-	}
+	};
+public:
+	MainWnd() : ListLayout(std::make_unique<Style>()) {}
+};
+
+class TextArea : public TextBox {
+private:
+	struct Style : TextBox::Style {
+		Style() {
+			width.max(100pct);
+			height.max(500px);
+			border.width(3.0).color(ColorSet::Honeydew);
+			padding.set(20px, 10px, 20px, 10px);
+			background.setColor(ColorSet::YellowGreen);
+			font.size(20px);
+		}
+	};
+public:
+	TextArea(const wstring& text): TextBox(std::make_unique<Style>(), text) {}
 };
 
 
 int main() {
 	MainWnd main_wnd;
+	TextArea text_area1(L"test1"), text_area2(L"test2"), text_area3(L"test3");
+	main_wnd.AppendChild(text_area1);
+	main_wnd.AppendChild(text_area2);
+	main_wnd.AppendChild(text_area3);
 	desktop.AddChild(main_wnd);
 	desktop.MessageLoop();
 	return 0;
 }
-
-*/

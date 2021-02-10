@@ -19,6 +19,7 @@ class RedrawQueue {
 private:
 	vector<list<ref_ptr<WndBase>>> _queue;
 	uint _next_depth;
+	bool _has_invalid_frame;
 
 private:
 	RedrawQueue();

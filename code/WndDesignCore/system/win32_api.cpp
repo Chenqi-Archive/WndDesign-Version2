@@ -1,5 +1,6 @@
 #include "../message/message.h"
 #include "../wnd/desktop.h"
+#include "../wnd/reflow_queue.h"
 #include "../wnd/redraw_queue.h"
 
 #include "win32_api.h"
@@ -250,12 +251,16 @@ void ReleaseFocus() {
 }
 
 int MessageLoop() {
-    MSG msg;
-    RedrawQueue& redraw_queue = GetRedrawQueue(); // Initialize redraw queue.
+    // Initialize reflow queue and redraw queue.
+    ReflowQueue& reflow_queue = GetReflowQueue();
+    RedrawQueue& redraw_queue = GetRedrawQueue();
+    MSG msg; 
     while (GetMessageW(&msg, nullptr, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
-        redraw_queue.Commit(); // Commit redraw queue every message loop.
+        // Commit reflow queue and redraw queue every message loop.
+        reflow_queue.Commit();
+        redraw_queue.Commit();
     }
     return (int)msg.wParam;
 }

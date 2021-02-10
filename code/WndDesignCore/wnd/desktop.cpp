@@ -91,6 +91,7 @@ void DesktopWndFrame::ReleaseFocus() {
 }
 
 void DesktopWndFrame::SetRegion(Rect region) {
+	if (_wnd.GetRegionOnParent() == region) { return; }
 	static_cast<DesktopObjectImpl&>(DesktopObject::Get()).SetChildRegionStyle(_wnd_object, region);
 }
 
@@ -104,7 +105,9 @@ WNDDESIGNCORE_API DesktopObject& DesktopObject::Get() {
     return desktop_object;
 }
 
-DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {}
+DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
+	SetAccessibleRegion(Rect(point_zero, GetDesktopSize()));
+}
 
 void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle());
@@ -114,7 +117,7 @@ void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 }
 
 void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
-	SetChildRegionStyle(child, parent_specified_region);
+	WndObject::SetChildRegionStyle(child, parent_specified_region);
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
@@ -164,11 +167,6 @@ std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertNonClientPointToDesktop
 	return std::make_pair(frame._hwnd, point);
 }
 
-
-DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {
-	SetAccessibleRegion(Rect(point_zero, GetDesktopSize()));
-	SetDepth(0);
-}
 
 const Rect DesktopBase::GetCachedRegion() const {
 	return Rect(point_zero, GetDesktopSize()); 

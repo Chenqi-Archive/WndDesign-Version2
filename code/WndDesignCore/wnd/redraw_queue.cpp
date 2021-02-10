@@ -7,7 +7,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-RedrawQueue::RedrawQueue() : _queue(max_wnd_depth + 1), _next_depth(0) {}
+RedrawQueue::RedrawQueue() : _queue(max_wnd_depth + 1), _next_depth(0), _has_invalid_frame(false) {}
 
 void RedrawQueue::AddWnd(WndBase& wnd) {
 	uint depth = wnd.GetDepth(); 
@@ -25,6 +25,7 @@ void RedrawQueue::RemoveWnd(WndBase& wnd) {
 
 void RedrawQueue::AddDesktopWnd(DesktopWndFrame& frame) {
 	frame._redraw_queue_index = _queue[0].insert(_queue[0].begin(), reinterpret_cast<ref_ptr<WndBase>>(&frame));
+	_has_invalid_frame = true;
 }
 
 void RedrawQueue::RemoveDesktopWnd(DesktopWndFrame& frame) {
@@ -33,7 +34,7 @@ void RedrawQueue::RemoveDesktopWnd(DesktopWndFrame& frame) {
 }
 
 void RedrawQueue::Commit() {
-	if (_next_depth == 0) { return; }
+	if (_next_depth == 0 && !_has_invalid_frame) { return; }
 
 	BeginDraw();
 
@@ -51,8 +52,9 @@ void RedrawQueue::Commit() {
 
 	// Update desktop windows, whose depth is 0.
 	assert(next_depth == 0);
-	while (!_queue[next_depth].empty()) {
-		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(_queue[next_depth].front());
+	_has_invalid_frame = false;
+	for (auto wnd : _queue[next_depth]) {
+		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(wnd);
 		frame.UpdateInvalidRegion();
 	}
 

@@ -96,7 +96,7 @@ public:
 
 class DesktopBase : public WndBase {
 public:
-	DesktopBase(DesktopObjectImpl& desktop_object);
+	DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) { _depth = 0; }
 	~DesktopBase() {}
 private:
 	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }

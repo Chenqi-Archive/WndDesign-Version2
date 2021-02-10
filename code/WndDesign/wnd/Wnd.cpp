@@ -13,7 +13,7 @@ Wnd::Wnd(unique_ptr<Style> style) :
 	_client_region(),
 	_invalid_layout({ true, true, true, true }) 
 {
-	if (style == nullptr) { throw std::invalid_argument("style can't be null"); }
+	if (_style == nullptr) { throw std::invalid_argument("style can't be null"); }
 	SetBackground(_style->background.get());
 }
 

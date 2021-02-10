@@ -48,7 +48,6 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
-	_object.OnAttachToParent();
 }
 
 void WndBase::ClearParent() {
@@ -90,6 +89,7 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 	_child_wnds.push_front(&child);
 	child.SetParent(this, _child_wnds.begin());
 	child.SetDepth(GetChildDepth());
+	child._object.OnAttachToParent();
 }
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {

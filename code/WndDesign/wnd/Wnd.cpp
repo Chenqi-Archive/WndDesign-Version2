@@ -1,8 +1,6 @@
 #include "Wnd.h"
 #include "../geometry/geometry_helper.h"
 #include "../style/style_helper.h"
-#include "../figure/figure_queue.h"
-#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

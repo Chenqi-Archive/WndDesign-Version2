@@ -1,9 +1,16 @@
-#include "MainWndFrame.h"
+//#include "MainWnd.h"
+#include "../WndDesign/WndDesign.h"
+
+#ifdef _DEBUG
+#pragma comment(lib, "..\\build\\x64\\Debug\\WndDesign.lib")
+#else
+#pragma comment(lib, "..\\build\\x64\\Release\\WndDesign.lib")
+#endif // _DEBUG
 
 
 int main() {
-	MainWndFrame main_wnd_frame;
-	desktop.AddChild(main_wnd_frame);
-	desktop.MessageLoop();
+	//MainWnd main_wnd;
+	//desktop.AddChild(main_wnd);
+	//desktop.MessageLoop();
 	return 0;
 }

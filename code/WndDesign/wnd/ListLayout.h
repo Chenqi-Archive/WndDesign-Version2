@@ -74,7 +74,7 @@ private:
 		WndObject::SetChildData(child, static_cast<ulonglong>(row));
 	}
 	static uint GetChildData(WndObject& child) {
-		return WndObject::GetChildData<ulonglong>(child);
+		return static_cast<uint>(WndObject::GetChildData<ulonglong>(child));
 	}
 public:
 	void SetChild(WndObject& child, uint row);

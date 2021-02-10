@@ -1,5 +1,4 @@
 #include "TextBox.h"
-#include "../figure/figure_queue.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

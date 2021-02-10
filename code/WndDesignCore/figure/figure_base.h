@@ -5,7 +5,7 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-class RenderTarget;  // An alias for ID2D1DeviceContext.
+struct RenderTarget;  // An alias for ID2D1DeviceContext.
 
 
 // The Figure abstract base class.

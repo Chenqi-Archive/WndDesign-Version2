@@ -1,7 +1,5 @@
 #include "OverlapLayout.h"
 #include "../common/reversion_wrapper.h"
-#include "../figure/figure_queue.h"
-#include "../message/message.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

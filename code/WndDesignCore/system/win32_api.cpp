@@ -104,8 +104,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             ime.UpdateResult(hWnd, lParam);
             break;
         case WM_IME_ENDCOMPOSITION:
-            ImeCompositionMsg ime_composition_msg(ime.GetResult());
-            frame->ReceiveMessage(Msg::ImeCompositionEnd, ime_composition_msg);
+            {
+                ImeCompositionMsg ime_composition_msg(ime.GetResult());
+                frame->ReceiveMessage(Msg::ImeCompositionEnd, ime_composition_msg); 
+            }
             ime.ResetComposition();
             ime.DestroyImeWindow(hWnd);
             break;

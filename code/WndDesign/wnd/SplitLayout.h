@@ -43,7 +43,7 @@ public:
 				NodeStyle style;
 			};
 			struct { // as leaf node
-				ref_ptr<WndObject> wnd = nullptr;
+				ref_ptr<WndObject> wnd;
 			};
 		};
 	protected:

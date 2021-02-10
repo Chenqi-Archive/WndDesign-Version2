@@ -57,11 +57,11 @@ private:
 protected:
 	template<class T> static void SetChildData(WndObject& child, T data) { 
 		static_assert(sizeof(Data) == sizeof(T));
-		child.data = reinterpret_cast<Data>(data);
+		child.data = *reinterpret_cast<Data*>(&data);
 	}
 	template<class T> static T GetChildData(WndObject& child) {
 		static_assert(sizeof(Data) == sizeof(T));
-		return reinterpret_cast<T>(child.data);
+		return *reinterpret_cast<T*>(&child.data);
 	}
 
 

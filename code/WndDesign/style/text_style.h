@@ -14,7 +14,7 @@ using std::unique_ptr;
 using std::wstring;
 using std::list;
 
-class TextLayout;  // An alias for IDWriteTextLayout.
+struct TextLayout;  // An alias for IDWriteTextLayout.
 
 
 struct TextRange {
@@ -67,43 +67,29 @@ public:
 };
 
 
-template <TextStyleBase::Type type, class ValueType>
-struct _TextStyleType : TextStyleBase {
-	ValueType value;
-	_TextStyleType(const ValueType& value) : value(value) {}
-	virtual TextStyleBase::Type GetType() const override { return type; }
-	virtual bool Equals(const TextStyleBase& style) const override {
-		assert(GetType() == style.GetType());
-		return this->value == static_cast<const _TextStyleType&>(style).value;
+#define _DECLARE_TEXT_STYLE(StyleType, ValueType)									\
+	struct TextStyle##StyleType : TextStyleBase{									\
+		ValueType value;															\
+		TextStyle##StyleType(const ValueType& value) : value(value) {}				\
+		virtual TextStyleBase::Type GetType() const override { 						\
+			return TextStyleBase::Type::StyleType; 									\
+		}																			\
+		virtual bool Equals(const TextStyleBase& style) const override {			\
+			assert(GetType() == style.GetType());									\
+			return value == static_cast<const TextStyle##StyleType&>(style).value;	\
+		}																			\
+		virtual unique_ptr<TextStyleBase> Clone() const override {					\
+			return std::make_unique<TextStyle##StyleType>(*this);					\
+		}																			\
+		virtual void ApplyTo(TextLayout& layout, TextRange range) const override;	\
 	}
-	virtual unique_ptr<TextStyleBase> Clone() const override {
-		return std::make_unique<_TextStyleType>(*this);
-	}
-};
 
-struct TextStyleFont : _TextStyleType<TextStyleBase::Type::Font, wstring> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
-
-struct TextStyleSize : _TextStyleType<TextStyleBase::Type::Size, float> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
-
-struct TextStyleBold : _TextStyleType<TextStyleBase::Type::Bold, bool> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
-
-struct TextStyleItalic : _TextStyleType<TextStyleBase::Type::Italic, bool> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
-
-struct TextStyleUnderline : _TextStyleType<TextStyleBase::Type::Underline, bool> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
-
-struct TextStyleColor : _TextStyleType<TextStyleBase::Type::Color, Color> {
-	virtual void ApplyTo(TextLayout& layout, TextRange range) const override;
-};
+_DECLARE_TEXT_STYLE(Font, wstring);
+_DECLARE_TEXT_STYLE(Size, float);
+_DECLARE_TEXT_STYLE(Bold, bool);
+_DECLARE_TEXT_STYLE(Italic, bool);
+_DECLARE_TEXT_STYLE(Underline, bool);
+_DECLARE_TEXT_STYLE(Color, Color);
 
 
 END_NAMESPACE(WndDesign)

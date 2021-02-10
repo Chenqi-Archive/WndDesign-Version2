@@ -1,9 +1,7 @@
 #pragma once
 
 #include "wnd/WndObject.h"
-#include "message/message.h"
 #include "figure/figure_types.h"
-#include "figure/figure_queue.h"
 
 #include <vector>
 #include <string>

@@ -185,7 +185,7 @@ void ListLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Re
 }
 
 bool ListLayout::ClientHandler(Msg msg, Para para) {
-
+	return true;
 }
 
 

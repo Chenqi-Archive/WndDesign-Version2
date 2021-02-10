@@ -15,10 +15,6 @@ private:
 	int _value;
 	Tag _tag;
 
-#error value can store the current value for the Auto tag.
-
-#error can use short to store value
-
 public:
 	explicit constexpr ValueTag(int value, Tag tag = Tag::Pixel) : _value(value), _tag(tag) {}
 	explicit constexpr ValueTag(uint value, Tag tag = Tag::Pixel) : _value(static_cast<int>(value)), _tag(tag) {}
@@ -42,7 +38,6 @@ public:
 		}
 	}
 };
-
 
 
 #pragma warning (push)

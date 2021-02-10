@@ -37,7 +37,7 @@ void TextBlock::TextChanged() {
 	hr = GetDWriteFactory().CreateTextLayout(
 		_text.c_str(), static_cast<UINT>(_text.length()),
 		AsTextFormat(_format),
-		_max_size.width, _max_size.height,
+		(FLOAT)_max_size.width, (FLOAT)_max_size.height,
 		AsTextLayout(&_layout)
 	);
 	AutoResize(_max_size);

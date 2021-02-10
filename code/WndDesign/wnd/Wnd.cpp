@@ -8,13 +8,18 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-Wnd::Wnd(unique_ptr<Style> style) : _style(std::move(style)) {
+Wnd::Wnd(unique_ptr<Style> style) : 
+	_style(std::move(style)),
+	_margin_without_padding(),
+	_margin(),
+	_client_region(),
+	_invalid_layout({ true, true, true, true }) 
+{
 	if (style == nullptr) { throw std::invalid_argument("style can't be null"); }
 	SetBackground(_style->background.get());
 }
 
 Wnd::~Wnd() {}
-
 
 const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
@@ -116,13 +121,16 @@ void Wnd::UpdateClientRegion(Size displayed_client_size) {
 			client_region = style.AutoResizeClientRegionToContent(client_region, content_region); 
 		}
 	}
-	_client_region = client_region + GetClientOffset(); // offset client region so that accessible region's origin will be at (0,0)
-	SetAccessibleRegion(ExtendRegionByMargin(_client_region, _margin));
+	_client_region = client_region; 
+	// offset client region so that accessible region's origin will be at (0,0)
+	SetAccessibleRegion(ExtendRegionByMargin(_client_region + GetClientOffset(), _margin));
 	_invalid_layout.client_region = false;
 }
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
-	OnClientPaint(figure_queue, GetClientRegion(), invalid_region);
+	uint group_begin = figure_queue.BeginGroup(GetClientOffset(), GetClientRegion());
+	OnClientPaint(figure_queue, GetClientRegion(), invalid_region - GetClientOffset());
+	figure_queue.EndGroup(group_begin);
 }
 
 void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
@@ -147,6 +155,9 @@ bool Wnd::NonClientHitTest(Size display_size, Point point) const {
 bool Wnd::NonClientHandler(Msg msg, Para para) {
 	// Hit test border and scrollbar.
 
+	// Mouse enter and mouse leave tracking.
+
+	// Send to layer handler.
 	return WndObject::NonClientHandler(msg, para);
 }
 

@@ -17,12 +17,12 @@ WNDDESIGNCORE_API unique_ptr<IWndBase> IWndBase::Create(WndObject& object) {
 
 WndBase::WndBase(WndObject& object) :
 	_object(object),
-	_parent(nullptr), 
+	_parent(nullptr),
 	_index_on_parent(),
 	_depth(-1),
 	_child_wnds(),
 
-	_accessible_region(region_empty), 
+	_accessible_region(region_empty),
 	_display_offset(point_zero),
 	_region_on_parent(region_empty),
 	_visible_region(region_empty),
@@ -51,12 +51,12 @@ void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterato
 	_object.OnAttachToParent();
 }
 
-void WndBase::ClearParent() { 
-	_parent = nullptr; _index_on_parent = {}; 
+void WndBase::ClearParent() {
+	_parent = nullptr; _index_on_parent = {};
 }
 
 void WndBase::DetachFromParent() {
-	if (HasParent()) { 
+	if (HasParent()) {
 		_parent->_object.RemoveChild(_object);
 	}
 }
@@ -86,6 +86,7 @@ void WndBase::SetDepth(uint depth) {
 
 void WndBase::AddChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
+	assert(child._parent != this);
 	_child_wnds.push_front(&child);
 	child.SetParent(this, _child_wnds.begin());
 	child.SetDepth(GetChildDepth());
@@ -93,6 +94,7 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
+	assert(child._parent == this);
 	_child_wnds.erase(child._index_on_parent);
 	child.ClearParent();
 	// Child's depth will be reset at UpdateInvalidRegion() or UpdateLayout().
@@ -106,7 +108,9 @@ void WndBase::SetAccessibleRegion(Rect accessible_region) {
 	if (_accessible_region == accessible_region) { return; }
 	_accessible_region = accessible_region;
 	if (HasLayer()) { _layer->ResetTileSize(_accessible_region.size); }
-	ResetVisibleRegion();
+	if (SetDisplayOffset(point_zero + GetDisplayOffset()) == vector_zero) {
+		ResetVisibleRegion();
+	}
 }
 
 const Vector WndBase::SetDisplayOffset(Point display_offset) {
@@ -268,7 +272,7 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) c
 		figure_queue.Append(parent_invalid_region.point, new LayerFigure(*_layer, _background, invalid_region, {}));
 	} else {
 		// figure in my coordinates - coordinate_offset = figure in parent's coordinates.
-		uint group_begin = figure_queue.BeginGroup(coordinate_offset, invalid_region);
+		uint group_begin = figure_queue.BeginGroup(vector_zero - coordinate_offset, invalid_region);
 		figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_region, false));
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
 		figure_queue.EndGroup(group_begin);

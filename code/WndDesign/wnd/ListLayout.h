@@ -25,8 +25,8 @@ public:
 	};
 
 public:
-	ListLayout(unique_ptr<Style> style) : Wnd(std::move(style)) {}
-	~ListLayout() {}
+	ListLayout(unique_ptr<Style> style);
+	~ListLayout();
 
 
 	//// style ////
@@ -36,11 +36,9 @@ protected:
 
 private:
 	Size _default_grid_size;
-	uint _min_grid_height, _max_grid_height;
 private:
 	const Size GetDefaultGridSize() { return _default_grid_size; }
-	bool UpdateDefaultGridSize(Size grid_size, uint min_grid_height, uint max_grid_height) {
-
+	bool UpdateDefaultGridSize(Size grid_size) {
 		return _default_grid_size == grid_size ? false : (_default_grid_size = grid_size, true);
 	}
 
@@ -49,7 +47,7 @@ private:
 private:
 	struct RowContainer {
 		uint y = 0;
-		uint height = 0;
+		uint height = -1;
 		ref_ptr<WndObject> wnd = nullptr;
 	public:
 		void Invalidate() { height = -1; }
@@ -58,7 +56,7 @@ private:
 	vector<RowContainer> _rows;
 
 public:
-	constexpr static uint row_end = -1;
+	static inline const uint row_end = -1;
 
 public:
 	uint GetRowNumber() const { return (uint)_rows.size(); }
@@ -78,21 +76,19 @@ private:
 	static uint GetChildData(WndObject& child) {
 		return WndObject::GetChildData<ulonglong>(child);
 	}
-
 public:
 	void SetChild(WndObject& child, uint row);
+	void InsertChild(WndObject& child, uint row);
+	void AppendChild(WndObject& child) { InsertChild(child, row_end); }
 	void RemoveChild(uint row_begin, uint row_count = 1);
-	void InsertChild(WndObject& child, uint row = row_end);
-	void AppendChild(WndObject& child) { InsertChild(child); }
 	void EraseChild(uint row_begin, uint row_count = 1) { EraseRow(row_begin, row_count); }
-
 private:
 	virtual void OnChildDetach(WndObject& child) override;
 
 
 	//// layout update ////
 private:
-	uint _invalid_layout_row_begin = -1;
+	uint _invalid_layout_row_begin;
 private:
 	void ContentLayoutChanged(uint row_begin = 0);
 	uint GetContentHeight() const;
@@ -112,10 +108,11 @@ private:
 	struct HitTestInfo {
 
 	};
-
 	const HitTestInfo HitTestPoint(Point point) {
 
 	}
+private:
+	virtual bool ClientHandler(Msg msg, Para para) override;
 };
 
 

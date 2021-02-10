@@ -1,6 +1,8 @@
 #include "ListLayout.h"
 #include "../style/style_helper.h"
 
+#include <algorithm>
+
 
 BEGIN_NAMESPACE(WndDesign)
 
@@ -9,23 +11,22 @@ BEGIN_NAMESPACE(Anonymous)
 
 struct ListLayoutStyleCalculator : ListLayout::Style {
 public:
+	uint GetGridLineWidth() const { return gridline._width; }
+	Color GetGridLineColor() const { return gridline._color; }
+	bool IsGridHeightAuto() const { return grid_height._normal.IsAuto(); }
 	uint CalculateGridHeight(uint client_height) const {
-		auto& style = GetStyleCalculator(*this);
+		auto& style = GetStyleCalculator(static_cast<const WndStyle&>(*this));
 		LengthStyle height = grid_height;
 		height = style.ConvertLengthToPixel(height, client_height);
+		if (height._normal.IsAuto()) { return height._max.AsUnsigned(); }
 		height._normal = style.BoundLengthBetween(height._normal, height._min, height._max);
 		return height._normal.AsUnsigned();
 	}
-public:
-	uint GetGridLineWidth() const { return gridline._width; }
-	Color GetGridLineColor() const { return gridline._color; }
-	bool IsGridHeightAuto() const {
-		return grid_height._normal.IsAuto();
+	std::pair<uint, uint> CalculateMinMaxGridHeight(uint client_height) const {
+		LengthStyle height = grid_height;
+		height._min.ConvertToPixel(client_height); height._max.ConvertToPixel(client_height);
+		return { height._min.AsUnsigned(), height._max.AsUnsigned() };
 	}
-	const Size CalcualteGridSize(Size client_size) const {
-		return Size(client_size.width, CalculateGridHeight(client_size.height));
-	}
-
 };
 
 const ListLayoutStyleCalculator& GetStyleCalculator(ListLayout::Style& style) {
@@ -35,6 +36,16 @@ const ListLayoutStyleCalculator& GetStyleCalculator(ListLayout::Style& style) {
 
 END_NAMESPACE(Anonymous)
 
+
+ListLayout::ListLayout(unique_ptr<Style> style) : 
+	Wnd(std::move(style)), 
+	_default_grid_size(), 
+	_rows(),
+	_invalid_layout_row_begin(0)
+{
+}
+
+ListLayout::~ListLayout() {}
 
 void ListLayout::SetRowNumber(uint row_number) {
 	uint current_row_number = GetRowNumber();
@@ -51,7 +62,9 @@ void ListLayout::InsertRow(uint row_begin, uint row_count) {
 	uint row_number = GetRowNumber();
 	if (row_begin > row_number) { row_begin = row_number; }
 	_rows.insert(_rows.begin() + row_begin, row_count, RowContainer());
-#error Update child data
+	for (uint row = row_begin + row_count; row < row_number + row_count; ++row) {
+		if (_rows[row].wnd != nullptr) { SetChildData(*_rows[row].wnd, row); }
+	}
 	ContentLayoutChanged(row_begin);
 }
 
@@ -60,7 +73,9 @@ void ListLayout::EraseEmptyRow(uint row_begin, uint row_count) {
 	if (row_begin >= row_number || row_count == 0) { return; }
 	if (row_count > row_number - row_begin) { row_count = row_number - row_begin; }
 	_rows.erase(_rows.begin() + row_begin, _rows.begin() + row_begin + row_count);
-#error Update child data
+	for (uint row = row_begin; row < row_number - row_count; ++row) {
+		if (_rows[row].wnd != nullptr) { SetChildData(*_rows[row].wnd, row); }
+	}
 	ContentLayoutChanged(row_begin);
 }
 
@@ -68,11 +83,6 @@ void ListLayout::EraseRow(uint row_begin, uint row_count) {
 	if (row_count == 0) { return; }
 	RemoveChild(row_begin, row_count);
 	EraseEmptyRow(row_begin, row_count);
-}
-
-void ListLayout::InsertChild(WndObject& child, uint row) {
-	InsertRow(row);
-	SetChild(child, row);
 }
 
 void ListLayout::SetChild(WndObject& child, uint row) {
@@ -84,13 +94,19 @@ void ListLayout::SetChild(WndObject& child, uint row) {
 	SetChildData(child, row);
 }
 
+void ListLayout::InsertChild(WndObject& child, uint row) {
+	InsertRow(row);
+	SetChild(child, row);
+}
+
 void ListLayout::RemoveChild(uint row_begin, uint row_count) {
 	uint row_number = GetRowNumber();
 	if (row_begin >= row_number || row_count == 0) { return; }
 	if (row_count > row_number - row_begin) { row_count = row_number - row_begin; }
-	for (uint i = row_begin; i < row_begin + row_count; ++i) {
-		UnregisterChild(*_rows[i].wnd);
-		_rows[i].wnd = nullptr;
+	for (uint row = row_begin; row < row_begin + row_count; ++row) {
+		UnregisterChild(*_rows[row].wnd);
+		_rows[row].wnd = nullptr;
+		_rows[row].Invalidate();
 	}
 	ContentLayoutChanged(row_begin);
 }
@@ -98,14 +114,14 @@ void ListLayout::RemoveChild(uint row_begin, uint row_count) {
 void ListLayout::OnChildDetach(WndObject& child) {
 	uint row = GetChildData(child);
 	assert(row < GetRowNumber());
-	_rows.
-		Rect child_region = child_container.region;
-	_child_wnds.erase(child_container.list_index);
+	_rows[row].wnd = nullptr;
+	_rows[row].Invalidate();
+	ContentLayoutChanged(row);
 }
 
 void ListLayout::ContentLayoutChanged(uint row_begin) {
+	if (_invalid_layout_row_begin == -1) { Wnd::ContentLayoutChanged(); }
 	if (row_begin < _invalid_layout_row_begin) { _invalid_layout_row_begin = row_begin; }
-	Wnd::ContentLayoutChanged();
 }
 
 uint ListLayout::GetContentHeight() const {
@@ -123,48 +139,52 @@ void ListLayout::ChildRegionMayChange(WndObject& child) {
 
 const Rect ListLayout::UpdateContentLayout(Size client_size) {
 	auto& style = GetStyleCalculator(GetStyle());
-	if (client_size == GetClientSize()) {
-	} else {
-		if (UpdateDefaultGridSize(style.CalcualteGridSize(client_size))) {
+	bool all_invalid = false;
+	if (client_size != GetClientSize()) {
+		if (UpdateDefaultGridSize(Size(style.CalculateGridHeight(client_size.height), client_size.width))) {
 			_invalid_layout_row_begin = 0;
+			all_invalid = true;
 		}
 	}
-	if (_invalid_layout_row_begin <= GetRowNumber()) {
-		Size grid_size = GetDefaultGridSize();
-		uint grid_height_max = 
-		uint gridline_width = style.GetGridLineWidth();
-
-		uint modified_grid_offset = -1;
-
-		uint y = _rows[_invalid_layout_row_begin].y;
-
-		for (uint i = _invalid_layout_row_begin; i < GetRowNumber(); ++i) {
-			uint height = 0;
-			if (_rows[i].wnd != nullptr) {
-				height = UpdateChildRegion(*_rows[i].wnd, grid_size).size.height;
-			}
-			BoundHeight();
-			if (_rows[i].height != height) {
-				if (_rows[i].wnd != nullptr) {
-					SetChildRegion(child, Rect(0, y, client_size.width, height));
-				}
-			}
-			_rows[i].y = y;
-			_rows[i].height = height;
-			y += height + gridline_width;
-		}
-		Invalidate(Rect(0, , client_size.width, ));
-		_invalid_layout_row_begin = -1;
+	if (_invalid_layout_row_begin >= GetRowNumber()) {
+		return Rect(point_zero, Size(client_size.width, GetContentHeight()));
 	}
-	return Rect(point_zero, Size(client_size.width, GetContentHeight()));
+	auto [min_grid_height, max_grid_height] = style.CalculateMinMaxGridHeight(client_size.height);
+	auto BoundHeightBetween = [](uint height, uint min_height, uint max_height) -> uint {
+		if (height < min_height) { height = min_height; } if (height > max_height) { height = max_height; } return height;
+	};
+	uint y0 = _rows[_invalid_layout_row_begin].y;
+	uint y = y0;
+	uint gridline_width = style.GetGridLineWidth();
+	for (uint row = _invalid_layout_row_begin; row < GetRowNumber(); ++row) {
+		uint height = 0;
+		if (_rows[row].wnd != nullptr && (all_invalid || _rows[row].IsInvalid())) {
+			height = UpdateChildRegion(*_rows[row].wnd, _default_grid_size).size.height;
+		}
+		height = BoundHeightBetween(height, min_grid_height, max_grid_height);
+		_rows[row].y = y;
+		_rows[row].height = height;
+		if (_rows[row].wnd != nullptr) {
+			SetChildRegion(*_rows[row].wnd, Rect(0, (int)y, client_size.width, height));
+		}
+		y += height + gridline_width;
+	}
+	uint height = GetContentHeight();
+	Invalidate(Rect(0, (int)y0, client_size.width, height - y0));
+	_invalid_layout_row_begin = -1;
+	return Rect(point_zero, Size(client_size.width, height));
 }
 
 void ListLayout::OnChildRegionUpdate(WndObject& child) {
-	assert(!GetStyleCalculator().IsGridHeightAuto());
+	assert(!GetStyleCalculator(GetStyle()).IsGridHeightAuto());
 	UpdateChildRegion(child, GetDefaultGridSize());
 }
 
 void ListLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {
+
+}
+
+bool ListLayout::ClientHandler(Msg msg, Para para) {
 
 }
 

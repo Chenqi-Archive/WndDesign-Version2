@@ -35,8 +35,9 @@ private:
 private:
 	Margin _margin_without_padding;
 	Margin _margin;
-	Rect _client_region;
+	Rect _client_region;  // in client_region's coordinates
 public:
+	// point_on_client_region + GetClientOffset() = point_on_accessible_region
 	const Vector GetClientOffset() const {return Vector(_margin.left, _margin.top);}
 	const Rect GetClientRegion() const { return _client_region; }
 	const Size GetClientSize() const { return _client_region.size; }
@@ -50,39 +51,24 @@ private:
 		bool client_region;
 		bool content_layout;
 	};
-	InvalidLayout _invalid_layout = { true, true, true, true };
+	InvalidLayout _invalid_layout;
 	virtual bool HasInvalidLayout() const override {
 		return _invalid_layout.region_on_parent || _invalid_layout.margin || 
 			_invalid_layout.client_region || _invalid_layout.content_layout;
 	}
+	WndObject::InvalidateLayout;
 protected:
-	enum class LayoutRegion {
-		RegionOnParent,
-		Margin,
-		ClientRegion,
-		ContentLayout,
-	};
-	constexpr void LayoutChanged(LayoutRegion layout_region) {
-		switch (layout_region) {
-		case LayoutRegion::RegionOnParent: _invalid_layout.region_on_parent = true;	break;
-		case LayoutRegion::Margin: _invalid_layout.margin = true; break;
-		case LayoutRegion::ClientRegion: _invalid_layout.client_region = true; break;
-		case LayoutRegion::ContentLayout: _invalid_layout.content_layout = true; break;
-		default: throw std::invalid_argument("layout type unrecognized");
-		}
-		JoinReflowQueue();
-	}
-	void RegionOnParentChanged() { LayoutChanged(LayoutRegion::RegionOnParent); }
-	void MarginChanged() { LayoutChanged(LayoutRegion::Margin); }
-	void ClientRegionChanged() { LayoutChanged(LayoutRegion::ClientRegion); }
-	void ContentLayoutChanged() { LayoutChanged(LayoutRegion::ContentLayout); }
+	void RegionOnParentChanged() { _invalid_layout.region_on_parent = true; InvalidateLayout(); }
+	void MarginChanged() { _invalid_layout.margin = true; InvalidateLayout(); }
+	void ClientRegionChanged() { _invalid_layout.client_region = true; InvalidateLayout(); }
+	void ContentLayoutChanged() { _invalid_layout.content_layout = true; InvalidateLayout(); }
 
 private:
 	virtual void OnAttachToParent() override { RegionOnParentChanged(); }
 	/* called by reflow queue for the first time to check if parent's layout may be influenced */
-	// returns true if region_on_parent may change, and reflow queue will add parent window in.
+	// returns true if region_on_parent may change, and reflow queue will notify parent window.
 	virtual bool MayRegionOnParentChange() override;
-	/* called by reflow queue when finally updating */
+	/* called by reflow queue when finally update layout */
 	virtual void UpdateLayout() override;
 	/* called by parent window when parent is updating */
 	virtual const Rect UpdateRegionOnParent(Size parent_size) override;
@@ -93,7 +79,7 @@ private:
 	virtual const Rect UpdateContentLayout(Size client_size) { return Rect(point_zero, client_size); }
 
 
-	// child windows
+	//// child windows ////
 protected:
 	void SetChildRegion(WndObject& child, Rect region) {
 		WndObject::SetChildRegion(child, region + GetClientOffset());
@@ -113,7 +99,6 @@ protected:
 	}
 private:
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override /*final*/;
-private:
 	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {}
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const override;
 

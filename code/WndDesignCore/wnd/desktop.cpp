@@ -57,7 +57,7 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 	//   push the group as the desktop relative to the target.
 	FigureQueue figure_queue;
 	Vector offset_from_desktop = _wnd.OffsetFromParent();
-	uint group_begin = figure_queue.BeginGroup(vector_zero - offset_from_desktop, _wnd.GetRegionOnParent());
+	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, _wnd.GetRegionOnParent());
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);
 	figure_queue.EndGroup(group_begin);
 

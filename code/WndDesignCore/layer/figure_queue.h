@@ -48,7 +48,7 @@ public:
 public:
 	uint BeginGroup(Vector coordinate_offset, Rect bounding_region) {
 		uint group_begin_index = (uint)groups.size();
-		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), vector_zero - coordinate_offset, bounding_region });
+		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), coordinate_offset, bounding_region });
 		return group_begin_index;
 	}
 	void EndGroup(uint group_begin_index) {

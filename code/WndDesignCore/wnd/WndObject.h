@@ -51,7 +51,7 @@ private:
 
 	//// data used by parent window ////
 protected:
-	using Data = unsigned long long; static_assert(sizeof(Data) == 8);
+	using Data = ulonglong; static_assert(sizeof(Data) == 8);
 private:
 	Data data = 0;
 protected:
@@ -87,8 +87,8 @@ private:
 	//// layout update ////
 protected:
 	void InvalidateLayout() { wnd->InvalidateLayout(); }
-protected:
 	void UpdateRegionOnParent() { if (HasParent()) { GetParent()->OnChildRegionUpdate(*this); } }
+protected:
 	static const Rect UpdateChildRegion(WndObject& child, Size parent_size) { return child.UpdateRegionOnParent(parent_size); }
 	static void SetChildRegionStyle(WndObject& child, Rect parent_specified_region) { child.SetRegionStyle(parent_specified_region); }
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
@@ -105,11 +105,11 @@ private:
 
 
 	//// other window styles ////
-protected:
-	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
 public:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { return { size_min, size_max }; }
 	virtual const wstring GetTitle() const { return L""; }
+protected:
+	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
 private:
 	virtual void OnChildTitleChange(WndObject& child) {}
 	
@@ -122,15 +122,12 @@ protected:
 	void NonClientInvalidate(Rect invalid_non_client_region) {
 		if (HasParent()) { GetParent()->InvalidateChild(*this, invalid_non_client_region); }
 	}
-private:
-	void InvalidateChild(WndObject& child, Rect child_invalid_region) {
-		Rect child_region = GetChildRegion(child);
-		Invalidate(child_region.Intersect(child_invalid_region + (child_region.point - point_zero)));
-	}
 protected:
 	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) { 
 		child.wnd->Composite(figure_queue, parent_invalid_region); 
 	}
+private:
+	void InvalidateChild(WndObject& child, Rect child_invalid_region) { wnd->InvalidateChild(*child.wnd, child_invalid_region); }
 private:
 	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {}
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {}
@@ -143,12 +140,8 @@ public:
 	void ReleaseCapture() { wnd->ReleaseCapture(); }
 	void ReleaseFocus() { wnd->ReleaseFocus(); }
 protected:
-	static bool HitTestChild(const WndObject& child, Point point) { 
-		return child.NonClientHitTest(child.GetDisplaySize(), point); 
-	}
-	bool SendChildMessage(WndObject& child, Msg msg, Para para) { 
-		return wnd->SendChildMessage(*child.wnd, msg, para);
-	}
+	static bool HitTestChild(const WndObject& child, Point point) { return child.NonClientHitTest(child.GetDisplaySize(), point); }
+	bool SendChildMessage(WndObject& child, Msg msg, Para para) { return wnd->SendChildMessage(*child.wnd, msg, para); }
 private:
 	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
 protected:
@@ -164,6 +157,7 @@ class ABSTRACT_BASE DesktopObject : protected WndObject {
 protected:
 	DesktopObject(unique_ptr<IWndBase> desktop) : WndObject(std::move(desktop)) {}
 	~DesktopObject() {}
+
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 

@@ -1,13 +1,15 @@
 #pragma once
 
-#include "WndObject.h"
+#include "Wnd.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class SplitLayout : public WndObject {
+class SplitLayout : public Wnd {
 public:
+	using Style = Wnd::Style;
+
 	struct NodeStyle {
 	public:
 		uint _line_width = 3;
@@ -25,6 +27,12 @@ public:
 		constexpr NodeStyle& which(bool is_second) { _which = is_second ? Second : First; return *this; }
 		constexpr NodeStyle& position(ValueTag position) { _position = position; return *this; }
 	};
+
+public:
+	SplitLayout(unique_ptr<Style> style) : Wnd(std::move(style)) {}
+	~SplitLayout() {}
+
+public:
 	class Node {
 	private:
 		ref_ptr<Node> parent;
@@ -83,29 +91,24 @@ private:
 public:
 	Node& GetRootNode() { return _root; }
 	const Node& GetRootNode() const { return _root; }
+
+
+	//// child windows ////
+
 	void SetChild(Node& node, WndObject& child) {
 
 	}
 
 private:
-
 	struct HitTestInfo {
 		ref_ptr<const Node> node;
 		Point point;
-		void Clear() { node = nullptr; point = point_zero; }
 	};
-
-	virtual const WndObject& HitTestChild(Point point) const { 
-		_hit_test_cache = HitTestPoint(point);
-		const Node& node = *_hit_test_cache.node;
-		if (node.IsLeaf() && node.GetWnd() != nullptr) { return *node.GetWnd(); }
-		return *this;
-	}
 
 	// The point must fall on a leaf node, or the split line of an internal node.
 	const HitTestInfo HitTestPoint(Point point) const {
 		ref_ptr<const Node> node = &GetRootNode();
-		assert(node->region.Contains(point));
+		if (!node->region.Contains(point)) { return { nullptr, point }; }
 		while (true) {
 			if (!node->IsLeaf()) {
 				const Node& first = node->GetFirst();
@@ -118,11 +121,6 @@ private:
 		}
 		assert(false);
 	}
-
-	// HitTest is usually followed by Handler, so if myself is hit, 
-	//   cache the hit test information to avoid doing it again.
-private:
-	mutable HitTestInfo _hit_test_cache;
 
 protected:
 	virtual bool Handler(Msg msg, Para para) override { return true; }

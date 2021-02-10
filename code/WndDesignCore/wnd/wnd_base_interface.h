@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../geometry/geometry.h"
+#include "../message/msg_base.h"
 
 #include <memory>
 
@@ -34,13 +35,13 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void SetRegionOnParent(Rect region_on_parent) pure;
 
 	//// layout update ////
-	virtual void JoinReflowQueue() pure;
-	virtual void LeaveReflowQueue() pure;
+	virtual void InvalidateLayout() pure;
 
 	//// painting and composition ////
 	virtual void SetBackground(const Background& background) pure;
 	virtual void AllocateLayer() pure;
 	virtual void Invalidate(Rect region) pure;
+	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) pure;
 	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const pure;
 
 	//// message handling ////

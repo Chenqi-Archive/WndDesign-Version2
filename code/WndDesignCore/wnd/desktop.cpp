@@ -27,17 +27,39 @@ void DesktopWndFrame::LeaveRedrawQueue() {
 	if (_redraw_queue_index.valid()) { RedrawQueue::Get().RemoveDesktopWnd(*this); } 
 }
 
+void DesktopWndFrame::OnRegionUpdate(Rect region) {
+	Rect old_region = _wnd.GetRegionOnParent();
+	if (old_region.size != region.size) {
+		_resource.OnResize(region.size);
+		Invalidate(Rect(point_zero, region.size));
+	}
+}
+
+void DesktopWndFrame::Invalidate(Region& region) {
+	_invalid_region.Union(region);
+	if (!_invalid_region.IsEmpty()) {
+		JoinRedrawQueue();
+	}
+}
+
+void DesktopWndFrame::Invalidate(Rect region) {
+	Invalidate(Region::Temp(region));
+}
+
 void DesktopWndFrame::UpdateInvalidRegion() {
-	auto [bounding_region, regions] = _wnd._invalid_region.GetRect();
+	_invalid_region.Intersect(Rect(point_zero, _wnd.GetRegionOnParent().size));
+	if (_invalid_region.IsEmpty()) { return; }
+
+	auto [bounding_region, regions] = _invalid_region.GetRect();
 
 	// A little tricky here. 
 	// Figures are drawn in desktop's coordinates, but the target is in window's coordinates, so first
 	//   push the group as the desktop relative to the target.
 	FigureQueue figure_queue;
 	Vector offset_from_desktop = _wnd.OffsetFromParent();
-	uint group_index = figure_queue.BeginGroup(vector_zero - offset_from_desktop, Rect(point_zero, GetDesktopSize()));
+	uint group_begin = figure_queue.BeginGroup(vector_zero - offset_from_desktop, _wnd.GetRegionOnParent());
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);
-	figure_queue.EndGroup(group_index);
+	figure_queue.EndGroup(group_begin);
 
 	Target& target = _resource.GetTarget();
 	for (auto& region : regions) {
@@ -45,13 +67,11 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 	}
 
 	// The invalid region will still be used at present time, and will be cleared after presentation, see below.
-
-	JoinRedrawQueue();
 }
 
 void DesktopWndFrame::Present() { 
-	_resource.Present(_wnd._invalid_region.GetRect().second);
-	_wnd._invalid_region.Clear();
+	_resource.Present(_invalid_region.GetRect().second);
+	_invalid_region.Clear();
 }
 
 void DesktopWndFrame::SetCapture() {
@@ -71,12 +91,7 @@ void DesktopWndFrame::ReleaseFocus() {
 }
 
 void DesktopWndFrame::SetRegion(Rect region) {
-	Rect old_region = _wnd.GetRegionOnParent();
-	if (old_region.size != region.size) {
-		_resource.OnResize(region.size);
-		_wnd.Invalidate(region_infinite);
-	}
-	_wnd.SetRegionOnParent(region);
+	static_cast<DesktopObjectImpl&>(DesktopObject::Get()).SetChildRegionStyle(_wnd_object, region);
 }
 
 const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
@@ -96,7 +111,10 @@ void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
 	frame._desktop_index = _child_wnds.begin();
 	SetChildFrame(child_object, frame);
-	frame.Invalidate(region_infinite);
+}
+
+void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
+	SetChildRegionStyle(child, parent_specified_region);
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
@@ -108,9 +126,10 @@ void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 
 void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
-	Rect child_region = UpdateChildRegion(child, GetSize());
-	Win32::MoveWnd(frame._hwnd, child_region);
-	SetChildRegion(child, child_region);
+	Rect region = UpdateChildRegion(child, GetSize());
+	frame.OnRegionUpdate(region);
+	Win32::MoveWnd(frame._hwnd, region);
+	SetChildRegion(child, region);
 }
 
 void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {

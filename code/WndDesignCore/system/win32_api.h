@@ -7,8 +7,6 @@ BEGIN_NAMESPACE(WndDesign)
 
 using HANDLE = void*;
 
-class DesktopWndFrame;
-
 
 BEGIN_NAMESPACE(Win32)
 

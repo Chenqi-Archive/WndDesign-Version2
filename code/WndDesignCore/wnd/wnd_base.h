@@ -4,7 +4,6 @@
 #include "../common/reference_wrapper.h"
 #include "../common/list_iterator.h"
 #include "../geometry/region.h"
-#include "../message/msg_base.h"
 
 #include <list>
 #include <memory>
@@ -98,6 +97,7 @@ public:
 	virtual void SetRegionOnParent(Rect region_on_parent) override;
 
 public:
+	const Vector GetDisplayOffset() const { return _display_offset - point_zero; }
 	// point_on_parent + offset_from_parent = point_on_myself
 	const Vector OffsetFromParent() const { return _display_offset - _region_on_parent.point; }
 
@@ -107,8 +107,9 @@ private:
 	friend class ReflowQueue;
 	list_iterator<ref_ptr<WndBase>> _reflow_queue_index;
 private:
-	virtual void JoinReflowQueue() override;
-	virtual void LeaveReflowQueue() override;
+	void JoinReflowQueue();
+	void LeaveReflowQueue();
+	virtual void InvalidateLayout() override { JoinReflowQueue(); }
 
 
 	//// invalid layout ////
@@ -156,7 +157,8 @@ private:
 	Region _invalid_region;
 private:
 	/* called by child window when child has updated invalid region */
-	virtual void Invalidate(WndBase& child);
+	virtual void InvalidateChild(WndBase& child, Region& child_invalid_region);
+	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) override;
 public:
 	virtual void Invalidate(Rect region) override;
 	/* called by redraw queue at commit time */

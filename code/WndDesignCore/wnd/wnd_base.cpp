@@ -48,6 +48,7 @@ WndBase::~WndBase() {
 void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = parent; _index_on_parent = index_on_parent;
+	_object.OnAttachToParent();
 }
 
 void WndBase::ClearParent() { 
@@ -203,15 +204,17 @@ void WndBase::LeaveRedrawQueue() {
 	}
 }
 
-void WndBase::Invalidate(WndBase& child) {
-	Region& child_invalid_region = child._invalid_region;
-	child_invalid_region.Translate(vector_zero - child.OffsetFromParent());
+void WndBase::InvalidateChild(WndBase& child, Region& child_invalid_region) {
+	child_invalid_region.Translate(child._region_on_parent.point - point_zero);
 	child_invalid_region.Intersect(child._region_on_parent.Intersect(GetCachedRegion()));
 	if (!child_invalid_region.IsEmpty()) {
 		_invalid_region.Union(child_invalid_region);
 		JoinRedrawQueue();
 	}
-	child_invalid_region.Clear();
+}
+
+void WndBase::InvalidateChild(IWndBase& child, Rect child_invalid_region) {
+	InvalidateChild(static_cast<WndBase&>(child), Region::Temp(child_invalid_region));
 }
 
 void WndBase::Invalidate(Rect region) {
@@ -246,12 +249,15 @@ void WndBase::UpdateInvalidRegion() {
 		}
 	}
 
-	// Invalidate parent window, my invalid region will be cleared by parent window.
-	_parent->Invalidate(*this);
+	// Invalidate parent window, my invalid region will be used by parent window.
+	_invalid_region.Translate(vector_zero - GetDisplayOffset());
+	_parent->InvalidateChild(*this, _invalid_region);
+	_invalid_region.Clear();
 }
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
-	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent); // intersection has been done by parent
+	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
+	assert(_region_on_parent.Contains(parent_invalid_region)); // intersection should have been done by parent.
 
 	// Composite client region.
 	// Convert parent invalid region to my invalid region.

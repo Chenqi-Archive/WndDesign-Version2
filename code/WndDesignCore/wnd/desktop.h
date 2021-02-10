@@ -31,6 +31,13 @@ private:
 	void JoinRedrawQueue();
 	void LeaveRedrawQueue();
 
+	void OnRegionUpdate(Rect region);
+
+private:
+	Region _invalid_region;
+public:
+	void Invalidate(Region& region);
+	void Invalidate(Rect region);
 public:
 	void UpdateInvalidRegion();
 	void Present();
@@ -45,7 +52,6 @@ public:
 	/* callback by WndProc */
 	void LoseCapture() { _wnd.ChildLoseCapture(); }
 	void LoseFocus() { _wnd.ChildLoseFocus(); }
-	void Invalidate(Rect region) { _wnd.Invalidate(region);	}
 	void ReceiveMessage(Msg msg, Para para) const { _wnd.DispatchMessage(msg, para); }
 	void SetRegion(Rect region);
 	const Vector OffsetFromParent() const { return _wnd.OffsetFromParent(); }
@@ -71,11 +77,13 @@ public:
 
 	void AddChild(WndBase& child, WndObject& child_object);
 
+	void SetChildRegionStyle(WndObject& child, Rect parent_specified_region);
+
 	virtual void OnChildDetach(WndObject& child) override;
 	virtual void OnChildRegionUpdate(WndObject& child) override;
 	virtual void OnChildTitleChange(WndObject& child) override;
 
-	void UpdateChildInvalidRegion(WndObject& child) { GetChildFrame(child).UpdateInvalidRegion(); }
+	void InvalidateChild(WndObject& child, Region& child_invalid_region) { GetChildFrame(child).Invalidate(child_invalid_region); }
 	void SetChildCapture(WndObject& child) { GetChildFrame(child).SetCapture(); }
 	void SetChildFocus(WndObject& child) { GetChildFrame(child).SetFocus(); }
 
@@ -96,7 +104,7 @@ private:
 	virtual const Rect GetCachedRegion() const override;
 private:
 	virtual void AddChild(IWndBase& child_wnd) override;
-	virtual void Invalidate(WndBase& child) override { GetObject().UpdateChildInvalidRegion(child._object); }
+	virtual void InvalidateChild(WndBase& child, Region& child_invalid_region) override { GetObject().InvalidateChild(child._object, child_invalid_region); }
 	virtual void SetChildCapture(WndBase& child) override { GetObject().SetChildCapture(child._object); }
 	virtual void SetChildFocus(WndBase& child) override { GetObject().SetChildFocus(child._object); }
 	virtual void ReleaseCapture() override;

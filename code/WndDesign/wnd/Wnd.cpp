@@ -31,6 +31,7 @@ void Wnd::SetRegionStyle(Rect parent_specified_region) {
 	style.position.top(px(parent_specified_region.point.y));
 	style.width.normal(px(parent_specified_region.size.width));
 	style.height.normal(px(parent_specified_region.size.height));
+	RegionOnParentChanged();
 }
 
 bool Wnd::MayRegionOnParentChange() {

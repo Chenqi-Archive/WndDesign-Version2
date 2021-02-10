@@ -36,6 +36,8 @@ void RedrawQueue::Commit() {
 	if (_next_depth == 0) { return; }
 
 	BeginDraw();
+
+	// Update all windows.
 	uint next_depth = _next_depth;
 	_next_depth = 0;
 	while (next_depth > 0) {
@@ -46,9 +48,17 @@ void RedrawQueue::Commit() {
 		}
 		next_depth--;
 	}
+
+	// Update desktop windows, whose depth is 0.
+	assert(next_depth == 0);
+	while (!_queue[next_depth].empty()) {
+		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(_queue[next_depth].front());
+		frame.UpdateInvalidRegion();
+	}
+
 	EndDraw();
 
-	// Present desktop windows whose depth is 0. (Now next_depth must be 0.)
+	// Present and remove desktop windows.
 	while (!_queue[next_depth].empty()) {
 		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(_queue[next_depth].front());
 		frame.Present();

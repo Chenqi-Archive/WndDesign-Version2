@@ -2,8 +2,8 @@
 
 #include "wnd_base_interface.h"
 #include "../common/uncopyable.h"
-#include "../message/message.h"
 #include "../layer/figure_queue.h"
+#include "../message/message.h"
 
 #include <string>
 
@@ -36,7 +36,7 @@ public:
 protected:
 	void RegisterChild(WndObject& child) { 
 		assert(child.GetParent() != this);
-		wnd->AddChild(*child.wnd); child.parent = this; child.OnAttachToParent(); 
+		child.parent = this; wnd->AddChild(*child.wnd);
 	}
 	void UnregisterChild(WndObject& child) { 
 		assert(child.GetParent() == this);
@@ -68,16 +68,16 @@ protected:
 	//// window region ////
 public:
 	const Rect GetAccessibleRegion() const { return wnd->GetAccessibleRegion(); }
-	const Rect GetDisplayRegion() const { return wnd->GetDisplayRegion(); }
 	const Size GetSize() const { return GetAccessibleRegion().size; }
-	const Point GetDisplayOffset() const { return GetDisplayRegion().point; }
+	const Rect GetDisplayRegion() const { return wnd->GetDisplayRegion(); }
 	const Size GetDisplaySize() const { return GetDisplayRegion().size; }
+	const Vector GetDisplayOffset() const { return GetDisplayRegion().point - point_zero; }
 public:
-	const Point ConvertPointToNonClientPoint(Point point) const { return point - (GetDisplayOffset() - point_zero); }
+	const Point ConvertPointToNonClientPoint(Point point) const { return point - GetDisplayOffset(); }
 	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (wnd->GetRegionOnParent().point - point_zero); }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
-	const Vector SetDisplayOffset(Point display_offset) { return wnd->SetDisplayOffset(display_offset); }
+	const Vector SetDisplayOffset(Vector display_offset) { return wnd->SetDisplayOffset(point_zero + display_offset); }
 	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real offset shifted
 private:
 	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrolling
@@ -86,10 +86,9 @@ private:
 
 	//// layout update ////
 protected:
-	void JoinReflowQueue() { wnd->JoinReflowQueue(); }
-	void LeaveReflowQueue() { wnd->LeaveReflowQueue(); }
+	void InvalidateLayout() { wnd->InvalidateLayout(); }
 protected:
-	void UpdateRegionOnParent() { if (HasParent()) { GetParent()->OnChildRegionUpdate(*this); } else { LeaveReflowQueue(); } }
+	void UpdateRegionOnParent() { if (HasParent()) { GetParent()->OnChildRegionUpdate(*this); } }
 	static const Rect UpdateChildRegion(WndObject& child, Size parent_size) { return child.UpdateRegionOnParent(parent_size); }
 	static void SetChildRegionStyle(WndObject& child, Rect parent_specified_region) { child.SetRegionStyle(parent_specified_region); }
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
@@ -119,7 +118,7 @@ private:
 protected:
 	void SetBackground(const Background& background) { wnd->SetBackground(background); }
 	void AllocateLayer() { wnd->AllocateLayer(); }
-	void Invalidate(Rect region) { wnd->Invalidate(region); }
+	void Invalidate(Rect invalidate_client_region) { wnd->Invalidate(invalidate_client_region); }
 	void NonClientInvalidate(Rect invalid_non_client_region) {
 		if (HasParent()) { GetParent()->InvalidateChild(*this, invalid_non_client_region); }
 	}
@@ -154,10 +153,7 @@ private:
 	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
 protected:
 	virtual bool NonClientHandler(Msg msg, Para para) {
-		if (IsMouseMsg(msg)) {
-			MouseMsg& mouse_msg = GetMouseMsg(para);
-			mouse_msg.point = mouse_msg.point + (GetDisplayOffset() - point_zero);
-		}
+		if (IsMouseMsg(msg)) { MouseMsg& mouse_msg = GetMouseMsg(para); mouse_msg.point = mouse_msg.point + GetDisplayOffset(); }
 		return Handler(msg, para);
 	}
 	virtual bool Handler(Msg msg, Para para) { return true; }

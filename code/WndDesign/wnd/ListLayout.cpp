@@ -51,6 +51,7 @@ void ListLayout::InsertRow(uint row_begin, uint row_count) {
 	uint row_number = GetRowNumber();
 	if (row_begin > row_number) { row_begin = row_number; }
 	_rows.insert(_rows.begin() + row_begin, row_count, RowContainer());
+#error Update child data
 	ContentLayoutChanged(row_begin);
 }
 
@@ -59,6 +60,7 @@ void ListLayout::EraseEmptyRow(uint row_begin, uint row_count) {
 	if (row_begin >= row_number || row_count == 0) { return; }
 	if (row_count > row_number - row_begin) { row_count = row_number - row_begin; }
 	_rows.erase(_rows.begin() + row_begin, _rows.begin() + row_begin + row_count);
+#error Update child data
 	ContentLayoutChanged(row_begin);
 }
 

@@ -1,5 +1,6 @@
 #include "../WndDesign/WndDesign.h"
 #include "../WndDesign/wnd/Wnd.h"
+#include "../WndDesign/system/win32_aero_snap.h"
 
 
 using namespace WndDesign;
@@ -16,10 +17,10 @@ class MainWnd : public Wnd {
 private:
 	struct Style : Wnd::Style {
 		Style() {
-			width.setFixed(70pct);
-			height.setFixed(70pct);
+			width.normal(800px).max(100pct);
+			height.normal(500px).max(100pct);
 			position.setHorizontalCenter().setVerticalCenter();
-			border.width(5).color(ColorSet::DarkGreen);
+			border.width(30).color(ColorSet::DarkGreen);
 			background.setColor(ColorSet::LightGray);
 			title.set(L"Wnd and Desktop test");
 		}
@@ -27,6 +28,14 @@ private:
 public:
 	MainWnd() : Wnd(std::make_unique<Style>()) {}
 	~MainWnd() {}
+
+private:
+	virtual bool NonClientHandler(Msg msg, Para para) override {
+		if (msg == Msg::LeftDown) {
+			AeroSnapDraggingEffect(*this, GetMouseMsg(para).point);
+		}
+		return true;
+	}
 };
 
 int main() {

@@ -254,15 +254,23 @@ int MessageLoop() {
     // Initialize reflow queue and redraw queue.
     ReflowQueue& reflow_queue = GetReflowQueue();
     RedrawQueue& redraw_queue = GetRedrawQueue();
-    MSG msg; 
-    while (GetMessageW(&msg, nullptr, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
-        // Commit reflow queue and redraw queue every message loop.
+    MSG msg;
+    while (true) {
+        GetMessageW(&msg, nullptr, 0, 0);
+        do {
+            if (msg.message == WM_QUIT) {
+                return (int)msg.wParam;
+            }
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        } while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE));
+
+    #pragma message(Remark"Could also set an update interval, may be 40ms, to avoid update frequently.")
+        // Commit reflow queue and redraw queue when there are no more messages.
         reflow_queue.Commit();
         redraw_queue.Commit();
     }
-    return (int)msg.wParam;
+    assert(false); return 0;
 }
 
 

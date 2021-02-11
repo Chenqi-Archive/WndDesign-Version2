@@ -144,8 +144,12 @@ public:
 	bool HasBorder() const { 
 		return border._width > 0 && border._color != color_transparent; 
 	}
-	const RoundedRectangle GetBorder(Size display_size) const { 
-		return RoundedRectangle(display_size, border._radius, (float)border._width, border._color); 
+	unique_ptr<Figure> GetBorder(Size display_size) const { 
+		if (border._radius > 0) {
+			return std::make_unique<RoundedRectangle>(display_size, border._radius, (float)border._width, border._color);
+		} else {
+			return std::make_unique<Rectangle>(display_size, (float)border._width, border._color);
+		}
 	}
 	bool IsPointInside(Size display_size, Point point) const {
 		return PointInRoundedRectangle(display_size, border._radius, point);

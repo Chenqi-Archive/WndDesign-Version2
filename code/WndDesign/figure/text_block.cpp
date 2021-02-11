@@ -45,6 +45,8 @@ void TextBlock::TextChanged() {
 }
 
 void TextBlock::AutoResize(Size max_size) {
+	if (_max_size == max_size) { return; }
+
 	if (_max_size.width != max_size.width) {
 		_max_size.width = max_size.width; _layout->SetMaxWidth(static_cast<FLOAT>(_max_size.width));
 	}

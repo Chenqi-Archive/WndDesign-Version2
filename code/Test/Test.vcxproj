@@ -156,7 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Wnd_and_Desktop_test.h" />
-    <ClInclude Include="OverlapLayout_and TextBox_test.h" />
+    <ClInclude Include="OverlapLayout_and_TextBox_test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

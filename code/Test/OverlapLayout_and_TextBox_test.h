@@ -17,7 +17,7 @@ class MainWnd : public OverlapLayout {
 private:
 	struct Style : Wnd::Style {
 		Style() {
-			width.normal(800px).max(100pct);
+			width.normal(600px).max(100pct);
 			height.normal(500px).max(100pct);
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(50).color(ColorSet::DarkGreen);

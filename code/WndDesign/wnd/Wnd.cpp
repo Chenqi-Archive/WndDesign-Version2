@@ -136,7 +136,7 @@ void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect display_region_without_border = style.GetDisplayRegionWithoutBorder(display_size);
 	if (style.HasBorder() && !display_region_without_border.Contains(invalid_display_region)) {
-		figure_queue.Append(point_zero, new RoundedRectangle(style.GetBorder(display_size)));
+		figure_queue.Append(point_zero, style.GetBorder(display_size));
 	}
 	if (style.HasScrollbar()) {
 		uint group_begin = figure_queue.BeginGroup(display_region_without_border.point - point_zero, display_region_without_border);

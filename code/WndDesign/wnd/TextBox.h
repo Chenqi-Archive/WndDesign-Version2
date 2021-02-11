@@ -12,8 +12,8 @@ public:
 	struct Style : FinalWnd::Style, TextBlockStyle {};
 	
 public:
-	TextBox(unique_ptr<Style> style, const wstring& text) :FinalWnd(std::move(style)), _text(text), _text_block(_text, *style) {}
-	~TextBox() {}
+	TextBox(unique_ptr<Style> style, const wstring& text);
+	~TextBox();
 
 
 	//// style ////

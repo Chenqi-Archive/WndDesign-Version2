@@ -79,7 +79,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 	if (_invalid_layout.margin || region_on_parent.size != GetDisplaySize() || is_region_on_parent_auto) {
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
 		if (is_region_on_parent_auto) {
-			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(region_on_parent.size, display_size);
+			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent.size, display_size);
 		}
 		bool scrollbar_margin_changed = UpdateScrollbar();
 		if (scrollbar_margin_changed) {

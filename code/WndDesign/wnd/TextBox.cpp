@@ -4,6 +4,12 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+TextBox::TextBox(unique_ptr<Style> style, const wstring& text) :
+	FinalWnd(std::move(style)), _text(text), _text_block(_text, GetStyle()) {
+}
+
+TextBox::~TextBox() {}
+
 const Rect TextBox::UpdateContentLayout(Size client_size) {
 	_text_block.AutoResize(client_size);
 	return Rect(point_zero, _text_block.GetSize());

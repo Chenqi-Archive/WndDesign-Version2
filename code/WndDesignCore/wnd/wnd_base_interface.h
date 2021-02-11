@@ -42,7 +42,7 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void AllocateLayer() pure;
 	virtual void Invalidate(Rect region) pure;
 	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) pure;
-	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const pure;
+	virtual void Composite(FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) const pure;
 
 	//// message handling ////
 	virtual void SetCapture() pure;

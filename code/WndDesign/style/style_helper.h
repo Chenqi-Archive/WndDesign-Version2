@@ -168,13 +168,19 @@ public:
 		ClientStyle client = this->client;
 		client._left.ConvertToPixel(displayed_client_size.width);   
 		client._top.ConvertToPixel(displayed_client_size.height);   
-		client._width.ConvertToPixel(displayed_client_size.width);  
-		client._height.ConvertToPixel(displayed_client_size.height);
+		client._width.IsAuto() ? client._width.Set(displayed_client_size.width) : client._width.ConvertToPixel(displayed_client_size.width);  
+		client._height.IsAuto() ? client._height.Set(displayed_client_size.height) : client._height.ConvertToPixel(displayed_client_size.height);
 		return Rect(client._left.AsSigned(), client._top.AsSigned(), client._width.AsUnsigned(), client._height.AsUnsigned());
 	}
-	const Size AutoResizeRegionOnParentToDisplaySize(Size region_on_parent_size, Size display_size) const {
-		if (IsRegionHorizontalAuto()) { region_on_parent_size.width = BoundLengthBetween(px(display_size.width), width._min, width._max).AsUnsigned(); }
-		if (IsRegionVerticalAuto()) { region_on_parent_size.height = BoundLengthBetween(px(display_size.height), height._min, height._max).AsUnsigned(); }
+	const Size AutoResizeRegionOnParentToDisplaySize(Size parent_size, Size region_on_parent_size, Size display_size) const {
+		if (IsRegionHorizontalAuto()) {
+			LengthStyle width = this->width; width = ConvertLengthToPixel(width, parent_size.width);
+			region_on_parent_size.width = BoundLengthBetween(px(display_size.width), width._min, width._max).AsUnsigned();
+		}
+		if (IsRegionVerticalAuto()) {
+			LengthStyle height = this->height; height = ConvertLengthToPixel(height, parent_size.width);
+			region_on_parent_size.height = BoundLengthBetween(px(display_size.height), height._min, height._max).AsUnsigned();
+		}
 		return region_on_parent_size;
 	}
 	const Rect AutoResizeClientRegionToContent(Rect client_region, Rect content_region) const {

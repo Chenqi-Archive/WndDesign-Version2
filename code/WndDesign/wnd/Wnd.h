@@ -92,7 +92,7 @@ protected:
 	//// painting and composition ////
 protected:
 	void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect invalid_client_region) const {
-		WndObject::CompositeChild(child, figure_queue, invalid_client_region + GetClientOffset());
+		WndObject::CompositeChild(child, figure_queue, GetClientOffset(), invalid_client_region + GetClientOffset());
 	}
 	void Invalidate(Rect invalid_client_region) {
 		WndObject::Invalidate(invalid_client_region + GetClientOffset());

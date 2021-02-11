@@ -44,6 +44,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 track_mouse_event.dwHoverTime = HOVER_DEFAULT;
                 TrackMouseEvent(&track_mouse_event);
                 mouse_leave_tracked = true;
+                frame->ReceiveMessage(Msg::MouseEnter, nullmsg);
             }
             break;
         case WM_LBUTTONDOWN: msg_type = Msg::LeftDown; break;

@@ -58,7 +58,7 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 	FigureQueue figure_queue;
 	Vector offset_from_desktop = _wnd.OffsetFromParent();
 	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, _wnd.GetRegionOnParent());
-	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);
+	_wnd.Composite(figure_queue, vector_zero, bounding_region - offset_from_desktop);
 	figure_queue.EndGroup(group_begin);
 
 	Target& target = _resource.GetTarget();

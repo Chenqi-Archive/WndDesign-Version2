@@ -114,9 +114,11 @@ struct WndStyle {
 		ValueTag _width = 100pct;
 		ValueTag _height = 100pct;
 	public:
-		constexpr void set(ValueTag left, ValueTag top, ValueTag width, ValueTag height) {
-			_left = left; _top = top; _width = width; _height = height;
-		}
+		constexpr ClientStyle& left(ValueTag left) { _left = left; return *this; }
+		constexpr ClientStyle& top(ValueTag top) { _top = top; return *this; }
+		constexpr ClientStyle& width(ValueTag width) { _width = width; return *this; }
+		constexpr ClientStyle& height(ValueTag height) { _height = height; return *this; }
+		constexpr void set(ValueTag left, ValueTag top, ValueTag width, ValueTag height) { _left = left; _top = top; _width = width; _height = height; }
 		constexpr void setInfinite() { set(position_min_tag, position_min_tag, position_max_tag, position_max_tag); }
 	}client;
 

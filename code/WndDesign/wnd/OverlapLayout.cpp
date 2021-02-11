@@ -30,8 +30,7 @@ void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
 }
 
 const Rect OverlapLayout::UpdateContentLayout(Size client_size) {
-	if (client_size == GetClientSize()) {
-	} else {
+	if (client_size != GetClientSize()) {
 		for (auto& child_container : _child_wnds) {
 			Rect child_region = UpdateChildRegion(child_container.wnd, client_size);
 			if (child_container.region != child_region) {

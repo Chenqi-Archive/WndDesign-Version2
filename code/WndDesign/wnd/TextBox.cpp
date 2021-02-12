@@ -15,7 +15,7 @@ const Rect TextBox::UpdateContentLayout(Size client_size) {
 	return Rect(point_zero, _text_block.GetSize());
 }
 
-void TextBox::OnClientPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
+void TextBox::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {
 	figure_queue.Append(point_zero, new TextBlockFigure(_text_block));
 }
 

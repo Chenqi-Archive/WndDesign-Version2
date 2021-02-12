@@ -31,7 +31,7 @@ struct ABSTRACT_BASE IWndBase {
 	virtual const Rect GetDisplayRegion() const pure;
 	virtual const Rect GetRegionOnParent() const pure;
 	virtual void SetAccessibleRegion(Rect accessible_region) pure;
-	virtual const Vector SetDisplayOffset(Point display_offset) pure;
+	virtual const Vector SetDisplayOffset(Vector display_offset) pure;
 	virtual void SetRegionOnParent(Rect region_on_parent) pure;
 
 	//// layout update ////

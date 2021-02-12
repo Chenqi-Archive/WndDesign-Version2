@@ -23,7 +23,7 @@ WndBase::WndBase(WndObject& object) :
 	_child_wnds(),
 
 	_accessible_region(region_empty),
-	_display_offset(point_zero),
+	_display_offset(vector_zero),
 	_region_on_parent(region_empty),
 	_visible_region(region_empty),
 
@@ -104,34 +104,35 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 	if (_last_tracked_child == &child) { ChildLoseTrack(); }
 }
 
+bool WndBase::UpdateDisplayOffset(Vector display_offset) {
+	display_offset = BoundRectInRegion(Rect(point_zero + display_offset, _region_on_parent.size), _accessible_region).point - point_zero;
+	return _display_offset == display_offset ? true : (_display_offset = display_offset, false);
+}
+
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
 	if (_accessible_region == accessible_region) { return; }
 	_accessible_region = accessible_region;
 	if (HasLayer()) { _layer->ResetTileSize(_accessible_region.size); }
-	if (SetDisplayOffset(point_zero + GetDisplayOffset()) == vector_zero) {
-		ResetVisibleRegion();
-	}
-}
-
-const Vector WndBase::SetDisplayOffset(Point display_offset) {
-	display_offset = BoundRectInRegion(Rect(display_offset, _region_on_parent.size), _accessible_region).point;
-	Vector vector = display_offset - _display_offset;
-	if (vector == vector_zero) { return vector; }
-	_display_offset = display_offset;
+	UpdateDisplayOffset(GetDisplayOffset());
 	ResetVisibleRegion();
 	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
-	return vector;
+}
+
+const Vector WndBase::SetDisplayOffset(Vector display_offset) {
+	if (UpdateDisplayOffset(GetDisplayOffset())) {
+		ResetVisibleRegion();
+		_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
+	}
+	return _display_offset;
 }
 
 void WndBase::SetRegionOnParent(Rect region_on_parent) {
-	Rect display_region = BoundRectInRegion(Rect(_display_offset, region_on_parent.size), _accessible_region);
-	bool display_region_changed = display_region != GetDisplayRegion();
-	if (!display_region_changed && _region_on_parent.point == region_on_parent.point) { return; }
-	_region_on_parent = Rect(region_on_parent.point, display_region.size);
-	_display_offset = display_region.point;
+	_region_on_parent.point = region_on_parent.point;
+	if (_region_on_parent.size == region_on_parent.size) { return; }
+	_region_on_parent.size = region_on_parent.size;
+	UpdateDisplayOffset(GetDisplayOffset());
 	ResetVisibleRegion();
-	if (!display_region_changed) { return; }
-	_object.OnDisplayRegionChange(_accessible_region, display_region);
+	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
 }
 
 void WndBase::JoinReflowQueue() {
@@ -177,22 +178,24 @@ void WndBase::SetVisibleRegion(Rect parent_cached_region) {
 
 	if (HasLayer()) {
 		Rect old_cached_region = _layer->GetCachedRegion();
+
 	#pragma message(Remark"May support user-defined layer caching policy")
 		if (!old_cached_region.Contains(_visible_region)) {
 			_layer->SetCachedRegion(_accessible_region, _visible_region);
 			// Invalidate new cached region.
-			Region& new_cached_region = Region::Temp(_layer->GetCachedRegion().Intersect(_accessible_region));
-			new_cached_region.Sub(old_cached_region);
-			if (!new_cached_region.IsEmpty()) {
-				_invalid_region.Union(new_cached_region);
-				JoinRedrawQueue();
-			}
+			Rect new_cached_region = _layer->GetCachedRegion().Intersect(_accessible_region);
+			Region& invalid_region = Region::Temp(new_cached_region); invalid_region.Sub(old_cached_region);
+			_invalid_region.Union(new_cached_region);
+			JoinRedrawQueue();
 			// For object's lazy loading.
-			_object.OnCachedRegionChange(_accessible_region, GetCachedRegion());
+			_object.OnCachedRegionChange(_accessible_region, new_cached_region);
+		} else {
+			// Cached region won't change.
+			return;
 		}
-	}
+	} 
 
-	// Set visible region for child windows.
+	// If cached region changed, set visible region for child windows.
 	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
 }
 

@@ -81,25 +81,27 @@ private:
 	Rect _accessible_region;
 	// The display region's offset, in my coordinates, size is determined by parent window.
 	// Rect(display_region_offset, display_region.size) must be contained in accessible_region.
-	Point _display_offset;
+	Vector _display_offset;
 	// The region shown on parent window, in parent's coordinates.
 	Rect _region_on_parent;
 	// The region, in my coordinates, that is cached on parent layer and must be composited.
 	//   (Parent's cached region relative to child is child's visible region.)
 	Rect _visible_region;
 
+private:
+	bool UpdateDisplayOffset(Vector display_offset);
 public:
 	virtual const Rect GetAccessibleRegion() const override { return _accessible_region; }
-	virtual const Rect GetDisplayRegion() const override { return Rect(_display_offset, _region_on_parent.size); }
+	virtual const Rect GetDisplayRegion() const override { return Rect(point_zero + _display_offset, _region_on_parent.size); }
 	virtual const Rect GetRegionOnParent() const override { return _region_on_parent; }
 	virtual void SetAccessibleRegion(Rect accessible_region) override;
-	virtual const Vector SetDisplayOffset(Point display_offset) override;  // returns the display_offset change.
+	virtual const Vector SetDisplayOffset(Vector display_offset) override;  // returns the display_offset change.
 	virtual void SetRegionOnParent(Rect region_on_parent) override;
 
 public:
-	const Vector GetDisplayOffset() const { return _display_offset - point_zero; }
+	const Vector GetDisplayOffset() const { return _display_offset; }
 	// point_on_parent + offset_from_parent = point_on_myself
-	const Vector OffsetFromParent() const { return _display_offset - _region_on_parent.point; }
+	const Vector OffsetFromParent() const { return _display_offset - (_region_on_parent.point - point_zero); }
 
 
 	//// reflow queue ////

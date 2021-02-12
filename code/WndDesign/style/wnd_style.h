@@ -67,11 +67,11 @@ struct WndStyle {
 	public:
 		constexpr BorderStyle& width(uint width) { _width = width; return *this; }
 		constexpr BorderStyle& color(Color color) { _color = color; return *this; }
-		constexpr BorderStyle& radius(Color color) { _color = color; return *this; }
+		constexpr BorderStyle& radius(uint radius) { _radius = radius; return *this; }
 	}border;
 
 
-	// The scrollbar reference.
+	// The scrollbar resource.
 	struct ScrollbarStyle {
 	public:
 		unique_ptr<Scrollbar> _scrollbar_resource = CreateDefaultScrollbar();
@@ -143,7 +143,7 @@ struct WndStyle {
 	}background;
 
 	
-	// cursor style.
+	// Cursor style.
 	struct CursorStyle {
 	public:
 		Cursor _cursor = Cursor::Default;
@@ -152,7 +152,7 @@ struct WndStyle {
 	}cursor;
 
 
-	// title style.
+	// Title style.
 	struct TitleStyle {
 	public:
 		wstring _title = wstring();

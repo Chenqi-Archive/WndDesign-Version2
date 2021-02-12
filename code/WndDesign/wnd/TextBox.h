@@ -41,7 +41,7 @@ private:
 
 	//// painting and composition ////
 protected:
-	virtual void OnClientPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override;
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const override;
 };
 
 

@@ -172,8 +172,8 @@ public:
 		ClientStyle client = this->client;
 		client._left.ConvertToPixel(displayed_client_size.width);   
 		client._top.ConvertToPixel(displayed_client_size.height);   
-		client._width.IsAuto() ? client._width.Set(displayed_client_size.width) : client._width.ConvertToPixel(displayed_client_size.width);  
-		client._height.IsAuto() ? client._height.Set(displayed_client_size.height) : client._height.ConvertToPixel(displayed_client_size.height);
+		client._width.IsAuto() ? client._width.Set(length_max) : client._width.ConvertToPixel(displayed_client_size.width);  
+		client._height.IsAuto() ? client._height.Set(length_max) : client._height.ConvertToPixel(displayed_client_size.height);
 		return Rect(client._left.AsSigned(), client._top.AsSigned(), client._width.AsUnsigned(), client._height.AsUnsigned());
 	}
 	const Size AutoResizeRegionOnParentToDisplaySize(Size parent_size, Size region_on_parent_size, Size display_size) const {

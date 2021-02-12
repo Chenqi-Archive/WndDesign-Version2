@@ -77,8 +77,7 @@ public:
 	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (wnd->GetRegionOnParent().point - point_zero); }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
-	const Vector SetDisplayOffset(Vector display_offset) { return wnd->SetDisplayOffset(point_zero + display_offset); }
-	const Vector ScrollView(Vector vector) { return SetDisplayOffset(GetDisplayOffset() + vector); }  // returns the real offset shifted
+	const Vector SetDisplayOffset(Vector display_offset) { return wnd->SetDisplayOffset(display_offset); }
 private:
 	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrolling
 	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) {}  // for lazy-loading
@@ -162,10 +161,9 @@ public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
 	void AddChild(WndObject& child) { RegisterChild(child); }
+	WndObject::RemoveChild;
 
-	virtual void OnChildDetach(WndObject& child) override pure {}
-	virtual void OnChildRegionUpdate(WndObject& child) override pure {}
-	virtual void OnChildTitleChange(WndObject& child) override pure {}
+	WndObject::GetSize;
 
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;

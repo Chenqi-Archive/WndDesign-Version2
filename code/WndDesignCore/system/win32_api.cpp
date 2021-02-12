@@ -175,7 +175,7 @@ FrameIrrelevantMessages:
     case WM_NCCALCSIZE: break;  // Process the message to set client region the same as the window region.
     case WM_NCACTIVATE: break;  // Do not draw the nonclient area.
     case WM_NCHITTEST: return HTCLIENT;  // There's no non-client region.
-    case WM_NCCREATE: return TRUE;
+    //case WM_NCCREATE: return TRUE; // Leave the message alone, or title won't get displayed.
     //case WM_NCDESTROY: break; // It doesn't matter.
     case WM_NCPAINT: break;
 
@@ -190,7 +190,7 @@ inline void RegisterWndClass() {
     static bool has_wnd_class_registered = false;
     if (!has_wnd_class_registered) {
         WNDCLASSEXW wcex = {};
-        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.cbSize = sizeof(WNDCLASSEXW);
         wcex.lpfnWndProc = WndProc;
         wcex.hInstance = (hInstance = GetModuleHandle(NULL));
         wcex.lpszClassName = wnd_class_name;

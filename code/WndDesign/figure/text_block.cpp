@@ -141,13 +141,13 @@ void TextBlock::SetStyle(uint begin, uint length, const TextStyleBase& style) {
 }
 
 void TextBlock::ClearStyle(uint begin, uint length) {
-	ClearStyle(begin, length);
+	ClearStyle(begin, length, true);
 	TextChanged(); // Just recreate the layout.
 }
 
 void TextBlock::TextInsertedResetStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
 	ExtendStyle(begin, length);
-	ClearStyle(begin, length);
+	ClearStyle(begin, length, true);
 	for (auto& style : styles) { SetStyle(begin, length, *style, true); }
 	TextChanged();
 }

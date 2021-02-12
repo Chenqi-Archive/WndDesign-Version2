@@ -17,10 +17,11 @@ class MainWnd : public OverlapLayout {
 private:
 	struct Style : Wnd::Style {
 		Style() {
-			width.normal(600px).max(100pct);
-			height.normal(500px).max(100pct);
+			width.normal(500px).max(100pct);
+			height.normal(400px).max(100pct);
 			position.setHorizontalCenter().setVerticalCenter();
-			border.width(50).color(ColorSet::DarkGreen);
+			border.width(5).color(ColorSet::DarkGreen);
+			padding.bottom(20px);
 			background.setColor(ColorSet::LightGray);
 			title.set(L"OverlapLayout and TextBox test");
 		}
@@ -29,6 +30,7 @@ public:
 	MainWnd() : OverlapLayout(std::make_unique<Style>()) {}
 	~MainWnd() {}
 };
+
 
 extern const wchar text[];
 
@@ -39,14 +41,13 @@ private:
 			width.normal(length_auto).min(200px).max(100pct);
 			height.normal(length_auto).min(200px).max(100pct);
 			position.left(0px).top(0px);
-			border.width(10).color(ColorSet::BlueViolet);
-			background.setColor(ColorSet::FloralWhite);
+			border.width(10).radius(20).color(ColorSet::BlueViolet);
+			background.setColor(color_transparent);
 
 			// Default TextBox Style.
-			padding.setAll(20px);
-			client.width(length_auto).height(length_auto);
+			padding.setAll(50px); //padding.bottom(10px);
+			client.height(length_auto);
 			cursor.set(Cursor::Text);
-
 
 		}
 	};

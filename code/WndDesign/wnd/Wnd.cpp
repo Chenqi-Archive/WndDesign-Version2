@@ -81,6 +81,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 		if (is_region_on_parent_auto) {
 			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent.size, display_size);
 		}
+	#error region on parent not set
 		bool scrollbar_margin_changed = UpdateScrollbar();
 		if (scrollbar_margin_changed) {
 			UpdateMarginAndClientRegion(region_on_parent.size);
@@ -92,6 +93,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 }
 
 bool Wnd::UpdateScrollbar() {
+#error may update scrollbar when setting display region
 	return GetStyleCalculator(GetStyle()).UpdateScrollbar(
 		ShrinkRegionByMargin(GetAccessibleRegion(), _margin_without_padding),
 		ShrinkRegionByMargin(GetDisplayRegion(), _margin_without_padding)

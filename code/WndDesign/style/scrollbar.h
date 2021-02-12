@@ -29,6 +29,8 @@ public:
 };
 
 
+unique_ptr<Scrollbar> CreateEmptyScrollbar() { return std::make_unique<Scrollbar>(); }
+
 unique_ptr<Scrollbar> CreateDefaultScrollbar();
 
 

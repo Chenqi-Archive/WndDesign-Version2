@@ -1,4 +1,5 @@
 #include "scrollbar.h"
+#include "../"
 #include "../figure/figure_queue.h"
 #include "../figure/figure_types.h"
 
@@ -8,7 +9,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 class DefaultScrollbar : public Scrollbar {
 private:
-	static inline const uint width = 25;
+	static inline const uint width = 20;
 	static inline const Color background_color = ColorSet::Gray;
 	static inline const Color slider_color = ColorSet::DarkGray;
 private:
@@ -36,7 +37,7 @@ public:
 		return Rect((int)(display_size.width - width), 0, width, display_size.height).Contains(point);
 	}
 	virtual bool Handler(Msg msg, Para para) override {
-
+		return true;
 	}
 	virtual bool IsVisible() const { return HasMargin(); }
 	virtual void OnPaint(FigureQueue& figure_queue, Size display_size) override {
@@ -49,7 +50,7 @@ public:
 };
 
 unique_ptr<Scrollbar> CreateDefaultScrollbar() {
-	return std::make_unique<Scrollbar>();
+	return std::make_unique<DefaultScrollbar>();
 }
 
 

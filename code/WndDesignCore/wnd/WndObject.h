@@ -23,7 +23,7 @@ private:
 	WndObject(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)), parent(nullptr) {}
 protected:
 	WndObject() : wnd(IWndBase::Create(*this)), parent(nullptr) {}
-	~WndObject() {}
+	~WndObject();
 
 
 	//// child and parent window relation ////
@@ -34,14 +34,17 @@ public:
 	bool HasParent() const { return GetParent() != nullptr; }
 	bool IsMyChild(WndObject& child) const { return child.GetParent() == this; }
 protected:
-	void RegisterChild(WndObject& child) { 
+	void RegisterChild(WndObject& child) {
 		assert(child.GetParent() != this);
 		child.parent = this; wnd->AddChild(*child.wnd);
 	}
-	void UnregisterChild(WndObject& child) { 
+	void UnregisterChild(WndObject& child) {
 		assert(child.GetParent() == this);
 		wnd->RemoveChild(*child.wnd); child.parent = nullptr;
+		child.NotifyDesktopWhenDetached();
 	}
+private:
+	void NotifyDesktopWhenDetached();  // defined below
 public:
 	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
 private:
@@ -55,7 +58,7 @@ protected:
 private:
 	Data data = 0;
 protected:
-	template<class T> static void SetChildData(WndObject& child, T data) { 
+	template<class T> static void SetChildData(WndObject& child, T data) {
 		static_assert(sizeof(Data) == sizeof(T));
 		child.data = *reinterpret_cast<Data*>(&data);
 	}
@@ -63,7 +66,6 @@ protected:
 		static_assert(sizeof(Data) == sizeof(T));
 		return *reinterpret_cast<T*>(&child.data);
 	}
-
 
 	//// window region ////
 public:
@@ -111,7 +113,7 @@ protected:
 	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
 private:
 	virtual void OnChildTitleChange(WndObject& child) {}
-	
+
 
 	//// painting and composition ////
 protected:
@@ -123,7 +125,7 @@ protected:
 	}
 protected:
 	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) {
-		child.wnd->Composite(figure_queue, client_offset, parent_invalid_region); 
+		child.wnd->Composite(figure_queue, client_offset, parent_invalid_region);
 	}
 private:
 	void InvalidateChild(WndObject& child, Rect child_invalid_region) { wnd->InvalidateChild(*child.wnd, child_invalid_region); }
@@ -133,19 +135,14 @@ private:
 
 
 	//// message handling ////
+protected:
+	void SetCapture();
+	void ReleaseCapture();
+	void SetFocus();
 public:
-	void SetCapture() { wnd->SetCapture(); }
-	void SetFocus() { wnd->SetFocus(); }
-	void ReleaseCapture() { wnd->ReleaseCapture(); }
-	void ReleaseFocus() { wnd->ReleaseFocus(); }
-protected:
-	static bool HitTestChild(const WndObject& child, Point point) { return child.NonClientHitTest(child.GetDisplaySize(), point); }
-	bool SendChildMessage(WndObject& child, Msg msg, Para para) { return wnd->SendChildMessage(*child.wnd, msg, para); }
-private:
 	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
-protected:
-	virtual bool NonClientHandler(Msg msg, Para para) {
-		if (IsMouseMsg(msg)) { MouseMsg& mouse_msg = GetMouseMsg(para); mouse_msg.point = mouse_msg.point + GetDisplayOffset(); }
+	virtual bool NonClientHandler(Msg msg, Para para) { 
+		if (IsMouseMsg(msg)) { GetMouseMsg(para).point += GetDisplayOffset(); } 
 		return Handler(msg, para);
 	}
 	virtual bool Handler(Msg msg, Para para) { return true; }
@@ -160,14 +157,32 @@ protected:
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
+	//// child windows ////
 	void AddChild(WndObject& child) { RegisterChild(child); }
 	WndObject::RemoveChild;
 
+	//// window region ////
 	WndObject::GetSize;
 
+	//// message handling ////
+private:
+	friend class WndObject;
+	virtual void OnWndDetach(WndObject& wnd) pure;
+	virtual void SetCapture(WndObject& wnd) pure;
+	virtual void ReleaseCapture() pure;
+	virtual void SetFocus(WndObject& wnd) pure;
+public:
 	virtual void MessageLoop() pure;
 	virtual void Terminate() pure;
 };
+
+extern DesktopObject& desktop;  // initialized in WndObject.cpp (both in dll and in lib)
+
+
+inline void WndObject::NotifyDesktopWhenDetached() {desktop.OnWndDetach(*this); }
+inline void WndObject::SetCapture() { desktop.SetCapture(*this); }
+inline void WndObject::ReleaseCapture() { desktop.ReleaseCapture(); }
+inline void WndObject::SetFocus() { desktop.SetFocus(*this); }
 
 
 END_NAMESPACE(WndDesign)

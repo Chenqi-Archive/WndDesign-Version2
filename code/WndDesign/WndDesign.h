@@ -13,8 +13,6 @@ using std::vector;
 using std::wstring;
 
 
-extern DesktopObject& desktop;
-
 vector<wstring> GetCommandLineArgs();
 
 

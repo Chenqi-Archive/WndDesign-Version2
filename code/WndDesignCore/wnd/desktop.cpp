@@ -19,20 +19,29 @@ DesktopWndFrame::~DesktopWndFrame() {
 	LeaveRedrawQueue();
 }
 
+void DesktopWndFrame::OnRegionChange(Rect region) {
+	Rect old_region = _wnd.GetRegionOnParent();
+	if (old_region.size != region.size) {
+		_resource.OnResize(region.size);
+		Invalidate(Rect(point_zero, region.size));
+	}
+}
+
+void DesktopWndFrame::SetRegion(Rect region) {
+	if (_wnd.GetRegionOnParent() == region) { return; }
+	static_cast<DesktopObjectImpl&>(DesktopObject::Get()).SetChildRegionStyle(_wnd_object, region);
+}
+
+const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
+	return _wnd_object.CalculateMinMaxSize(GetDesktopSize());
+}
+
 void DesktopWndFrame::JoinRedrawQueue() { 
 	if (!_redraw_queue_index.valid()) { RedrawQueue::Get().AddDesktopWnd(*this); } 
 }
 
 void DesktopWndFrame::LeaveRedrawQueue() { 
 	if (_redraw_queue_index.valid()) { RedrawQueue::Get().RemoveDesktopWnd(*this); } 
-}
-
-void DesktopWndFrame::OnRegionUpdate(Rect region) {
-	Rect old_region = _wnd.GetRegionOnParent();
-	if (old_region.size != region.size) {
-		_resource.OnResize(region.size);
-		Invalidate(Rect(point_zero, region.size));
-	}
 }
 
 void DesktopWndFrame::Invalidate(Region& region) {
@@ -74,29 +83,55 @@ void DesktopWndFrame::Present() {
 	_invalid_region.Clear();
 }
 
-void DesktopWndFrame::SetCapture() {
-	Win32::SetCapture(_hwnd);
+void DesktopWndFrame::OnWndDetach(WndObject& wnd) {
+	if (_capture_wnd == &wnd) { LoseCapture(); }
+	if (_focus_wnd == &wnd) { LoseFocus(); }
 }
 
-void DesktopWndFrame::ReleaseCapture() {
-	Win32::ReleaseCapture();
+void DesktopWndFrame::SetCapture(WndObject& wnd, Vector offset) {
+	_capture_wnd_offset = offset;
+	if (_capture_wnd == &wnd) { return; }
+	if (_capture_wnd == nullptr) { 
+		Win32::SetCapture(_hwnd);
+	} else {
+		LoseCapture();
+	}
+	_capture_wnd = &wnd;
 }
 
-void DesktopWndFrame::SetFocus() {
-	Win32::SetFocus(_hwnd);
+void DesktopWndFrame::SetFocus(WndObject& wnd) {
+	if (_focus_wnd == &wnd) { return; }
+	if (_focus_wnd == nullptr) {
+		Win32::SetFocus(_hwnd);
+	} else {
+		LoseFocus();
+	}
+	_focus_wnd = &wnd;
 }
 
-void DesktopWndFrame::ReleaseFocus() {
-	Win32::ReleaseFocus();
+void DesktopWndFrame::LoseCapture() {
+	assert(_capture_wnd != nullptr);
+	_capture_wnd->NonClientHandler(Msg::LoseCapture, nullmsg);
+	_capture_wnd = nullptr;
 }
 
-void DesktopWndFrame::SetRegion(Rect region) {
-	if (_wnd.GetRegionOnParent() == region) { return; }
-	static_cast<DesktopObjectImpl&>(DesktopObject::Get()).SetChildRegionStyle(_wnd_object, region);
+void DesktopWndFrame::LoseFocus() {
+	assert(_focus_wnd != nullptr);
+	_focus_wnd->NonClientHandler(Msg::LoseCapture, nullmsg);
+	_focus_wnd = nullptr;
 }
 
-const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
-	return _wnd_object.CalculateMinMaxSize(GetDesktopSize());
+void DesktopWndFrame::ReceiveMessage(Msg msg, Para para) const {
+	if (IsMouseMsg(msg) && _capture_wnd != nullptr) {
+		GetMouseMsg(para).point += _capture_wnd_offset;
+		_capture_wnd->NonClientHandler(msg, para);
+		return;
+	}
+	if (IsKeyboardMsg(msg) && _focus_wnd != nullptr) {
+		_focus_wnd->NonClientHandler(msg, para);
+		return;
+	}
+	_wnd_object.NonClientHandler(msg, para);
 }
 
 
@@ -109,15 +144,13 @@ DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopB
 	SetAccessibleRegion(Rect(point_zero, GetDesktopSize()));
 }
 
+DesktopObjectImpl::~DesktopObjectImpl() {}
+
 void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
 	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle());
 	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
 	frame._desktop_index = _child_wnds.begin();
 	SetChildFrame(child_object, frame);
-}
-
-void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
-	WndObject::SetChildRegionStyle(child, parent_specified_region);
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
@@ -127,17 +160,43 @@ void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 	Win32::DestroyWnd(hwnd);
 }
 
-void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
-	DesktopWndFrame& frame = GetChildFrame(child);
-	Rect region = UpdateChildRegion(child, GetSize());
-	frame.OnRegionUpdate(region);
-	Win32::MoveWnd(frame._hwnd, region);
-	SetChildRegion(child, region);
+void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
+	WndObject::SetChildRegionStyle(child, parent_specified_region);
 }
 
 void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Win32::SetWndTitle(frame._hwnd, child.GetTitle());
+}
+
+void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
+	DesktopWndFrame& frame = GetChildFrame(child);
+	Rect region = UpdateChildRegion(child, GetSize());
+	frame.OnRegionChange(region);
+	Win32::MoveWnd(frame._hwnd, region);
+	SetChildRegion(child, region);
+}
+
+void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {
+	if (ref_ptr<DesktopWndFrame> frame = GetWndFrame(wnd); frame != nullptr) {
+		frame->OnWndDetach(wnd);
+	}
+}
+
+void DesktopObjectImpl::SetCapture(WndObject& wnd) {
+	if (auto [frame, point_on_frame] = ConvertWndNonClientPointToFramePoint(wnd, point_zero); frame != nullptr) {
+		frame->SetCapture(wnd, point_zero - point_on_frame);
+	}
+}
+
+void DesktopObjectImpl::ReleaseCapture() {
+	Win32::ReleaseCapture();
+}
+
+void DesktopObjectImpl::SetFocus(WndObject& wnd) {
+	if (ref_ptr<DesktopWndFrame> frame = GetWndFrame(wnd); frame != nullptr) {
+		frame->SetFocus(wnd);
+	}
 }
 
 void DesktopObjectImpl::MessageLoop() {
@@ -151,7 +210,18 @@ void DesktopObjectImpl::Terminate() {
 	}
 }
 
-std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertNonClientPointToDesktopPoint(WndObject& wnd, Point point) const {
+ref_ptr<DesktopWndFrame> DesktopObjectImpl::GetWndFrame(WndObject& wnd) const {
+	auto child = &wnd;
+	auto parent = wnd.GetParent();
+	while (parent != this) {
+		if (parent == nullptr) { return nullptr; }
+		child = parent;
+		parent = parent->GetParent();
+	}
+	return &GetChildFrame(*child);
+}
+
+const std::pair<ref_ptr<DesktopWndFrame>, Point> DesktopObjectImpl::ConvertWndNonClientPointToFramePoint(WndObject& wnd, Point point) const {
 	auto child = &wnd;
 	auto parent = wnd.GetParent();
 	while (parent != this) {
@@ -163,8 +233,7 @@ std::pair<HANDLE, const Point> DesktopObjectImpl::ConvertNonClientPointToDesktop
 		child = parent;
 		parent = parent->GetParent();
 	}
-	DesktopWndFrame& frame = GetChildFrame(*child);
-	return std::make_pair(frame._hwnd, point);
+	return { &GetChildFrame(*child), point };
 }
 
 
@@ -176,14 +245,6 @@ void DesktopBase::AddChild(IWndBase& child_wnd) {
 	WndBase::AddChild(child_wnd);
 	WndBase& child = static_cast<WndBase&>(child_wnd);
 	GetObject().AddChild(child, child._object);
-}
-
-void DesktopBase::ReleaseCapture() {
-	Win32::ReleaseCapture();
-}
-
-void DesktopBase::ReleaseFocus() {
-	Win32::ReleaseFocus();
 }
 
 

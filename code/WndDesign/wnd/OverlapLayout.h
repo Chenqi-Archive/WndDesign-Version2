@@ -47,17 +47,17 @@ public:
 	//// layout update ////
 private:
 	virtual void OnChildRegionUpdate(WndObject& child) override;
-	virtual const Rect UpdateContentLayout(Size client_size);
+	virtual const Rect UpdateContentLayout(Size client_size) override;
 
 
 	//// painting and composition ////
 private:
-	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const;
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const override;
 
 
 	//// message handling ////
 protected:
-	virtual bool ClientHandler(Msg msg, Para para) override;
+	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const override;
 };
 
 

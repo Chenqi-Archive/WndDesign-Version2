@@ -25,7 +25,7 @@ void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
 		Invalidate(child_container.region);
 		Invalidate(child_region);
 		child_container.region = child_region;
-		SetChildRegion(child, child_region); // UpdateChildRegion must be followed by SetChildRegion
+		SetChildRegion(child, child_region);
 	}
 }
 
@@ -53,29 +53,16 @@ void OverlapLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region,
 	}
 }
 
-bool OverlapLayout::ClientHandler(Msg msg, Para para) {
-	if (IsMouseMsg(msg)) {
-		MouseMsg mouse_msg = GetMouseMsg(para);
-		ref_ptr<WndObject> child = nullptr;
-		Point point; 
-		for (auto& child_container : _child_wnds) {
-			point = mouse_msg.point;
-			if (child_container.region.Contains(point)) {
-				point = point - (child_container.region.point - point_zero);
-				if (HitTestChild(child_container.wnd, point)) {
-					child = &child_container.wnd;
-					break;
-				}
-			}
-		}
-		if (child != nullptr) {
-			mouse_msg.point = point;
-			if (SendChildMessage(*child, msg, mouse_msg)) {
-				return true;
+const Wnd::HitTestInfo OverlapLayout::ClientHitTest(Size client_size, Point point) const { 
+	for (auto& container : _child_wnds) {
+		if (container.region.Contains(point)){
+			Point point_on_child = point - (container.region.point - point_zero);
+			if (container.wnd.NonClientHitTest(container.region.size, point_on_child)) {
+				return { &container.wnd, point_on_child };
 			}
 		}
 	}
-	return false; 
+	return {}; 
 }
 
 

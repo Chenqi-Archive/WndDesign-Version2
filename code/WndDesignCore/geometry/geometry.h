@@ -51,4 +51,21 @@ inline const Rect operator-(const Rect& rect, const Vector& vector) {
 }
 
 
+inline Point& operator+=(Point& point, Vector offset) {
+	return point = point + offset; 
+}
+
+inline Point& operator-=(Point& point, Vector offset) {
+	return point = point - offset;
+}
+
+inline Rect& operator+=(Rect& rect, Vector offset) {
+	return rect = rect + offset;
+}
+
+inline Rect& operator-=(Rect& rect, Vector offset) {
+	return rect = rect - offset;
+}
+
+
 END_NAMESPACE(WndDesign)

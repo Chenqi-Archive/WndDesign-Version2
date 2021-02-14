@@ -159,6 +159,7 @@
     <ClCompile Include="figure\figure_types.cpp" />
     <ClCompile Include="figure\image.cpp" />
     <ClCompile Include="figure\text_block.cpp" />
+    <ClCompile Include="style\border_resizer.cpp" />
     <ClCompile Include="style\scrollbar.cpp" />
     <ClCompile Include="style\text_style.cpp" />
     <ClCompile Include="system\cursor.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="wnd\OverlapLayout.cpp" />
     <ClCompile Include="wnd\TextBox.cpp" />
     <ClCompile Include="wnd\Wnd.cpp" />
+    <ClCompile Include="wnd\WndObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\core.h" />
@@ -187,7 +189,7 @@
     <ClInclude Include="figure\text_block.h" />
     <ClInclude Include="geometry\margin.h" />
     <ClInclude Include="message\msg_base.h" />
-    <ClInclude Include="style\border.h" />
+    <ClInclude Include="style\border_resizer.h" />
     <ClInclude Include="style\scrollbar.h" />
     <ClInclude Include="style\text_block_style.h" />
     <ClInclude Include="style\text_style.h" />

@@ -43,13 +43,6 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void Invalidate(Rect region) pure;
 	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) pure;
 	virtual void Composite(FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) const pure;
-
-	//// message handling ////
-	virtual void SetCapture() pure;
-	virtual void SetFocus() pure;
-	virtual void ReleaseCapture() pure;
-	virtual void ReleaseFocus() pure;
-	virtual bool SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) pure;
 };
 
 

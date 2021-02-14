@@ -2,6 +2,7 @@
 
 #include "value_tag.h"
 #include "scrollbar.h"
+#include "border_resizer.h"
 #include "../figure/color.h"
 #include "../figure/background_types.h"
 #include "../system/cursor.h"
@@ -64,10 +65,12 @@ struct WndStyle {
 		uint _width = 0;
 		Color _color = ColorSet::Black;
 		uint _radius = 0;
+		unique_ptr<BorderResizer> _resizer = CreateEmptyBorderResizer();
 	public:
 		constexpr BorderStyle& width(uint width) { _width = width; return *this; }
 		constexpr BorderStyle& color(Color color) { _color = color; return *this; }
 		constexpr BorderStyle& radius(uint radius) { _radius = radius; return *this; }
+		BorderStyle& setResizer(unique_ptr<BorderResizer> resizer) { _resizer = std::move(resizer); return *this; }
 	}border;
 
 

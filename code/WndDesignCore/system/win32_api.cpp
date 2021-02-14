@@ -53,10 +53,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_RBUTTONUP: msg_type = Msg::RightUp; break;
         case WM_MOUSEWHEEL: msg_type = Msg::MouseWheel;
             // The point is relative to the desktop, convert it to the point on window.
-            mouse_msg.point = mouse_msg.point + frame->OffsetFromParent();
+            mouse_msg.point = mouse_msg.point + frame->GetRegionOffset();
             break;
         case WM_MOUSEHWHEEL: msg_type = Msg::MouseWheelHorizontal; 
-            mouse_msg.point = mouse_msg.point + frame->OffsetFromParent();
+            mouse_msg.point = mouse_msg.point + frame->GetRegionOffset();
             break;
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
         }

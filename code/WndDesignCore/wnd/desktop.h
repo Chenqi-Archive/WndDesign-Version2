@@ -24,15 +24,18 @@ public:
 	DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd);
 	~DesktopWndFrame();
 
+public:
+	void OnRegionChange(Rect region);
+	void SetRegion(Rect region);
+	const Vector GetRegionOffset() const { return point_zero - _wnd._region_on_parent.point; }
+	const pair<Size, Size> CalculateMinMaxSize();
+
 private:
 	friend class RedrawQueue;
 	list_iterator<ref_ptr<WndBase>> _redraw_queue_index;
 private:
 	void JoinRedrawQueue();
 	void LeaveRedrawQueue();
-
-	void OnRegionUpdate(Rect region);
-
 private:
 	Region _invalid_region;
 public:
@@ -43,19 +46,17 @@ public:
 	void Present();
 
 private:
-	void SetCapture();
-	void SetFocus();
-	void ReleaseCapture();
-	void ReleaseFocus();
-
+	Vector _capture_wnd_offset;
+	ref_ptr<WndObject> _capture_wnd = nullptr; 
+	ref_ptr<WndObject> _focus_wnd = nullptr;
+private:
+	void OnWndDetach(WndObject& wnd);
+	void SetCapture(WndObject& wnd, Vector offset);
+	void SetFocus(WndObject& wnd);
 public:
-	/* callback by WndProc */
-	void LoseCapture() { _wnd.ChildLoseCapture(); }
-	void LoseFocus() { _wnd.ChildLoseFocus(); }
-	void ReceiveMessage(Msg msg, Para para) const { _wnd.DispatchMessage(msg, para); }
-	void SetRegion(Rect region);
-	const Vector OffsetFromParent() const { return _wnd.OffsetFromParent(); }
-	const pair<Size, Size> CalculateMinMaxSize();
+	void LoseCapture();
+	void LoseFocus();
+	void ReceiveMessage(Msg msg, Para para) const;
 };
 
 
@@ -66,8 +67,9 @@ private:
 
 public:
 	DesktopObjectImpl();
-	~DesktopObjectImpl() {}
+	~DesktopObjectImpl();
 
+public:
 	static void SetChildFrame(WndObject& child, DesktopWndFrame& frame) {
 		SetChildData(child, &frame);
 	}
@@ -76,21 +78,41 @@ public:
 	}
 
 	void AddChild(WndBase& child, WndObject& child_object);
-
-	void SetChildRegionStyle(WndObject& child, Rect parent_specified_region);
-
 	virtual void OnChildDetach(WndObject& child) override;
-	virtual void OnChildRegionUpdate(WndObject& child) override;
+
+public:
+	void SetChildRegionStyle(WndObject& child, Rect parent_specified_region);
 	virtual void OnChildTitleChange(WndObject& child) override;
 
+public:
+	virtual void OnChildRegionUpdate(WndObject& child) override;
+
+public:
 	void InvalidateChild(WndObject& child, Region& child_invalid_region) { GetChildFrame(child).Invalidate(child_invalid_region); }
-	void SetChildCapture(WndObject& child) { GetChildFrame(child).SetCapture(); }
-	void SetChildFocus(WndObject& child) { GetChildFrame(child).SetFocus(); }
+
+public:
+	virtual void OnWndDetach(WndObject& wnd) override;
+	virtual void SetCapture(WndObject& wnd) override;
+	virtual void ReleaseCapture() override;
+	virtual void SetFocus(WndObject& wnd) override;
 
 	virtual void MessageLoop() override;
 	virtual void Terminate() override;
 
-	std::pair<HANDLE, const Point> ConvertNonClientPointToDesktopPoint(WndObject& wnd, Point point) const;
+
+	//// win32 helper functions ////
+private:
+	ref_ptr<DesktopWndFrame> GetWndFrame(WndObject& wnd) const;
+	const std::pair<ref_ptr<DesktopWndFrame>, Point> ConvertWndNonClientPointToFramePoint(WndObject& wnd, Point point) const;
+public:
+	HANDLE GetWndHandle(WndObject& wnd) const { 
+		if (auto frame = GetWndFrame(wnd); frame != nullptr) { return frame->_hwnd; }
+		return nullptr;
+	}
+	const std::pair<HANDLE, Point> ConvertWndNonClientPointToDesktopWindowPoint(WndObject& wnd, Point point) const {
+		if (auto [frame, point_on_frame] = ConvertWndNonClientPointToFramePoint(wnd, point); frame != nullptr) { return { frame->_hwnd, point_on_frame }; }
+		return { nullptr, point_zero };
+	}
 };
 
 
@@ -105,10 +127,6 @@ private:
 private:
 	virtual void AddChild(IWndBase& child_wnd) override;
 	virtual void InvalidateChild(WndBase& child, Region& child_invalid_region) override { GetObject().InvalidateChild(child._object, child_invalid_region); }
-	virtual void SetChildCapture(WndBase& child) override { GetObject().SetChildCapture(child._object); }
-	virtual void SetChildFocus(WndBase& child) override { GetObject().SetChildFocus(child._object); }
-	virtual void ReleaseCapture() override;
-	virtual void ReleaseFocus() override;
 };
 
 

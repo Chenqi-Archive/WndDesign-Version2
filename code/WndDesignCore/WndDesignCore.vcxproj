@@ -225,6 +225,7 @@
     <ClCompile Include="wnd\desktop.cpp" />
     <ClCompile Include="wnd\redraw_queue.cpp" />
     <ClCompile Include="wnd\reflow_queue.cpp" />
+    <ClCompile Include="wnd\WndObject.cpp" />
     <ClCompile Include="wnd\wnd_base.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

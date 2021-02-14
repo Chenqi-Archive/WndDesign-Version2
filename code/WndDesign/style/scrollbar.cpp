@@ -1,5 +1,4 @@
 #include "scrollbar.h"
-#include "../"
 #include "../figure/figure_queue.h"
 #include "../figure/figure_types.h"
 

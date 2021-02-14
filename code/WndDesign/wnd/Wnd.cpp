@@ -153,23 +153,12 @@ bool Wnd::NonClientHitTest(Size display_size, Point point) const {
 }
 
 bool Wnd::NonClientHandler(Msg msg, Para para) {
-	// Hit test border and scrollbar.
+	// Hit test border.
+	
+	// Hit test scrollbar.
 
-	// Mouse enter and mouse leave tracking.
+	// Hit test client region for child window.
 
-	// Send to layer handler.
-	return WndObject::NonClientHandler(msg, para);
-}
-
-bool Wnd::Handler(Msg msg, Para para) {
-	if (IsMouseMsg(msg)) {
-		MouseMsg& mouse_msg = GetMouseMsg(para);
-		mouse_msg.point = mouse_msg.point - GetClientOffset();
-	}
-	if (msg == Msg::MouseEnter) {
-		SetCursor(GetStyle().cursor._cursor);
-	}
-	return ClientHandler(msg, para);
 }
 
 

@@ -2,7 +2,7 @@
 
 #include "../geometry/geometry.h"
 #include "../geometry/margin.h"
-#include "../message/msg_base.h"
+#include "../message/message.h"
 
 #include <memory>
 

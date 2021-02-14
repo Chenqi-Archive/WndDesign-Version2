@@ -32,11 +32,7 @@ WndBase::WndBase(WndObject& object) :
 	_layer(),
 
 	_redraw_queue_index(),
-	_invalid_region(),
-
-	_capture_child(nullptr),
-	_focus_child(nullptr),
-	_last_tracked_child(nullptr) {
+	_invalid_region() {
 }
 
 WndBase::~WndBase() {
@@ -99,9 +95,6 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 	child.ClearParent();
 	// Child's depth will be reset at UpdateInvalidRegion() or UpdateLayout().
 	// Child's visible region remains unchanged until attached to a parent window next time.
-	if (_capture_child == &child) { _capture_child = nullptr; }
-	if (_focus_child == &child) { _focus_child = nullptr; }
-	if (_last_tracked_child == &child) { ChildLoseTrack(); }
 }
 
 bool WndBase::UpdateDisplayOffset(Vector display_offset) {
@@ -286,92 +279,6 @@ void WndBase::Composite(FigureQueue& figure_queue, Vector client_offset, Rect pa
 	uint group_begin = figure_queue.BeginGroup(display_region_offset - client_offset, parent_invalid_region - display_region_offset);
 	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - display_region_offset);
 	figure_queue.EndGroup(group_begin);
-}
-
-void WndBase::ChildLoseCapture() {
-	if (_capture_child != nullptr) {
-		if (_capture_child == this) { 
-			HandleMessage(Msg::LoseCapture, nullmsg); 
-		} else { 
-			_capture_child->ChildLoseCapture();
-		}
-		_capture_child = nullptr;
-	}
-}
-
-void WndBase::ChildLoseFocus() {
-	if (_focus_child != nullptr) {
-		if (_focus_child == this) {
-			HandleMessage(Msg::LoseFocus, nullmsg);
-		} else {
-			_focus_child->ChildLoseFocus();
-		}
-		_focus_child = nullptr;
-	}
-}
-
-void WndBase::ChildLoseTrack() {
-	if (_last_tracked_child != nullptr) {
-		_last_tracked_child->DispatchMessage(Msg::MouseLeave, nullmsg);
-		_last_tracked_child = nullptr;
-	}
-}
-
-void WndBase::SetChildCapture(WndBase& child) {
-	if (_capture_child == &child) { return; }
-	ChildLoseCapture();
-	_capture_child = &child;
-	if (HasParent()) { _parent->SetChildCapture(*this); }
-}
-
-void WndBase::SetChildFocus(WndBase& child) {
-	if (_focus_child == &child) { return; }
-	ChildLoseFocus();
-	_focus_child = &child;
-	if (HasParent()) { _parent->SetChildFocus(*this); }
-}
-
-void WndBase::ReleaseCapture() { 
-	ChildLoseCapture(); 
-	if (HasParent()) { _parent->ReleaseCapture(); } 
-}
-
-void WndBase::ReleaseFocus() { 
-	ChildLoseFocus(); 
-	if (HasParent()) { _parent->ReleaseFocus(); } 
-}
-
-bool WndBase::SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) {
-	WndBase* child = &static_cast<WndBase&>(child_wnd);
-	if (IsMouseMsg(msg)) {
-		if (child != _last_tracked_child) {
-			ChildLoseTrack();
-			_last_tracked_child = child;
-			child->HandleMessage(Msg::MouseEnter, nullmsg);
-		}
-		MouseMsg& mouse_msg = GetMouseMsg(para);
-		mouse_msg.point = mouse_msg.point + child->OffsetFromParent();
-	}
-	return child->DispatchMessage(msg, para);
-}
-
-bool WndBase::HandleMessage(Msg msg, Para para) {
-	return _object.NonClientHandler(msg, para);
-}
-
-bool WndBase::DispatchMessage(Msg msg, Para para) {
-	if (IsMouseMsg(msg)) {
-		ref_ptr<WndBase> child = _capture_child;
-		if (child == nullptr || child == this) { 
-			return HandleMessage(msg, para);
-		}
-		return SendChildMessage(*child, msg, para);
-	}
-	if (IsKeyboardMsg(msg) && _focus_child != nullptr && _focus_child != this) {
-		return _focus_child->DispatchMessage(msg, para);
-	}
-	if (msg == Msg::MouseLeave) { ChildLoseTrack(); }
-	return HandleMessage(msg, para);
 }
 
 

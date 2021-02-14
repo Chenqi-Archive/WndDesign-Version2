@@ -63,6 +63,12 @@
     <ClCompile Include="style\scrollbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wnd\WndObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="style\border_resizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -215,7 +221,7 @@
     <ClInclude Include="message\msg_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="style\border.h">
+    <ClInclude Include="style\border_resizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

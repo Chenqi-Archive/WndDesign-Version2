@@ -19,7 +19,6 @@ extern int main();
 
 BEGIN_NAMESPACE(WndDesign)
 
-DesktopObject& desktop = DesktopObject::Get();
 
 vector<wstring> GetCommandLineArgs() {
 	int argc;

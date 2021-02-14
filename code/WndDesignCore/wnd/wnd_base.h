@@ -167,31 +167,6 @@ public:
 	void UpdateInvalidRegion();
 	/* called by parent window (WndObject) , the coordinate space of figure_queue now is parent's client region */
 	virtual void Composite(FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) const override;
-
-
-	///////////////////////////////////////////////////////////
-	////                      Message                      ////
-	///////////////////////////////////////////////////////////
-private:
-	ref_ptr<WndBase> _capture_child;	   // child, this, or nullptr
-	ref_ptr<WndBase> _focus_child;		   // child, this, or nullptr
-	ref_ptr<WndBase> _last_tracked_child;  // child or nullptr
-private:
-	void ChildLoseCapture();
-	void ChildLoseFocus();
-	void ChildLoseTrack();
-private:
-	virtual void SetChildCapture(WndBase& child);
-	virtual void SetChildFocus(WndBase& child);
-public:
-	virtual void SetCapture() override { SetChildCapture(*this); }
-	virtual void SetFocus() override { SetChildFocus(*this); }
-	virtual void ReleaseCapture() override;
-	virtual void ReleaseFocus() override;
-private:
-	virtual bool SendChildMessage(IWndBase& child_wnd, Msg msg, Para para) override;
-	bool HandleMessage(Msg msg, Para para);
-	bool DispatchMessage(Msg msg, Para para);
 };
 
 

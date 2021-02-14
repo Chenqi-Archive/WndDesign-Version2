@@ -1,4 +1,5 @@
 #include "border_resizer.h"
+#include "../wnd/Wnd.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

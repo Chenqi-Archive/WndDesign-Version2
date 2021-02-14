@@ -112,6 +112,7 @@ void ListLayout::RemoveChild(uint row_begin, uint row_count) {
 }
 
 void ListLayout::OnChildDetach(WndObject& child) {
+	Wnd::OnChildDetach(child);
 	uint row = GetChildData(child);
 	assert(row < GetRowNumber());
 	_rows[row].wnd = nullptr;

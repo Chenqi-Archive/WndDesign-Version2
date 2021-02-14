@@ -77,9 +77,9 @@ struct WndStyle {
 	// The scrollbar resource.
 	struct ScrollbarStyle {
 	public:
-		unique_ptr<Scrollbar> _scrollbar_resource = CreateDefaultScrollbar();
+		unique_ptr<Scrollbar> _resource = CreateDefaultScrollbar();
 	public:
-		void set(unique_ptr<Scrollbar> scrollbar_resource) { _scrollbar_resource = std::move(scrollbar_resource); }
+		void set(unique_ptr<Scrollbar> scrollbar_resource) { _resource = std::move(scrollbar_resource); }
 	}scrollbar;
 
 
@@ -133,16 +133,16 @@ struct WndStyle {
 	// The background of the window.
 	struct BackgroundStyle {
 	public:
-		shared_ptr<Background> _background_resource = GetNullBackground();
+		shared_ptr<Background> _resource = GetNullBackground();
 	public:
-		void setColor(Color color) { _background_resource.reset(new SolidColorBackground(color)); }
+		void setColor(Color color) { _resource.reset(new SolidColorBackground(color)); }
 		void setImage(const wstring& image_file, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
-			_background_resource.reset(new ImageRepeatBackground(Image(image_file), opacity, offset_on_image));
+			_resource.reset(new ImageRepeatBackground(Image(image_file), opacity, offset_on_image));
 		}
 		void setImage(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
-			_background_resource.reset(new ImageRepeatBackground(image, opacity, offset_on_image));
+			_resource.reset(new ImageRepeatBackground(image, opacity, offset_on_image));
 		}
-		const Background& get() const { return *_background_resource; }
+		const Background& get() const { return *_resource; }
 	}background;
 
 	

@@ -35,7 +35,7 @@ public:
 		return padding._left.IsPercent() || padding._top.IsPercent() || padding._right.IsPercent() || padding._bottom.IsPercent();
 	}
 	static bool IsScrollbarAuto(const ScrollbarStyle& scrollbar) {
-		return scrollbar._scrollbar_resource->IsAuto();
+		return scrollbar._resource->IsAuto();
 	}
 	static bool IsClientRelative(const ClientStyle& client) {
 		return client._left.IsPercent() || client._top.IsPercent() || client._width.IsPercent() || client._height.IsPercent();
@@ -132,14 +132,11 @@ public:
 			CalculateLength(height, position._top, position._bottom, parent_size.height)
 		);
 	}
-	bool HasScrollbar() const { 
-		return scrollbar._scrollbar_resource->IsVisible(); 
-	}
-	bool UpdateScrollbar(Rect displayed_client_region_with_padding, Rect client_region_with_padding) const {
-		return scrollbar._scrollbar_resource->Update(displayed_client_region_with_padding, client_region_with_padding);
+	bool HasScrollbar() const {
+		return scrollbar._resource->IsVisible();
 	}
 	const Margin GetScrollbarMargin() const {
-		return scrollbar._scrollbar_resource->GetMargin();
+		return scrollbar._resource->GetMargin();
 	}
 	bool HasBorder() const { 
 		return border._width > 0 && border._color != color_transparent; 

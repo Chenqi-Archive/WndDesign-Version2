@@ -30,8 +30,8 @@ private:
 	/* called by parent window when region is specified by parent window */
 	virtual void SetRegionStyle(Rect parent_specified_region) override;
 protected:
-	BorderResizer& GetBorderResizer() {}
-	Scrollbar& GetScrollbar() {}
+	BorderResizer& GetBorderResizer() { return *GetStyle().border._resizer; }
+	Scrollbar& GetScrollbar() { return *GetStyle().scrollbar._resource; }
 
 
 	//// non-client and client region ////
@@ -76,10 +76,12 @@ private:
 	/* called by parent window when parent is updating */
 	virtual const Rect UpdateRegionOnParent(Size parent_size) override;
 
-	bool UpdateScrollbar();
+	void UpdateScrollbar(Rect accessible_region, Rect display_region) { OnDisplayRegionChange(accessible_region, display_region); }
 	const Size UpdateMarginAndClientRegion(Size display_size);
 	void UpdateClientRegion(Size displayed_client_size);
 	virtual const Rect UpdateContentLayout(Size client_size) { return Rect(point_zero, client_size); }
+
+	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region);
 
 
 	//// child windows ////
@@ -107,24 +109,63 @@ private:
 
 
 	//// message handling ////
+private:
+	enum class ElementType { None, Border, Scrollbar, Client, /*Child*/ };
+private:
+	void NotifyElement(ElementType type, Msg msg, Para para) {
+		assert(!(IsMouseMsg(msg) || IsKeyboardMsg(msg)));
+		switch (type) {
+		case ElementType::Border: GetBorderResizer().Handler(*this, msg, para); break;
+		case ElementType::Scrollbar: GetScrollbar().Handler(*this, msg, para); break;
+		case ElementType::Client: Handler(msg, para); break;
+		}
+	}
+
+	// mouse capture
+private:
+	struct MouseCaptureInfo {
+		ElementType _type;
+		bool IsNull() const { return _type == ElementType::None; }
+		void Update(Wnd& wnd, ElementType type);
+	};
+	MouseCaptureInfo _mouse_capture_info;
+private:
+	friend class Scrollbar;
+	friend class BorderResizer;
+	void SetScrollbarCapture() { _mouse_capture_info.Update(*this, ElementType::Scrollbar); }
+	void SetBorderCapture() { _mouse_capture_info.Update(*this, ElementType::Border); }
+	void LoseCapture() { _mouse_capture_info.Update(*this, ElementType::None); }
+private:
+	WndObject::SetCapture;
+public:
+	void SetCapture() { _mouse_capture_info.Update(*this, ElementType::Client); }
+
+	// mouse track
+private:
+	struct MouseTrackInfo {
+		ElementType _type;
+		ref_ptr<WndObject> _child;
+		bool IsChild() const { return _child != nullptr; }
+		void Update(Wnd& wnd, ElementType type);
+		void Update(Wnd& wnd, WndObject& child);
+	};
+	MouseTrackInfo _mouse_track_info;
+private:
+	void MouseLeave() { _mouse_track_info.Update(*this, ElementType::None); }
+protected:
+	virtual void OnChildDetach(WndObject& child) override {
+		if (_mouse_track_info._child == &child) { _mouse_track_info.Update(*this, ElementType::None); }
+	}
+
+protected:
+	virtual bool NonClientHitTest(Size display_size, Point point) const override;
+	virtual bool NonClientHandler(Msg msg, Para para) override;
+
 protected:
 	struct HitTestInfo {
 		ref_ptr<WndObject> child;
 		Point point;
 	};
-private:
-	struct MouseTrackInfo {
-		union {
-			struct {
-				ref_ptr<WndObject> child;
-				enum { None, Border, Scrollbar, Client } type;
-			};
-			HitTestInfo hit_test_info;
-		};
-	};
-protected:
-	virtual bool NonClientHitTest(Size display_size, Point point) const override;
-	virtual bool NonClientHandler(Msg msg, Para para) override;
 protected:
 	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const { return {}; }
 	virtual bool Handler(Msg msg, Para para) { if (msg == Msg::MouseEnter) { SetCursor(GetStyle().cursor._cursor); }return true; }

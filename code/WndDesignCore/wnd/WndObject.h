@@ -23,7 +23,7 @@ private:
 	WndObject(unique_ptr<IWndBase> desktop) : wnd(std::move(desktop)), parent(nullptr) {}
 protected:
 	WndObject() : wnd(IWndBase::Create(*this)), parent(nullptr) {}
-	~WndObject();
+	~WndObject() {}
 
 
 	//// child and parent window relation ////

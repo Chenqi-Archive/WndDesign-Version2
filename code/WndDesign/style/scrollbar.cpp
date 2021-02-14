@@ -1,4 +1,5 @@
 #include "scrollbar.h"
+#include "../wnd/Wnd.h"
 #include "../figure/figure_queue.h"
 #include "../figure/figure_types.h"
 
@@ -19,23 +20,20 @@ public:
 	DefaultScrollbar() :_entire_length(0), _display_length(0), _display_offset(0) {}
 	virtual ~DefaultScrollbar() override {}
 	virtual bool IsAuto() const override { return true; }
-	bool HasMargin() const { return _display_length < _entire_length; }
+	virtual bool HasMargin() const override { return _display_length < _entire_length; }
 	virtual const Margin GetMargin() const override { return Margin{ 0, 0, HasMargin() ? width : 0, 0 }; }
-	virtual bool Update(Rect accessible_region, Rect display_region) override {
-		bool has_margin = HasMargin();
-		_entire_length = accessible_region.size.height;
+	virtual void Update(Size entire_size, Rect display_region) override {
+		assert(Rect(point_zero, entire_size).Contains(display_region));
+		_entire_length = entire_size.height;
 		_display_length = display_region.size.height;
-		int display_offset = display_region.point.x - accessible_region.point.x;
-		assert(display_offset >= 0);
-		_display_offset = (uint)display_offset;
-		return has_margin ^ HasMargin(); // returns true if margin changed
+		_display_offset = (uint)display_region.point.x;
 	}
 
-	virtual bool HitTest(Point point, Size display_size) override {
+	virtual bool HitTest(Size display_size, Point point) override {
 		if (!HasMargin()) { return false; }
 		return Rect((int)(display_size.width - width), 0, width, display_size.height).Contains(point);
 	}
-	virtual bool Handler(Msg msg, Para para) override {
+	virtual bool Handler(Wnd& wnd, Msg msg, Para para) override {
 		return true;
 	}
 	virtual bool IsVisible() const { return HasMargin(); }

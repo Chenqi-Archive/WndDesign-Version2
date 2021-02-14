@@ -13,6 +13,7 @@ void OverlapLayout::AddChild(WndObject& child) {
 }
 
 void OverlapLayout::OnChildDetach(WndObject& child) {
+	Wnd::OnChildDetach(child);
 	ChildWndContainer& child_container = GetChildData(child);
 	Invalidate(child_container.region);
 	_child_wnds.erase(child_container.list_index);

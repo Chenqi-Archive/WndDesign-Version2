@@ -15,13 +15,12 @@ using namespace WndDesign;
 
 class MainWnd : public OverlapLayout {
 private:
-	struct Style : Wnd::Style {
+	struct Style : OverlapLayout::Style {
 		Style() {
 			width.normal(500px).max(100pct);
 			height.normal(400px).max(100pct);
 			position.setHorizontalCenter().setVerticalCenter();
-			border.width(5).color(ColorSet::DarkGreen);
-			padding.bottom(20px);
+			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
 			background.setColor(ColorSet::LightGray);
 			title.set(L"OverlapLayout and TextBox test");
 		}

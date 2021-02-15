@@ -35,7 +35,7 @@ public:
 		return padding._left.IsPercent() || padding._top.IsPercent() || padding._right.IsPercent() || padding._bottom.IsPercent();
 	}
 	static bool IsScrollbarAuto(const ScrollbarStyle& scrollbar) {
-		return scrollbar._resource->IsAuto();
+		return scrollbar._resource->IsMarginAuto();
 	}
 	static bool IsClientRelative(const ClientStyle& client) {
 		return client._left.IsPercent() || client._top.IsPercent() || client._width.IsPercent() || client._height.IsPercent();

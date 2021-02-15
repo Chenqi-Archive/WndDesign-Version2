@@ -17,9 +17,9 @@ class DefaultBorderResizer : public BorderResizer {
 
 };
 
-unique_ptr<BorderResizer> CreateDefaultBorderResizer() {
-    return unique_ptr<DefaultBorderResizer>();
-}
+
+unique_ptr<BorderResizer> CreateEmptyBorderResizer() { return std::make_unique<BorderResizer>(); }
+unique_ptr<BorderResizer> CreateDefaultBorderResizer() { return std::make_unique<DefaultBorderResizer>(); }
 
 
 END_NAMESPACE(WndDesign)

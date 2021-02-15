@@ -30,8 +30,8 @@ private:
 	/* called by parent window when region is specified by parent window */
 	virtual void SetRegionStyle(Rect parent_specified_region) override;
 protected:
-	BorderResizer& GetBorderResizer() { return *GetStyle().border._resizer; }
-	Scrollbar& GetScrollbar() { return *GetStyle().scrollbar._resource; }
+	BorderResizer& GetBorderResizer() const { return *GetStyle().border._resizer; }
+	Scrollbar& GetScrollbar() const { return *GetStyle().scrollbar._resource; }
 
 
 	//// non-client and client region ////
@@ -78,7 +78,7 @@ private:
 	/* called by parent window when parent is updating */
 	virtual const Rect UpdateRegionOnParent(Size parent_size) override;
 
-	void UpdateScrollbar(Rect accessible_region, Rect display_region) { OnDisplayRegionChange(accessible_region, display_region); }
+	void UpdateScrollbar(Rect accessible_region, Rect display_region);
 	const Size UpdateMarginAndClientRegion(Size display_size);
 	void UpdateClientRegion(Size displayed_client_size);
 	virtual const Rect UpdateContentLayout(Size client_size) { return Rect(point_zero, client_size); }
@@ -116,14 +116,7 @@ private:
 private:
 	enum class ElementType { None, Border, Scrollbar, Client, /*Child*/ };
 private:
-	void NotifyElement(ElementType type, Msg msg, Para para) {
-		assert(!(IsMouseMsg(msg) || IsKeyboardMsg(msg)));
-		switch (type) {
-		case ElementType::Border: GetBorderResizer().Handler(*this, msg, para); break;
-		case ElementType::Scrollbar: GetScrollbar().Handler(*this, msg, para); break;
-		case ElementType::Client: Handler(msg, para); break;
-		}
-	}
+	void NotifyElement(ElementType type, Msg msg, Para para);
 
 	// mouse capture
 private:

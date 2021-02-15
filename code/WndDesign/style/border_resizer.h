@@ -26,8 +26,7 @@ protected:
 };
 
 
-inline unique_ptr<BorderResizer> CreateEmptyBorderResizer() { return std::make_unique<BorderResizer>(); }
-
+unique_ptr<BorderResizer> CreateEmptyBorderResizer();
 unique_ptr<BorderResizer> CreateDefaultBorderResizer();
 
 

@@ -95,6 +95,16 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 	return region_on_parent;
 }
 
+void Wnd::UpdateScrollbar(Rect accessible_region, Rect display_region) {
+	Rect client_region_with_padding = ShrinkRegionByMargin(accessible_region, _margin_without_padding);
+	Rect displayed_client_region_with_padding = ShrinkRegionByMargin(display_region, _margin_without_padding);
+	GetScrollbar().Update(
+		client_region_with_padding.size,
+		displayed_client_region_with_padding - (client_region_with_padding.point - point_zero)
+	);
+	GetScrollbar().SetRegion(GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_region.size));
+}
+
 const Size Wnd::UpdateMarginAndClientRegion(Size display_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	_margin_without_padding = style.CalculateBorderMargin() + style.GetScrollbarMargin();
@@ -123,12 +133,7 @@ void Wnd::UpdateClientRegion(Size displayed_client_size) {
 }
 
 void Wnd::OnDisplayRegionChange(Rect accessible_region, Rect display_region) {
-	accessible_region = ShrinkRegionByMargin(accessible_region, _margin_without_padding);
-	display_region = ShrinkRegionByMargin(display_region, _margin_without_padding);
-	GetScrollbar().Update(
-		accessible_region.size,
-		display_region - (accessible_region.point - point_zero)
-	);
+	UpdateScrollbar(accessible_region, display_region);
 }
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
@@ -140,21 +145,29 @@ void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invali
 void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
 	// Draw border and scroll bar.
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
-	Rect display_region_without_border = style.GetDisplayRegionWithoutBorder(display_size);
-	if (style.HasBorder() && !display_region_without_border.Contains(invalid_display_region)) {
+	if (style.HasBorder()) {
 		figure_queue.Append(point_zero, style.GetBorder(display_size));
 	}
 	if (style.HasScrollbar()) {
-		Vector offset = figure_queue.PushOffset(display_region_without_border.point - point_zero);
-		style.scrollbar._resource->OnPaint(figure_queue, display_region_without_border.size);
+		Vector offset = figure_queue.PushOffset(GetScrollbar().GetRegion().point - point_zero);
+		style.scrollbar._resource->OnPaint(figure_queue);
 		figure_queue.PopOffset(offset);
+	}
+}
+
+void Wnd::NotifyElement(ElementType type, Msg msg, Para para) {
+	assert(!(IsMouseMsg(msg) || IsKeyboardMsg(msg)));
+	switch (type) {
+	case ElementType::Border: GetBorderResizer().Handler(*this, msg, para); break;
+	case ElementType::Scrollbar: GetScrollbar().Handler(*this, msg, para); break;
+	case ElementType::Client: Handler(msg, para); break;
 	}
 }
 
 void Wnd::MouseCaptureInfo::Update(Wnd& wnd, ElementType type) {
 	if (_type == type) { return; }
 	if (_type == ElementType::None) {
-		wnd.SetCapture();
+		wnd.WndObject::SetCapture();
 	} else {
 		wnd.NotifyElement(_type, Msg::LoseCapture, nullmsg);
 	}
@@ -184,7 +197,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg& mouse_msg = GetMouseMsg(para);
 		Size display_size = GetDisplaySize();
-		Rect display_region_without_border = GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_size);
+		Rect scrollbar_region = GetScrollbar().GetRegion();
 		Vector display_region_to_client_offset = GetDisplayOffset() - GetClientOffset();
 		// Find the message receiver.
 		do {
@@ -197,7 +210,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 				_mouse_track_info.Update(*this, ElementType::Border); break;
 			}
 			// Hit test scrollbar.
-			if (GetScrollbar().HitTest(display_region_without_border.size, mouse_msg.point - (display_region_without_border.point - point_zero))) {
+			if (GetScrollbar().HitTest(mouse_msg.point - (scrollbar_region.point - point_zero))) {
 				_mouse_track_info.Update(*this, ElementType::Scrollbar); break;
 			}
 			// Hit test client region.
@@ -217,7 +230,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		case ElementType::Border: 
 			GetBorderResizer().Handler(*this, msg, para); return true;
 		case ElementType::Scrollbar: 
-			mouse_msg.point -= display_region_without_border.point - point_zero; 
+			mouse_msg.point -= scrollbar_region.point - point_zero;
 			GetScrollbar().Handler(*this, msg, para); return true;
 		case ElementType::Client:
 			mouse_msg.point -= display_region_to_client_offset;
@@ -241,7 +254,10 @@ bool Wnd::Handler(Msg msg, Para para) {
 		Vector scroll_offset = vector_zero;
 		if (msg == Msg::MouseWheel) { scroll_offset.y -= GetMouseMsg(para).wheel_delta; }
 		if (msg == Msg::MouseWheelHorizontal) { scroll_offset.x -= GetMouseMsg(para).wheel_delta; }
-		SetDisplayOffset(GetDisplayOffset() + scroll_offset);
+		Vector old_display_offset = GetDisplayOffset();
+		Vector actual_scroll_offset = SetDisplayOffset(old_display_offset + scroll_offset) - old_display_offset;
+		Vector remaining_scroll_offset = scroll_offset - actual_scroll_offset;
+		// Send remaining scroll offset to parent window.
 		return true;
 	}
 	return true;

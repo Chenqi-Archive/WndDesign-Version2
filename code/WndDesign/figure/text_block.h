@@ -37,7 +37,7 @@ public:
 private:
 	void TextChanged();
 public:
-	void AutoResize(Size max_size);
+	bool AutoResize(Size max_size);
 public:
 	const TextBlockHitTestInfo HitTestPoint(Point point) const;
 	const TextBlockHitTestInfo HitTestTextPosition(uint text_position) const;

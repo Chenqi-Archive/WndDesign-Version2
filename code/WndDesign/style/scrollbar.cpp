@@ -29,11 +29,10 @@ private:
 	Vector _display_offset = vector_zero;
 public:
 	virtual void Update(Size entire_size, Rect display_region) override {
-		assert(Rect(point_zero, entire_size).Contains(display_region));
+		//assert(Rect(point_zero, entire_size).Contains(display_region));
 		_entire_length = entire_size.height;
 		_display_length = display_region.size.height;
 		_display_offset = display_region.point - point_zero;
-		// non client invalidate
 	}
 
 	// margin calculation

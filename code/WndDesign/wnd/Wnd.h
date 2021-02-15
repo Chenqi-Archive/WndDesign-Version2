@@ -28,7 +28,10 @@ protected:
 	virtual const wstring GetTitle() const override;
 private:
 	/* called by parent window when region is specified by parent window */
-	virtual void SetRegionStyle(Rect parent_specified_region) override;
+	virtual void SetRegionStyle(Rect parent_specified_region, Size parent_size) override;
+private:
+	/* called by border resizer */
+	void ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend);
 protected:
 	BorderResizer& GetBorderResizer() const { return *GetStyle().border._resizer; }
 	Scrollbar& GetScrollbar() const { return *GetStyle().scrollbar._resource; }

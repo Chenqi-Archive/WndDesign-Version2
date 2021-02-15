@@ -28,8 +28,8 @@ public:
 	static bool IsPositionRelative(const PositionStyle& position) {
 		return position._left.IsPercent() || position._top.IsPercent() || position._right.IsPercent() || position._bottom.IsPercent();
 	}
-	static bool IsPositionAuto(ValueTag position_low, ValueTag position_high) {
-		return position_low.IsAuto() || position_high.IsAuto() || position_low.IsCenter() || position_high.IsCenter();
+	static bool IsPositionAuto(ValueTag position) {
+		return position.IsAuto() || position.IsCenter();
 	}
 	static bool IsPaddingRelative(const PaddingStyle& padding) {
 		return padding._left.IsPercent() || padding._top.IsPercent() || padding._right.IsPercent() || padding._bottom.IsPercent();
@@ -45,10 +45,10 @@ public:
 	}
 public:
 	bool IsRegionHorizontalAuto() const {
-		return IsLengthAuto(width) && IsPositionAuto(position._left, position._right);
+		return IsLengthAuto(width) && (IsPositionAuto(position._left) || IsPositionAuto(position._right));
 	}
 	bool IsRegionVerticalAuto() const {
-		return IsLengthAuto(height) && IsPositionAuto(position._top, position._bottom);
+		return IsLengthAuto(height) && (IsPositionAuto(position._top) || IsPositionAuto(position._bottom));
 	}
 public:
 	bool IsRegionOnParentRelative() const {
@@ -104,10 +104,10 @@ public:
 		ValueTag& max_length = length._max;
 
 		if (normal_length.IsAuto()) {
-			if (IsPositionAuto(position_low, position_high)) {
+			if (IsPositionAuto(position_low) || IsPositionAuto(position_high)) {
 				normal_length = max_length;
 			} else {
-				normal_length.Set(position_high.AsSigned() - position_low.AsSigned());
+				normal_length.Set((int)parent_length - position_low.AsSigned() - position_high.AsSigned());
 			}
 		}
 		normal_length = BoundLengthBetween(normal_length, min_length, max_length);
@@ -131,6 +131,33 @@ public:
 			CalculateLength(width, position._left, position._right, parent_size.width),
 			CalculateLength(height, position._top, position._bottom, parent_size.height)
 		);
+	}
+	void ResetRegionOnParent(Rect region_on_parent, Size parent_size) {
+		Margin margin_to_parent = CalculateRelativeMargin(parent_size, region_on_parent);
+		position.set(px(margin_to_parent.left), px(margin_to_parent.top), px(margin_to_parent.right), px(margin_to_parent.bottom));
+		width.normal(length_auto); height.normal(length_auto);
+	}
+	void ResetRegionOnParent(Rect old_region_on_parent, Margin margin_to_extend) {
+		if (margin_to_extend.left) {
+			if (position._right.IsAuto()) { throw style_parse_exception; }; 
+			position.left(position_auto);
+			width.normal(px((int)old_region_on_parent.size.width + margin_to_extend.left));
+		}
+		if (margin_to_extend.top) {
+			if (position._bottom.IsAuto()) { throw style_parse_exception; };
+			position.top(position_auto);
+			height.normal(px((int)old_region_on_parent.size.height + margin_to_extend.top));
+		}
+		if (margin_to_extend.right) { 
+			if (position._left.IsAuto()) { throw style_parse_exception; };
+			position.right(position_auto);
+			width.normal(px((int)old_region_on_parent.size.width + margin_to_extend.right)); 
+		}
+		if (margin_to_extend.bottom) { 
+			if (position._top.IsAuto()) { throw style_parse_exception; };
+			position.bottom(position_auto);
+			height.normal(px((int)old_region_on_parent.size.height + margin_to_extend.bottom));
+		}
 	}
 	bool HasScrollbar() const {
 		return scrollbar._resource->IsVisible();

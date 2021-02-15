@@ -38,6 +38,15 @@ inline const Rect ExtendRegionByMargin(Rect region, Margin margin) {
 	return ShrinkRegionByMargin(region, -margin);
 }
 
+inline const Margin CalculateRelativeMargin(Size size, Rect region) {
+	// ExtentRegionByMargin(region, margin) == Rect(point_zero, size);
+	// margin = CalcualteRelativeMargin(size, region);
+	return {
+		region.point.x, region.point.y,
+		(int)size.width - region.point.x - (int)region.size.width, (int)size.height - region.point.y - (int)region.size.height
+	};
+}
+
 
 inline bool PointInRoundedRectangle(Size size, uint radius, Point point) {
 	if ((uint)point.x >= size.width || (uint)point.y >= size.height) { return false; }

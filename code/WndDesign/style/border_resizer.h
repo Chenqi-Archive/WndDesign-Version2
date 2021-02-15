@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../message/message.h"
+#include "../geometry/margin.h"
 
 #include <memory>
 
@@ -16,11 +17,10 @@ class BorderResizer {
 public:
 	BorderResizer() {}
 	virtual ~BorderResizer() {}
-	virtual void Handler(Wnd& wnd, Msg msg, Para para);
-
+public:
+	virtual void Handler(Wnd& wnd, Rect window_region, uint border_width, Msg msg, Para para);
 protected:
-	const Size GetWndSize(Wnd& wnd);
-	void ResizeWnd(Wnd& wnd);
+	void ResizeWnd(Wnd& wnd, Rect old_window_region, Margin margin_to_extend);
 	void SetWndCapture(Wnd& wnd);
 	void ReleaseWndCapture(Wnd& wnd);
 };

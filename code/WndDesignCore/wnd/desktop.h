@@ -47,6 +47,7 @@ public:
 
 private:
 	Vector _capture_wnd_offset;
+	Point _capture_frame_offset;
 	ref_ptr<WndObject> _capture_wnd = nullptr; 
 	ref_ptr<WndObject> _focus_wnd = nullptr;
 private:

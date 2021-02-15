@@ -30,12 +30,13 @@ const wstring Wnd::GetTitle() const {
 	return GetStyle().title._title;
 }
 
-void Wnd::SetRegionStyle(Rect parent_specified_region) {
-	Style& style = GetStyle();
-	style.position.left(px(parent_specified_region.point.x));
-	style.position.top(px(parent_specified_region.point.y));
-	style.width.normal(px(parent_specified_region.size.width));
-	style.height.normal(px(parent_specified_region.size.height));
+void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
+	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(parent_specified_region, parent_size);
+	RegionOnParentChanged();
+}
+
+void Wnd::ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend) {
+	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(old_window_region, margin_to_extend);
 	RegionOnParentChanged();
 }
 
@@ -71,7 +72,7 @@ void Wnd::UpdateLayout() {
 	}
 	if (_invalid_layout.content_layout) {
 		assert(!style.IsClientRegionAuto());
-		UpdateContentLayout(GetClientRegion().size);
+		UpdateContentLayout(GetClientSize());
 		_invalid_layout.content_layout = false;
 	}
 }
@@ -158,7 +159,7 @@ void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid
 void Wnd::NotifyElement(ElementType type, Msg msg, Para para) {
 	assert(!(IsMouseMsg(msg) || IsKeyboardMsg(msg)));
 	switch (type) {
-	case ElementType::Border: GetBorderResizer().Handler(*this, msg, para); break;
+	case ElementType::Border: GetBorderResizer().Handler(*this, GetChildRegion(*this), GetStyle().border._width, msg, para); break;
 	case ElementType::Scrollbar: GetScrollbar().Handler(*this, msg, para); break;
 	case ElementType::Client: Handler(msg, para); break;
 	}
@@ -196,7 +197,8 @@ bool Wnd::NonClientHitTest(Size display_size, Point point) const {
 bool Wnd::NonClientHandler(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg& mouse_msg = GetMouseMsg(para);
-		Size display_size = GetDisplaySize();
+		Rect region_on_parent = GetChildRegion(*this); 
+		Size display_size = region_on_parent.size;
 		Rect scrollbar_region = GetScrollbar().GetRegion();
 		Vector display_region_to_client_offset = GetDisplayOffset() - GetClientOffset();
 		// Find the message receiver.
@@ -228,7 +230,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		// Send to border, scrollbar or client region.
 		switch (_mouse_track_info._type) {
 		case ElementType::Border: 
-			GetBorderResizer().Handler(*this, msg, para); return true;
+			GetBorderResizer().Handler(*this, region_on_parent, GetStyle().border._width, msg, para); return true;
 		case ElementType::Scrollbar: 
 			mouse_msg.point -= scrollbar_region.point - point_zero;
 			GetScrollbar().Handler(*this, msg, para); return true;

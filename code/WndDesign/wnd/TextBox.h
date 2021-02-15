@@ -34,7 +34,7 @@ private:
 	TextBlock _text_block;
 public:
 	TextBlock& GetTextBlock() { return _text_block; }
-	void TextUpdated() { ContentLayoutChanged(); }
+	void TextUpdated() { Invalidate(region_infinite); ContentLayoutChanged(); }
 private:
 	virtual const Rect UpdateContentLayout(Size client_size);
 

@@ -90,6 +90,7 @@ void DesktopWndFrame::OnWndDetach(WndObject& wnd) {
 
 void DesktopWndFrame::SetCapture(WndObject& wnd, Vector offset) {
 	_capture_wnd_offset = offset;
+	_capture_frame_offset = _wnd.GetRegionOnParent().point;
 	if (_capture_wnd == &wnd) { return; }
 	if (_capture_wnd == nullptr) { 
 		Win32::SetCapture(_hwnd);
@@ -123,7 +124,7 @@ void DesktopWndFrame::LoseFocus() {
 
 void DesktopWndFrame::ReceiveMessage(Msg msg, Para para) const {
 	if (IsMouseMsg(msg) && _capture_wnd != nullptr) {
-		GetMouseMsg(para).point += _capture_wnd_offset;
+		GetMouseMsg(para).point += _capture_wnd_offset + (_wnd.GetRegionOnParent().point - _capture_frame_offset);
 		_capture_wnd->NonClientHandler(msg, para);
 		return;
 	}
@@ -161,7 +162,7 @@ void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 }
 
 void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
-	WndObject::SetChildRegionStyle(child, parent_specified_region);
+	WndObject::SetChildRegionStyle(child, parent_specified_region, GetSize());
 }
 
 void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {
@@ -175,6 +176,7 @@ void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	frame.OnRegionChange(region);
 	Win32::MoveWnd(frame._hwnd, region);
 	SetChildRegion(child, region);
+	SetChildRegionStyle(child, region);
 }
 
 void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {

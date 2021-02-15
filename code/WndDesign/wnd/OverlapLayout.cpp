@@ -19,27 +19,27 @@ void OverlapLayout::OnChildDetach(WndObject& child) {
 	_child_wnds.erase(child_container.list_index);
 }
 
-void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
-	auto& child_container = GetChildData(child);
-	Rect child_region = UpdateChildRegion(child, GetClientSize());
+void OverlapLayout::UpdateChildRegion(ChildWndContainer& child_container, Size client_size) {
+	Rect child_region = WndObject::UpdateChildRegion(child_container.wnd, client_size);
 	if (child_container.region != child_region) {
 		Invalidate(child_container.region);
 		Invalidate(child_region);
 		child_container.region = child_region;
-		SetChildRegion(child, child_region);
+		SetChildRegion(child_container.wnd, child_region);
 	}
+}
+
+void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
+	ChildWndContainer& child_container = GetChildData(child);
+	UpdateChildRegion(child_container, GetClientSize());
+	//// Reset child region style only when child initiated region update request.
+	//SetChildRegionStyle(child_container.wnd, child_container.region, GetClientSize());
 }
 
 const Rect OverlapLayout::UpdateContentLayout(Size client_size) {
 	if (client_size != GetClientSize()) {
 		for (auto& child_container : _child_wnds) {
-			Rect child_region = UpdateChildRegion(child_container.wnd, client_size);
-			if (child_container.region != child_region) {
-				Invalidate(child_container.region);
-				Invalidate(child_region);
-				child_container.region = child_region;
-				SetChildRegion(child_container.wnd, child_region);
-			}
+			UpdateChildRegion(child_container, client_size);
 		}
 	}
 	return Rect(point_zero, client_size);

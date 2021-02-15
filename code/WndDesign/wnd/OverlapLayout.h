@@ -46,6 +46,8 @@ public:
 
 	//// layout update ////
 private:
+	void UpdateChildRegion(ChildWndContainer& child_container, Size client_size);
+private:
 	virtual void OnChildRegionUpdate(WndObject& child) override;
 	virtual const Rect UpdateContentLayout(Size client_size) override;
 

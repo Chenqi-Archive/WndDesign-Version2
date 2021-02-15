@@ -91,16 +91,16 @@ protected:
 	void UpdateRegionOnParent() { if (HasParent()) { GetParent()->OnChildRegionUpdate(*this); } }
 protected:
 	static const Rect UpdateChildRegion(WndObject& child, Size parent_size) { return child.UpdateRegionOnParent(parent_size); }
-	static void SetChildRegionStyle(WndObject& child, Rect parent_specified_region) { child.SetRegionStyle(parent_specified_region); }
+	static void SetChildRegionStyle(WndObject& child, Rect child_region, Size client_size) { child.SetRegionStyle(child_region, client_size); }
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
-	static const Rect GetChildRegion(WndObject& child) { child.wnd->GetRegionOnParent(); }
+	static const Rect GetChildRegion(WndObject& child) { return child.wnd->GetRegionOnParent(); }
 private:
 	virtual bool HasInvalidLayout() const { return false; }
 	virtual bool MayRegionOnParentChange() { return false; }
 	virtual void ChildRegionMayChange(WndObject& child) {}
 	virtual void UpdateLayout() {}
 private:
-	virtual void SetRegionStyle(Rect parent_specified_region) {}
+	virtual void SetRegionStyle(Rect parent_specified_region, Size parent_size) {}
 	virtual void OnChildRegionUpdate(WndObject& child) {}
 	virtual const Rect UpdateRegionOnParent(Size parent_size) { return region_empty; }
 

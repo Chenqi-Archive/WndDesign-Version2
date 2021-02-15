@@ -18,6 +18,20 @@ public:
 		Vector offset;
 		unique_ptr<const Figure> figure;
 	};
+private:
+	vector<FigureContainer> figures;
+public:
+	const vector<FigureContainer>& GetFigures() const { return figures; }
+
+	void Append(Point offset, unique_ptr<const Figure> figure) {
+		figures.emplace_back(FigureContainer{ offset - point_zero + this->offset, std::move(figure) });
+	}
+	void Append(Point offset, alloc_ptr<const Figure> figure) {
+		Append(offset, unique_ptr<const Figure>(figure));
+	}
+
+
+public:
 	struct FigureGroup {
 		union {
 			// as group begin
@@ -35,34 +49,33 @@ public:
 				mutable Rect prev_clip_region;
 			};
 		};
+		Vector prev_group_offset; // for temporary use
+
 		bool IsBegin() const { return group_end_index != (uint)-1; }
 	};
 private:
-	vector<FigureContainer> figures;
 	vector<FigureGroup> groups;
-
 public:
 	const vector<FigureGroup>& GetFigureGroups() const { return groups; }
-	const vector<FigureContainer>& GetFigures() const { return figures; }
 
-public:
 	uint BeginGroup(Vector coordinate_offset, Rect bounding_region) {
 		uint group_begin_index = (uint)groups.size();
-		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), coordinate_offset, bounding_region });
+		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), coordinate_offset + offset, bounding_region, offset});
+		offset = vector_zero;  // store current offset in group begin and clear to zero
 		return group_begin_index;
 	}
 	void EndGroup(uint group_begin_index) {
 		groups[group_begin_index].group_end_index = (uint)groups.size();
-		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), vector_zero, region_empty });
+		offset = groups[group_begin_index].prev_group_offset;  // restore previous offset
+		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), vector_zero, region_empty, vector_zero });
 	}
 
+
+private:
+	Vector offset = vector_zero;
 public:
-	void Append(Point offset, unique_ptr<const Figure> figure) {
-		figures.emplace_back(FigureContainer{ offset - point_zero, std::move(figure) });
-	}
-	void Append(Point offset, alloc_ptr<const Figure> figure) {
-		Append(offset, unique_ptr<const Figure>(figure));
-	}
+	const Vector PushOffset(Vector offset) { this->offset += offset; return offset; }
+	void PopOffset(Vector offset) { this->offset -= offset; }
 };
 
 

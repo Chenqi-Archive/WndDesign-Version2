@@ -128,9 +128,9 @@ void Wnd::OnDisplayRegionChange(Rect accessible_region, Rect display_region) {
 }
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
-	uint group_begin = figure_queue.BeginGroup(GetClientOffset(), GetClientRegion());
+	Vector offset = figure_queue.PushOffset(GetClientOffset());
 	OnClientPaint(figure_queue, GetClientRegion(), invalid_region - GetClientOffset());
-	figure_queue.EndGroup(group_begin);
+	figure_queue.PopOffset(offset);
 }
 
 void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
@@ -141,9 +141,9 @@ void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid
 		figure_queue.Append(point_zero, style.GetBorder(display_size));
 	}
 	if (style.HasScrollbar()) {
-		uint group_begin = figure_queue.BeginGroup(display_region_without_border.point - point_zero, display_region_without_border);
+		Vector offset = figure_queue.PushOffset(display_region_without_border.point - point_zero);
 		style.scrollbar._resource->OnPaint(figure_queue, display_region_without_border.size);
-		figure_queue.EndGroup(group_begin);
+		figure_queue.PopOffset(offset);
 	}
 }
 

@@ -255,7 +255,7 @@ void WndBase::UpdateInvalidRegion() {
 	_invalid_region.Clear();
 }
 
-void WndBase::Composite(FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) const {
+void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
 	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
 	assert(_region_on_parent.Contains(parent_invalid_region)); // intersection should have been done by parent.
 
@@ -265,10 +265,10 @@ void WndBase::Composite(FigureQueue& figure_queue, Vector client_offset, Rect pa
 	Rect invalid_region = parent_invalid_region + coordinate_offset;
 	if (HasLayer()) {
 		// Draw layer directly in parent's coordinates, no need to create figure group.
-		figure_queue.Append(parent_invalid_region.point - client_offset, new LayerFigure(*_layer, _background, invalid_region, {}));
+		figure_queue.Append(parent_invalid_region.point, new LayerFigure(*_layer, _background, invalid_region, {}));
 	} else {
 		// figure in my coordinates - coordinate_offset = figure in parent's coordinates.
-		uint group_begin = figure_queue.BeginGroup(vector_zero - coordinate_offset - client_offset, invalid_region);
+		uint group_begin = figure_queue.BeginGroup(vector_zero - coordinate_offset, invalid_region);
 		figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_region, false));
 		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
 		figure_queue.EndGroup(group_begin);
@@ -276,7 +276,7 @@ void WndBase::Composite(FigureQueue& figure_queue, Vector client_offset, Rect pa
 
 	// Composite non-client region.
 	Vector display_region_offset = _region_on_parent.point - point_zero;
-	uint group_begin = figure_queue.BeginGroup(display_region_offset - client_offset, parent_invalid_region - display_region_offset);
+	uint group_begin = figure_queue.BeginGroup(display_region_offset, parent_invalid_region - display_region_offset);
 	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - display_region_offset);
 	figure_queue.EndGroup(group_begin);
 }

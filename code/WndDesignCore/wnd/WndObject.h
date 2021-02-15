@@ -124,8 +124,8 @@ protected:
 		if (HasParent()) { GetParent()->InvalidateChild(*this, invalid_non_client_region); }
 	}
 protected:
-	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Vector client_offset, Rect parent_invalid_region) {
-		child.wnd->Composite(figure_queue, client_offset, parent_invalid_region);
+	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) {
+		child.wnd->Composite(figure_queue, parent_invalid_region);
 	}
 private:
 	void InvalidateChild(WndObject& child, Rect child_invalid_region) { wnd->InvalidateChild(*child.wnd, child_invalid_region); }

@@ -117,7 +117,7 @@ void DesktopWndFrame::LoseCapture() {
 
 void DesktopWndFrame::LoseFocus() {
 	assert(_focus_wnd != nullptr);
-	_focus_wnd->NonClientHandler(Msg::LoseCapture, nullmsg);
+	_focus_wnd->NonClientHandler(Msg::LoseFocus, nullmsg);
 	_focus_wnd = nullptr;
 }
 

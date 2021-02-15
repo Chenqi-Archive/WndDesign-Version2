@@ -7,6 +7,10 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+void Scrollbar::SetWndCapture(Wnd& wnd) { wnd.SetScrollbarCapture(); }
+void Scrollbar::ReleaseWndCapture(Wnd& wnd) { wnd.ReleaseCapture(); }
+
+
 class DefaultScrollbar : public Scrollbar {
 private:
 	static inline const uint width = 20;

@@ -158,7 +158,7 @@ void Wnd::MouseCaptureInfo::Update(Wnd& wnd, ElementType type) {
 }
 
 void Wnd::MouseTrackInfo::Update(Wnd& wnd, ElementType type) {
-	if (IsChild()) { _child->NonClientHandler(Msg::MouseLeave, nullmsg); _child = nullptr; return; }
+	if (IsChild()) { _child->NonClientHandler(Msg::MouseLeave, nullmsg); _child = nullptr; }
 	if (_type == type) { return; }
 	wnd.NotifyElement(_type, Msg::MouseLeave, nullmsg);
 	_type = type;
@@ -189,7 +189,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 				_mouse_track_info.Update(*this, _mouse_capture_info._type); break;
 			}
 			// Hit test border.
-			if (GetBorderResizer().HitTest(display_size, GetStyle().border._width)) {
+			if (GetStyleCalculator(GetStyle()).HitTestBorder(display_size, mouse_msg.point)) {
 				_mouse_track_info.Update(*this, ElementType::Border); break;
 			}
 			// Hit test scrollbar.
@@ -206,8 +206,8 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 			_mouse_track_info.Update(*this, *hit_test_info.child);
 			GetMouseMsg(para).point = hit_test_info.point;
 			return _mouse_track_info._child->NonClientHandler(msg, para);
-
 		} while (false);
+
 		// Send to border, scrollbar or client region.
 		switch (_mouse_track_info._type) {
 		case ElementType::Border: 
@@ -215,7 +215,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		case ElementType::Scrollbar: 
 			mouse_msg.point -= display_region_without_border.point - point_zero; 
 			GetScrollbar().Handler(*this, msg, para); return true;
-		case ElementType::Client: Handler(msg, para); 
+		case ElementType::Client:
 			mouse_msg.point -= display_region_to_client_offset;
 			return Handler(msg, para);
 		}

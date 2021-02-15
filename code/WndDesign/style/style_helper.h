@@ -148,6 +148,10 @@ public:
 			return std::make_unique<Rectangle>(display_size, (float)border._width, border._color);
 		}
 	}
+	bool HitTestBorder(Size display_size, Point point) const {
+		Rect display_region = Rect(point_zero, display_size);
+		return display_region.Contains(point) && !ShrinkRegionByLength(display_region, border._width).Contains(point);
+	}
 	bool IsPointInside(Size display_size, Point point) const {
 		return PointInRoundedRectangle(display_size, border._radius, point);
 	}

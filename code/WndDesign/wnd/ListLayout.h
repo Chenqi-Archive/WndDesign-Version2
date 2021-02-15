@@ -105,14 +105,11 @@ private:
 
 	//// message handling ////
 private:
-	struct HitTestInfo {
+	struct HitTestInfo : public Wnd::HitTestInfo {
 
 	};
-	const HitTestInfo HitTestPoint(Point point) {
-
-	}
 private:
-	virtual bool ClientHandler(Msg msg, Para para) override;
+	virtual const Wnd::HitTestInfo ClientHitTest(Size client_size, Point point) const override;
 };
 
 

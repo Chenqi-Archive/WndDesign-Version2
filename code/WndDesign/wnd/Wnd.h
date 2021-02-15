@@ -163,8 +163,8 @@ protected:
 
 protected:
 	struct HitTestInfo {
-		ref_ptr<WndObject> child;
-		Point point;
+		ref_ptr<WndObject> child = nullptr;
+		Point point = point_zero;
 	};
 protected:
 	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const { return {}; }

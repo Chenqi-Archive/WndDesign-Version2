@@ -32,12 +32,12 @@ public:
 	virtual bool Handler(Wnd& wnd, Msg msg, Para para) { return false; }
 
 protected:
-	void SetWndCapture(Wnd& wnd) { wnd.SetScrollbarCapture(); }
-	void ReleaseWndCapture(Wnd& wnd) { wnd.ReleaseCapture(); }
+	void SetWndCapture(Wnd& wnd);
+	void ReleaseWndCapture(Wnd& wnd);
 };
 
 
-unique_ptr<Scrollbar> CreateEmptyScrollbar() { return std::make_unique<Scrollbar>(); }
+inline unique_ptr<Scrollbar> CreateEmptyScrollbar() { return std::make_unique<Scrollbar>(); }
 
 unique_ptr<Scrollbar> CreateDefaultScrollbar();
 

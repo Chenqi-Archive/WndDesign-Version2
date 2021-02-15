@@ -57,7 +57,7 @@ private:
 
 	//// message handling ////
 protected:
-	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const override;
+	virtual const Wnd::HitTestInfo ClientHitTest(Size client_size, Point point) const override;
 };
 
 

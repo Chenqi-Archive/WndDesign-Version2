@@ -185,8 +185,8 @@ void ListLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Re
 
 }
 
-bool ListLayout::ClientHandler(Msg msg, Para para) {
-	return true;
+const Wnd::HitTestInfo ListLayout::ClientHitTest(Size client_size, Point point) const {
+	return Wnd::HitTestInfo();
 }
 
 

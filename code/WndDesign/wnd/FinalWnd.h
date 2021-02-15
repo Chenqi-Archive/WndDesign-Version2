@@ -27,8 +27,6 @@ private:
 	virtual void OnChildRegionUpdate(WndObject& child) override final {}
 	virtual void OnChildTitleChange(WndObject& child) override final {}
 	WndObject::CompositeChild;
-	WndObject::HitTestChild;
-	WndObject::SendChildMessage;
 };
 
 

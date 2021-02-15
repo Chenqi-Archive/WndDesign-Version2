@@ -41,9 +41,11 @@ private:
 	Rect _client_region;  // in client_region's coordinates
 public:
 	// point_on_client_region + GetClientOffset() = point_on_accessible_region
-	const Vector GetClientOffset() const {return Vector(_margin.left, _margin.top);}
+	const Vector GetClientOffset() const { return Vector(_margin.left, _margin.top); }
 	const Rect GetClientRegion() const { return _client_region; }
 	const Size GetClientSize() const { return _client_region.size; }
+public:
+	bool IsScrollable() const;
 
 
 	//// layout update ////
@@ -56,7 +58,7 @@ private:
 	};
 	InvalidLayout _invalid_layout;
 	virtual bool HasInvalidLayout() const override {
-		return _invalid_layout.region_on_parent || _invalid_layout.margin || 
+		return _invalid_layout.region_on_parent || _invalid_layout.margin ||
 			_invalid_layout.client_region || _invalid_layout.content_layout;
 	}
 	WndObject::InvalidateLayout;
@@ -170,7 +172,7 @@ protected:
 	};
 protected:
 	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const { return {}; }
-	virtual bool Handler(Msg msg, Para para) { if (msg == Msg::MouseEnter) { SetCursor(GetStyle().cursor._cursor); }return true; }
+	virtual bool Handler(Msg msg, Para para);
 };
 
 

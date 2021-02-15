@@ -99,7 +99,10 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 
 bool WndBase::UpdateDisplayOffset(Vector display_offset) {
 	display_offset = BoundRectInRegion(Rect(point_zero + display_offset, _region_on_parent.size), _accessible_region).point - point_zero;
-	return _display_offset == display_offset ? true : (_display_offset = display_offset, false);
+	if (_display_offset == display_offset) { return false; }
+	_display_offset = display_offset;
+	if (HasParent()) { _parent->InvalidateChild(*this, region_infinite); }
+	return true;
 }
 
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
@@ -112,7 +115,7 @@ void WndBase::SetAccessibleRegion(Rect accessible_region) {
 }
 
 const Vector WndBase::SetDisplayOffset(Vector display_offset) {
-	if (UpdateDisplayOffset(GetDisplayOffset())) {
+	if (UpdateDisplayOffset(display_offset)) {
 		ResetVisibleRegion();
 		_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
 	}

@@ -183,7 +183,7 @@ public:
 			region_on_parent_size.width = BoundLengthBetween(px(display_size.width), width._min, width._max).AsUnsigned();
 		}
 		if (IsRegionVerticalAuto()) {
-			LengthStyle height = this->height; height = ConvertLengthToPixel(height, parent_size.width);
+			LengthStyle height = this->height; height = ConvertLengthToPixel(height, parent_size.height);
 			region_on_parent_size.height = BoundLengthBetween(px(display_size.height), height._min, height._max).AsUnsigned();
 		}
 		return region_on_parent_size;

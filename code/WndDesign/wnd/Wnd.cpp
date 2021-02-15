@@ -39,6 +39,10 @@ void Wnd::SetRegionStyle(Rect parent_specified_region) {
 	RegionOnParentChanged();
 }
 
+bool Wnd::IsScrollable() const { 
+	return GetDisplaySize() == ExtendSizeByMargin(GetClientSize(), _margin) ? false : true;
+}
+
 bool Wnd::MayRegionOnParentChange() {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	if (_invalid_layout.content_layout && style.IsClientRegionAuto()) { _invalid_layout.client_region = true; }
@@ -226,6 +230,21 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 	if (msg == Msg::MouseLeave) { MouseLeave(); return true; }
 	if (IsKeyboardMsg(msg) || msg == Msg::LoseFocus) { return Handler(msg, para); }
 	assert(false); return true; // never reached, there are no more message types
+}
+
+bool Wnd::Handler(Msg msg, Para para) {
+	if (msg == Msg::MouseEnter) {
+		SetCursor(GetStyle().cursor._cursor);
+		return true;
+	}
+	if ((msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) && IsScrollable()) {
+		Vector scroll_offset = vector_zero;
+		if (msg == Msg::MouseWheel) { scroll_offset.y -= GetMouseMsg(para).wheel_delta; }
+		if (msg == Msg::MouseWheelHorizontal) { scroll_offset.x -= GetMouseMsg(para).wheel_delta; }
+		SetDisplayOffset(GetDisplayOffset() + scroll_offset);
+		return true;
+	}
+	return true;
 }
 
 

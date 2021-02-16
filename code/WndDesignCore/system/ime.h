@@ -31,4 +31,12 @@ struct ImeComposition {
 };
 
 
+class WndObject;
+
+WNDDESIGNCORE_API void EnableIME(WndObject& wnd);
+WNDDESIGNCORE_API void DisableIME(WndObject& wnd);
+WNDDESIGNCORE_API void CancelIME(WndObject& wnd);
+WNDDESIGNCORE_API void MoveImeWindow(WndObject& wnd, Rect caret_region);
+
+
 END_NAMESPACE(WndDesign)

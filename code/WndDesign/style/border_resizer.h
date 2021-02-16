@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../message/message.h"
+#include "../geometry/geometry.h"
 #include "../geometry/margin.h"
 
 #include <memory>

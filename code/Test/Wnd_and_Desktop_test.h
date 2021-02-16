@@ -22,7 +22,6 @@ private:
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(30).color(ColorSet::DarkGreen);
 			background.setColor(ColorSet::LightGray);
-			title.set(L"Wnd and Desktop test");
 		}
 	};
 public:

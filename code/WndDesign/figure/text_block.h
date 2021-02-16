@@ -55,17 +55,30 @@ private:
 	void ShrinkStyle(uint begin, uint length);
 	void ApplyAllStyles();
 
-public:
 	// Set or clear the style of a text range.
+public:
 	void SetStyle(uint begin, uint length, const TextStyleBase& style);
 	void ClearStyle(uint begin, uint length);
 
-public:
 	// Update layout and styles when text inserted or deleted.
+public:
+	void TextDeleted(uint begin, uint length);
 	void TextInsertedResetStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles);
 	void TextInsertedMergeStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles);
 	void TextInsertedWithoutStyle(uint begin, uint length);
-	void TextDeleted(uint begin, uint length);
+
+	void TextReplacedResetStyle(uint begin, uint old_length, uint new_length, const vector<unique_ptr<TextStyleBase>>& styles) {
+		ShrinkStyle(begin, old_length);
+		TextInsertedResetStyle(begin, new_length, styles);
+	}
+	void TextReplacedMergeStyle(uint begin, uint old_length, uint new_length, const vector<unique_ptr<TextStyleBase>>& styles) {
+		ShrinkStyle(begin, old_length);
+		TextInsertedMergeStyle(begin, new_length, styles);
+	}
+	void TextReplacedWithoutStyle(uint begin, uint old_length, uint new_length) {
+		ShrinkStyle(begin, old_length);
+		TextInsertedWithoutStyle(begin, new_length);
+	}
 };
 
 

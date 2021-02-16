@@ -1,10 +1,11 @@
 #pragma once
 
 #include "msg_base.h"
-#include "../system/ime.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
+
+struct ImeComposition;
 
 
 struct ImeCompositionMsg : _MsgPara {

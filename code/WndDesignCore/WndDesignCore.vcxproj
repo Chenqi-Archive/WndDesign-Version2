@@ -216,6 +216,7 @@
     <ClCompile Include="geometry\region.cpp" />
     <ClCompile Include="layer\layer.cpp" />
     <ClCompile Include="system\directx\d2d_api_window.cpp" />
+    <ClCompile Include="system\ime.cpp" />
     <ClCompile Include="system\metrics.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
     <ClCompile Include="system\directx\dxgi_api.cpp" />

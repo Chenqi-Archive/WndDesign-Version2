@@ -69,6 +69,15 @@
     <ClCompile Include="style\border_resizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="message\timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wnd\EditBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\clipboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -222,6 +231,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="style\border_resizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\clipboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system\ime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -151,12 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ListLayout_and_EditBox_test.h" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Wnd_and_Desktop_test.h" />
     <ClInclude Include="OverlapLayout_and_TextBox_test.h" />
+    <ClInclude Include="ListLayout_and_EditBox_test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -145,24 +145,6 @@ struct WndStyle {
 		const Background& get() const { return *_resource; }
 	}background;
 
-	
-	// Cursor style.
-	struct CursorStyle {
-	public:
-		Cursor _cursor = Cursor::Default;
-	public:
-		void set(Cursor cursor) { _cursor = cursor; }
-	}cursor;
-
-
-	// Title style.
-	struct TitleStyle {
-	public:
-		wstring _title = wstring();
-	public:
-		void set(const wstring& title) { _title = title; }
-	}title;
-
 
 	virtual ~WndStyle() {}  // style may contain allocated resources like background or title.
 };

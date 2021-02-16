@@ -149,6 +149,11 @@ void TextBlock::ClearStyle(uint begin, uint length) {
 	TextChanged(); // Just recreate the layout.
 }
 
+void TextBlock::TextDeleted(uint begin, uint length) {
+	ShrinkStyle(begin, length);
+	TextChanged();
+}
+
 void TextBlock::TextInsertedResetStyle(uint begin, uint length, const vector<unique_ptr<TextStyleBase>>& styles) {
 	ExtendStyle(begin, length);
 	ClearStyle(begin, length, true);
@@ -164,11 +169,6 @@ void TextBlock::TextInsertedMergeStyle(uint begin, uint length, const vector<uni
 
 void TextBlock::TextInsertedWithoutStyle(uint begin, uint length) {
 	ExtendStyle(begin, length);
-	TextChanged();
-}
-
-void TextBlock::TextDeleted(uint begin, uint length) {
-	ShrinkStyle(begin, length);
 	TextChanged();
 }
 

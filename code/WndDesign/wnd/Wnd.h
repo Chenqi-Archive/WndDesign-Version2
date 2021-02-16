@@ -25,7 +25,6 @@ protected:
 	const Style& GetStyle() const { return *_style; }
 protected:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
-	virtual const wstring GetTitle() const override;
 private:
 	/* called by parent window when region is specified by parent window */
 	virtual void SetRegionStyle(Rect parent_specified_region, Size parent_size) override;
@@ -42,11 +41,13 @@ private:
 	Margin _margin_without_padding;
 	Margin _margin;
 	Rect _client_region;  // in client_region's coordinates
+	Vector _client_to_display_offset;
 public:
 	// point_on_client_region + GetClientOffset() = point_on_accessible_region
 	const Vector GetClientOffset() const { return Vector(_margin.left, _margin.top); }
 	const Rect GetClientRegion() const { return _client_region; }
 	const Size GetClientSize() const { return _client_region.size; }
+	const Vector ClientToDisplayOffset() const { return _client_to_display_offset; }
 public:
 	bool IsScrollable() const;
 
@@ -110,7 +111,8 @@ protected:
 		WndObject::Invalidate(invalid_client_region + GetClientOffset());
 	}
 private:
-	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override /*final*/;
+	virtual void OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const override final;
+protected:
 	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {}
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const override;
 

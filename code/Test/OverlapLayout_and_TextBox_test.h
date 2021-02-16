@@ -22,12 +22,12 @@ private:
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
 			background.setColor(ColorSet::LightGray);
-			title.set(L"OverlapLayout and TextBox test");
 		}
 	};
 public:
 	MainWnd() : OverlapLayout(std::make_unique<Style>()) {}
 	~MainWnd() {}
+	virtual const wstring GetTitle() const override { return L"OverlapLayout and TextBox test"; }
 };
 
 
@@ -46,7 +46,6 @@ private:
 			// Default TextBox Style.
 			padding.setAll(50px); //padding.bottom(10px);
 			client.height(length_auto);
-			cursor.set(Cursor::Text);
 
 		}
 	};

@@ -22,7 +22,6 @@ private:
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(5).color(ColorSet::DarkGreen);
 			background.setColor(ColorSet::LightGray);
-			title.set(L"ListLayout Test");
 			grid_height.min(100px).max(300px);
 		}
 	};
@@ -43,7 +42,7 @@ private:
 		}
 	};
 public:
-	TextArea();//: EditBox(std::make_unique<Style>(), L"Type something here.") {}
+	TextArea(): EditBox(std::make_unique<Style>(), L"Type something here...") {}
 };
 
 

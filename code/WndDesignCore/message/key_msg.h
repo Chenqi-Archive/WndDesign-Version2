@@ -105,7 +105,7 @@ constexpr inline Key CharKey(char ch) {
 		(ch >= 'A' && ch <= 'Z')) {   // Captial letters: 0x41 - 0x5A
 		return static_cast<Key>(ch);
 	}
-	throw std::invalid_argument("ch should be number or captial letter.");
+	throw std::invalid_argument("ch should be number or captial letter");
 }
 
 

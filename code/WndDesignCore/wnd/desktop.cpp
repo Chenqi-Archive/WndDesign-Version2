@@ -89,8 +89,7 @@ void DesktopWndFrame::OnWndDetach(WndObject& wnd) {
 }
 
 void DesktopWndFrame::SetCapture(WndObject& wnd, Vector offset) {
-	_capture_wnd_offset = offset;
-	_capture_frame_offset = _wnd.GetRegionOnParent().point;
+	_capture_wnd_offset_from_desktop = _wnd.GetRegionOnParent().point + offset;
 	if (_capture_wnd == &wnd) { return; }
 	if (_capture_wnd == nullptr) { 
 		Win32::SetCapture(_hwnd);
@@ -124,7 +123,7 @@ void DesktopWndFrame::LoseFocus() {
 
 void DesktopWndFrame::ReceiveMessage(Msg msg, Para para) const {
 	if (IsMouseMsg(msg) && _capture_wnd != nullptr) {
-		GetMouseMsg(para).point += _capture_wnd_offset + (_wnd.GetRegionOnParent().point - _capture_frame_offset);
+		GetMouseMsg(para).point += _wnd.GetRegionOnParent().point - _capture_wnd_offset_from_desktop;
 		_capture_wnd->NonClientHandler(msg, para);
 		return;
 	}
@@ -187,7 +186,7 @@ void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {
 
 void DesktopObjectImpl::SetCapture(WndObject& wnd) {
 	if (auto [frame, point_on_frame] = ConvertWndNonClientPointToFramePoint(wnd, point_zero); frame != nullptr) {
-		frame->SetCapture(wnd, point_zero - point_on_frame);
+		frame->SetCapture(wnd, point_on_frame - point_zero);
 	}
 }
 

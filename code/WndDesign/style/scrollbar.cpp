@@ -59,8 +59,8 @@ private:
 		if (_entire_length == 0) {
 			_slider_region = region_empty;
 		} else {
-			uint slider_length = display_size.height * _display_length / _entire_length;
-			int slider_offset = display_size.height * _display_offset.y / _entire_length;
+			uint slider_length = (uint)round((double)display_size.height * _display_length / _entire_length);
+			int slider_offset = (int)round((double)display_size.height * _display_offset.y / _entire_length);
 			_slider_region = Rect((int)(display_size.width - width), slider_offset, width, slider_length);
 		}
 	}
@@ -97,7 +97,7 @@ public:
 				int current_mouse_position = GetMouseMsg(para).point.y;
 				if (current_mouse_position != _mouse_down_position) {
 					int target_offset = _mouse_down_display_offset +
-						(current_mouse_position - _mouse_down_position) * (int)_entire_length / (int)GetDisplaySize().height;
+						(int)round(((double)current_mouse_position - _mouse_down_position) * (int)_entire_length / GetDisplaySize().height);
 					SetWndScrollOffset(wnd, Vector(_display_offset.x, target_offset));
 				}
 			}

@@ -12,7 +12,7 @@ TextBox::~TextBox() {}
 
 const Rect TextBox::UpdateContentLayout(Size client_size) {
 	if (_text_block.AutoResize(client_size)) {
-		Invalidate(Rect(point_zero, _text_block.GetSize()));
+		Invalidate(region_infinite);
 	}
 	return Rect(point_zero, _text_block.GetSize());
 }

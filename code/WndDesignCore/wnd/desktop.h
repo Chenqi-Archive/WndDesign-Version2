@@ -46,8 +46,7 @@ public:
 	void Present();
 
 private:
-	Vector _capture_wnd_offset;
-	Point _capture_frame_offset;
+	Point _capture_wnd_offset_from_desktop;
 	ref_ptr<WndObject> _capture_wnd = nullptr; 
 	ref_ptr<WndObject> _focus_wnd = nullptr;
 private:

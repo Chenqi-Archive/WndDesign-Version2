@@ -51,7 +51,7 @@ private:
 		}
 	};
 public:
-	MyTextBox() : TextBox(std::make_unique<Style>(), wstring(text)) { AllocateLayer(); }
+	MyTextBox() : TextBox(std::make_unique<Style>(), wstring(text)) { /*AllocateLayer();*/ }
 	~MyTextBox() {}
 };
 

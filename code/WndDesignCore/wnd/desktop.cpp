@@ -110,13 +110,13 @@ void DesktopWndFrame::SetFocus(WndObject& wnd) {
 }
 
 void DesktopWndFrame::LoseCapture() {
-	assert(_capture_wnd != nullptr);
+	if (_capture_wnd == nullptr) { return; }
 	_capture_wnd->NonClientHandler(Msg::LoseCapture, nullmsg);
 	_capture_wnd = nullptr;
 }
 
 void DesktopWndFrame::LoseFocus() {
-	assert(_focus_wnd != nullptr);
+	if (_focus_wnd == nullptr) { return; }
 	_focus_wnd->NonClientHandler(Msg::LoseFocus, nullmsg);
 	_focus_wnd = nullptr;
 }

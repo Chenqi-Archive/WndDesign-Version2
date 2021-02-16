@@ -100,7 +100,7 @@ void Wnd::UpdateScrollbar(Rect accessible_region, Rect display_region) {
 		client_region_with_padding.size,
 		displayed_client_region_with_padding - (client_region_with_padding.point - point_zero)
 	);
-	GetScrollbar().SetRegion(GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_region.size));
+	GetScrollbar().SetRegion(*this, GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_region.size));
 	_client_to_display_offset = GetClientOffset() - (display_region.point - point_zero);
 }
 
@@ -137,7 +137,7 @@ void Wnd::OnDisplayRegionChange(Rect accessible_region, Rect display_region) {
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
 	Vector offset = figure_queue.PushOffset(GetClientOffset());
-	OnClientPaint(figure_queue, GetClientRegion(), invalid_region - GetClientOffset());
+	OnClientPaint(figure_queue, GetClientRegion(), (invalid_region - GetClientOffset()).Intersect(GetClientRegion()));
 	figure_queue.PopOffset(offset);
 }
 
@@ -245,17 +245,16 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 }
 
 bool Wnd::Handler(Msg msg, Para para) {
-	if ((msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) && IsScrollable()) {
-		Vector scroll_offset = vector_zero;
-		if (msg == Msg::MouseWheel) { scroll_offset.y -= GetMouseMsg(para).wheel_delta; }
-		if (msg == Msg::MouseWheelHorizontal) { scroll_offset.x -= GetMouseMsg(para).wheel_delta; }
-		Vector old_display_offset = GetDisplayOffset();
-		Vector actual_scroll_offset = SetDisplayOffset(old_display_offset + scroll_offset) - old_display_offset;
-		Vector remaining_scroll_offset = scroll_offset - actual_scroll_offset;
-		// Send remaining scroll offset to parent window.
+	if (msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) {
+		if (IsScrollable()) {
+			Vector scroll_offset = vector_zero;
+			if (msg == Msg::MouseWheel) { scroll_offset.y -= GetMouseMsg(para).wheel_delta; }
+			if (msg == Msg::MouseWheelHorizontal) { scroll_offset.x -= GetMouseMsg(para).wheel_delta; }
+			SetDisplayOffset(GetDisplayOffset() + scroll_offset);
+		}
 		return true;
 	}
-	return true;
+	return false;
 }
 
 

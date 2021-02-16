@@ -40,12 +40,21 @@ void TextBlock::TextChanged() {
 		(FLOAT)_max_size.width, (FLOAT)_max_size.height,
 		AsTextLayout(&_layout)
 	);
-	AutoResize(_max_size);
+	UpdateSize();
 	ApplyAllStyles();
 }
 
-bool TextBlock::AutoResize(Size max_size) {
-	if (_max_size == max_size) { return false; }
+void TextBlock::UpdateSize() {
+	DWRITE_TEXT_METRICS metrics;
+	_layout->GetMetrics(&metrics);
+	_size = Size(
+		static_cast<uint>(ceil(metrics.widthIncludingTrailingWhitespace)),  // Round up the size.
+		static_cast<uint>(ceil(metrics.height))
+	);
+}
+
+void TextBlock::AutoResize(Size max_size) {
+	if (_max_size == max_size) { return; }
 
 	if (_max_size.width != max_size.width) {
 		_max_size.width = max_size.width; _layout->SetMaxWidth(static_cast<FLOAT>(_max_size.width));
@@ -54,17 +63,7 @@ bool TextBlock::AutoResize(Size max_size) {
 		_max_size.height = max_size.height; _layout->SetMaxHeight(static_cast<FLOAT>(_max_size.height));
 	}
 
-	DWRITE_TEXT_METRICS metrics;
-	_layout->GetMetrics(&metrics);
-
-	Size size = Size(
-		static_cast<uint>(ceil(metrics.widthIncludingTrailingWhitespace)),  // Round up the size.
-		static_cast<uint>(ceil(metrics.height))
-	);
-
-	if (_size == size) { return false; }
-	_size = size;
-	return true;
+	UpdateSize();
 }
 
 const TextBlockHitTestInfo TextBlock::HitTestPoint(Point point) const {

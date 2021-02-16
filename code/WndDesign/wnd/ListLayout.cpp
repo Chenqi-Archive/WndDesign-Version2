@@ -22,10 +22,11 @@ public:
 		height._normal = style.BoundLengthBetween(height._normal, height._min, height._max);
 		return height._normal.AsUnsigned();
 	}
-	std::pair<uint, uint> CalculateMinMaxGridHeight(uint client_height) const {
+	const Size CalculateMinMaxGridHeight(uint client_height) const {
 		LengthStyle height = grid_height;
 		height._min.ConvertToPixel(client_height); height._max.ConvertToPixel(client_height);
-		return { height._min.AsUnsigned(), height._max.AsUnsigned() };
+		if (height._min.AsUnsigned() > height._max.AsUnsigned()) { height._min = height._max; }
+		return Size(height._min.AsUnsigned(), height._max.AsUnsigned()); // stored in Size
 	}
 };
 
@@ -37,12 +38,12 @@ const ListLayoutStyleCalculator& GetStyleCalculator(ListLayout::Style& style) {
 END_NAMESPACE(Anonymous)
 
 
-ListLayout::ListLayout(unique_ptr<Style> style) : 
-	Wnd(std::move(style)), 
-	_default_grid_size(), 
+ListLayout::ListLayout(unique_ptr<Style> style) :
+	Wnd(std::move(style)),
+	_default_grid_size(),
+	_min_max_grid_height(),
 	_rows(),
-	_invalid_layout_row_begin(0)
-{
+	_invalid_layout_row_begin(0) {
 }
 
 ListLayout::~ListLayout() {}
@@ -95,6 +96,8 @@ void ListLayout::SetChild(WndObject& child, uint row) {
 }
 
 void ListLayout::InsertChild(WndObject& child, uint row) {
+	uint row_number = GetRowNumber();
+	if (row > row_number) { row = row_number; }
 	InsertRow(row);
 	SetChild(child, row);
 }
@@ -104,9 +107,11 @@ void ListLayout::RemoveChild(uint row_begin, uint row_count) {
 	if (row_begin >= row_number || row_count == 0) { return; }
 	if (row_count > row_number - row_begin) { row_count = row_number - row_begin; }
 	for (uint row = row_begin; row < row_begin + row_count; ++row) {
-		UnregisterChild(*_rows[row].wnd);
-		_rows[row].wnd = nullptr;
-		_rows[row].Invalidate();
+		if (_rows[row].wnd != nullptr) {
+			UnregisterChild(*_rows[row].wnd);
+			_rows[row].wnd = nullptr;
+			_rows[row].Invalidate();
+		}
 	}
 	ContentLayoutChanged(row_begin);
 }
@@ -130,6 +135,14 @@ uint ListLayout::GetContentHeight() const {
 	return row_number == 0 ? 0 : _rows[row_number - 1].y + _rows[row_number - 1].height;
 }
 
+uint ListLayout::HitTestRow(uint y) const {
+	auto cmp = [](const RowContainer& row, uint y) { return row.y > y; };
+	auto it_row = std::lower_bound(_rows.rbegin(), _rows.rend(), y, cmp);
+	assert(it_row != _rows.rend());  // underflow (never happens because y >= 0)
+	if (it_row == _rows.rbegin() && y - it_row->y >= it_row->height) { return row_end; }  // overflow
+	return (uint)(_rows.rend() - it_row - 1);
+}
+
 void ListLayout::ChildRegionMayChange(WndObject& child) {
 	if (GetStyleCalculator(GetStyle()).IsGridHeightAuto()) {
 		uint row = GetChildData(child);
@@ -142,7 +155,9 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 	auto& style = GetStyleCalculator(GetStyle());
 	bool all_invalid = false;
 	if (client_size != GetClientSize()) {
-		if (UpdateDefaultGridSize(Size(style.CalculateGridHeight(client_size.height), client_size.width))) {
+		bool default_grid_size_changed = UpdateDefaultGridSize(Size(client_size.width, style.CalculateGridHeight(client_size.height)));
+		bool min_max_grid_height_changed = UpdateMinMaxGridHeight(style.CalculateMinMaxGridHeight(client_size.height));
+		if (default_grid_size_changed || min_max_grid_height_changed) {
 			_invalid_layout_row_begin = 0;
 			all_invalid = true;
 		}
@@ -150,7 +165,8 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 	if (_invalid_layout_row_begin >= GetRowNumber()) {
 		return Rect(point_zero, Size(client_size.width, GetContentHeight()));
 	}
-	auto [min_grid_height, max_grid_height] = style.CalculateMinMaxGridHeight(client_size.height);
+	uint old_height = GetContentHeight();
+	uint min_grid_height = _min_max_grid_height.width, max_grid_height = _min_max_grid_height.height;
 	auto BoundHeightBetween = [](uint height, uint min_height, uint max_height) -> uint {
 		if (height < min_height) { height = min_height; } if (height > max_height) { height = max_height; } return height;
 	};
@@ -158,20 +174,25 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 	uint y = y0;
 	uint gridline_width = style.GetGridLineWidth();
 	for (uint row = _invalid_layout_row_begin; row < GetRowNumber(); ++row) {
-		uint height = 0;
-		if (_rows[row].wnd != nullptr && (all_invalid || _rows[row].IsInvalid())) {
-			height = UpdateChildRegion(*_rows[row].wnd, _default_grid_size).size.height;
+		RowContainer& row_container = _rows[row];
+		uint height = row_container.height;
+		if (all_invalid || row_container.IsInvalid()) {
+			if (row_container.wnd == nullptr) {
+				height = min_grid_height;
+			} else {
+				height = UpdateChildRegion(*row_container.wnd, _default_grid_size).size.height;
+				height = BoundHeightBetween(height, min_grid_height, max_grid_height);
+			}
 		}
-		height = BoundHeightBetween(height, min_grid_height, max_grid_height);
-		_rows[row].y = y;
-		_rows[row].height = height;
-		if (_rows[row].wnd != nullptr) {
-			SetChildRegion(*_rows[row].wnd, Rect(0, (int)y, client_size.width, height));
+		row_container.y = y;
+		row_container.height = height;
+		if (row_container.wnd != nullptr) {
+			SetChildRegion(*row_container.wnd, Rect(0, (int)y, client_size.width, height));
 		}
 		y += height + gridline_width;
 	}
 	uint height = GetContentHeight();
-	Invalidate(Rect(0, (int)y0, client_size.width, height - y0));
+	Invalidate(Rect(0, (int)y0, client_size.width, max(old_height, height) - y0));
 	_invalid_layout_row_begin = -1;
 	return Rect(point_zero, Size(client_size.width, height));
 }
@@ -182,11 +203,33 @@ void ListLayout::OnChildRegionUpdate(WndObject& child) {
 }
 
 void ListLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const {
-
+	uint y1 = (uint)invalid_client_region.top(), y2 = (uint)invalid_client_region.bottom() - 1;
+	uint row1 = HitTestRow(y1), row2 = HitTestRow(y2);
+	if (row1 == row_end) { return; } 
+	if (row2 == row_end) { row2 = GetRowNumber() - 1; }
+	assert(row1 != row_end && row2 != row_end && row2 >= row1);
+	for (uint row = row1; row <= row2; ++row) {
+		const RowContainer& row_container = _rows[row];
+		// Composite child window.
+		if (row_container.wnd != nullptr) {
+			Rect child_region = Rect(0, (int)row_container.y, client_region.size.width, row_container.height);
+			Rect child_invalid_region = child_region.Intersect(invalid_client_region);
+			if (!child_invalid_region.IsEmpty()) {
+				CompositeChild(*row_container.wnd, figure_queue, child_invalid_region);
+			}
+		}
+		// Draw grid line as rectangle.
+		figure_queue.Append(
+			Point(0, row_container.y + row_container.height),
+			new Rectangle(Size(client_region.size.width, GetStyle().gridline._width), GetStyle().gridline._color)
+		);
+	}
 }
 
 const Wnd::HitTestInfo ListLayout::ClientHitTest(Size client_size, Point point) const {
-	return Wnd::HitTestInfo();
+	uint y = (uint)point.y;	uint row = HitTestRow(y);
+	if (row == row_end || _rows[row].wnd == nullptr || y - _rows[row].y >= _rows[row].height) { return {}; }
+	return { _rows[row].wnd, Point(point.x, y - _rows[row].y) };
 }
 
 

@@ -32,7 +32,7 @@ public:
 
 	// painting
 private:
-	virtual void SizeUpdated() {}
+	virtual void SizeUpdated(Wnd& wnd) {}
 public:
 	virtual bool IsVisible() const { return false; }
 	virtual void OnPaint(FigureQueue& figure_queue) {}
@@ -46,7 +46,7 @@ public:
 private:
 	Rect _region;
 public:
-	void SetRegion(Rect region) { _region = region; SizeUpdated(); }
+	void SetRegion(Wnd& wnd, Rect region) { _region = region; SizeUpdated(wnd); }
 	const Rect GetRegion() const { return _region; }
 protected:
 	const Size GetDisplaySize() const { return _region.size; }

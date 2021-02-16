@@ -128,8 +128,9 @@ void EditBox::DoSelection(Point mouse_move_position) {
 	GetTextBlock().HitTestTextRange(_selection_begin, _selection_end - _selection_begin, _selection_info);
 	_selection_region_union = region_empty;
 	for (auto& it : _selection_info) {
-		_selection_region_union.Union(it.geometry_region);
+		_selection_region_union = _selection_region_union.Union(it.geometry_region);
 	}
+	InvalidateSelectionRegion();
 }
 
 void EditBox::ClearSelection() {
@@ -236,6 +237,10 @@ void EditBox::Paste() {
 }
 
 bool EditBox::Handler(Msg msg, Para para) {
+	if (Wnd::Handler(msg, para)) { 
+		return true; 
+	}
+
 	switch (msg) {
 	case Msg::LeftDown:
 		SetCapture();

@@ -53,7 +53,7 @@ private:
 	Rect _frame_region = region_empty;
 	Rect _slider_region = region_empty;
 private:
-	virtual void SizeUpdated() override {
+	virtual void SizeUpdated(Wnd& wnd) override {
 		Size display_size = GetDisplaySize();
 		_frame_region = Rect((int)(display_size.width - width), 0, width, display_size.height);
 		if (_entire_length == 0) {
@@ -63,6 +63,7 @@ private:
 			int slider_offset = (int)round((double)display_size.height * _display_offset.y / _entire_length);
 			_slider_region = Rect((int)(display_size.width - width), slider_offset, width, slider_length);
 		}
+		InvalidateWnd(wnd, _frame_region);
 	}
 public:
 	virtual bool IsVisible() const override { return HasMargin(); }

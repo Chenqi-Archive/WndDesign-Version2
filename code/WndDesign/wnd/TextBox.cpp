@@ -11,9 +11,9 @@ TextBox::TextBox(unique_ptr<Style> style, const wstring& text) :
 TextBox::~TextBox() {}
 
 const Rect TextBox::UpdateContentLayout(Size client_size) {
-	if (_text_block.AutoResize(client_size)) {
-		Invalidate(region_infinite);
-	}
+	Size old_size = _text_block.GetSize();
+	_text_block.AutoResize(client_size);
+	if (_text_block.GetSize() != old_size) { Invalidate(region_infinite); }
 	return Rect(point_zero, _text_block.GetSize());
 }
 

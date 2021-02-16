@@ -36,14 +36,20 @@ protected:
 
 private:
 	Size _default_grid_size;
+	Size _min_max_grid_height;  // stored two uint number in Size
 private:
 	const Size GetDefaultGridSize() { return _default_grid_size; }
 	bool UpdateDefaultGridSize(Size grid_size) {
 		return _default_grid_size == grid_size ? false : (_default_grid_size = grid_size, true);
 	}
+	bool UpdateMinMaxGridHeight(Size min_max_grid_height) {
+		return _min_max_grid_height == min_max_grid_height ? false : (_min_max_grid_height = min_max_grid_height, true);
+	}
 
 
 	//// row operation ////
+public:
+	static inline const uint row_end = -1;
 private:
 	struct RowContainer {
 		uint y = 0;
@@ -54,10 +60,6 @@ private:
 		bool IsInvalid() const { return height == -1; }
 	};
 	vector<RowContainer> _rows;
-
-public:
-	static inline const uint row_end = -1;
-
 public:
 	uint GetRowNumber() const { return (uint)_rows.size(); }
 	void SetRowNumber(uint row_number);
@@ -92,6 +94,7 @@ private:
 private:
 	void ContentLayoutChanged(uint row_begin = 0);
 	uint GetContentHeight() const;
+	uint HitTestRow(uint y) const;
 private:
 	virtual void ChildRegionMayChange(WndObject& child) override;
 	virtual const Rect UpdateContentLayout(Size client_size);
@@ -104,10 +107,6 @@ private:
 
 
 	//// message handling ////
-private:
-	struct HitTestInfo : public Wnd::HitTestInfo {
-
-	};
 private:
 	virtual const Wnd::HitTestInfo ClientHitTest(Size client_size, Point point) const override;
 };

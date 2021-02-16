@@ -18,9 +18,10 @@ private:
 	struct Style : ListLayout::Style {
 		Style() {
 			width.max(70pct);
-			height.max(70pct);
+			height.max(80pct);
 			position.setHorizontalCenter().setVerticalCenter();
-			border.width(5).color(ColorSet::DarkGreen);
+			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
+			client.height(length_auto);
 			background.setColor(ColorSet::LightGray);
 			grid_height.min(100px).max(300px);
 		}
@@ -29,14 +30,16 @@ public:
 	MainWnd() : ListLayout(std::make_unique<Style>()) {}
 };
 
+
 class TextArea : public EditBox {
 private:
 	struct Style : EditBox::Style {
 		Style() {
 			width.max(100pct);
-			height.max(500px);
+			height.max(100pct);
 			border.width(3).color(ColorSet::Honeydew);
 			padding.set(20px, 10px, 20px, 10px);
+			client.height(length_auto);
 			background.setColor(ColorSet::YellowGreen);
 			font.size(20px);
 		}

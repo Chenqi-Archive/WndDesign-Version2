@@ -29,15 +29,15 @@ private:
 	alloc_ptr<TextLayout> _layout;
 	Size _max_size;
 	Size _size;
-
 public:
 	const Size GetSize() const { return _size; }
 	TextLayout& GetLayout() const { return *_layout; }
 	const TextBlockStyle& GetDefaultStyle() const { return _style; }
 private:
 	void TextChanged();
+	void UpdateSize();
 public:
-	bool AutoResize(Size max_size);
+	void AutoResize(Size max_size);
 public:
 	const TextBlockHitTestInfo HitTestPoint(Point point) const;
 	const TextBlockHitTestInfo HitTestTextPosition(uint text_position) const;

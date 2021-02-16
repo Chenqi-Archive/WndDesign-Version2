@@ -37,8 +37,8 @@ struct WndStyle {
 	// (relative to the inner edges of parent window)
 	struct PositionStyle {
 	public:
-		ValueTag _left = position_auto;
-		ValueTag _top = position_auto;
+		ValueTag _left = 0px;
+		ValueTag _top = 0px;
 		ValueTag _right = position_auto;
 		ValueTag _bottom = position_auto;
 	public:

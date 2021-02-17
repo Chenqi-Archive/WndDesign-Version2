@@ -139,8 +139,10 @@ void Wnd::OnDisplayRegionChange(Rect accessible_region, Rect display_region) {
 }
 
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
+	Rect invalid_client_region = (invalid_region - GetClientOffset()).Intersect(GetClientRegion());
+	if (invalid_client_region.IsEmpty()) { return; }
 	Vector offset = figure_queue.PushOffset(GetClientOffset());
-	OnClientPaint(figure_queue, GetClientRegion(), (invalid_region - GetClientOffset()).Intersect(GetClientRegion()));
+	OnClientPaint(figure_queue, GetClientRegion(), invalid_client_region);
 	figure_queue.PopOffset(offset);
 }
 

@@ -115,6 +115,9 @@ void TextBlock::HitTestTextRange(uint text_position, uint text_length, vector<Te
 			false,
 			Rect(POINT2Point(D2D1::Point2F(metrics[i].left, metrics[i].top)), SIZE2Size(D2D1::SizeF(metrics[i].width, metrics[i].height))),
 		};
+
+		// Add width for empty lines.
+		if (geometry_regions[i].geometry_region.size.width < 5) { geometry_regions[i].geometry_region.size.width = 5; }
 	}
 }
 

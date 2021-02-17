@@ -35,10 +35,12 @@ public:
 	void Union(const Region& region);
 	void Intersect(const Region& region);
 	void Sub(const Region& region);
+	void Xor(const Region& region);
 
 	void Union(const Rect& region);
 	void Intersect(const Rect& region);
 	void Sub(const Rect& region);
+	void Xor(const Rect& region);
 
 	std::pair<Rect, vector<Rect>> GetRect() const;
 };

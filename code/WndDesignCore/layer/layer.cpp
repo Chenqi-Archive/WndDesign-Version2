@@ -20,7 +20,6 @@ inline bool IsVisibleRegionSizeValid(Size visible_region_size) {
 Layer::Layer() :
     _tile_size(tile_size_empty),
     _cached_tile_range(region_empty),
-    _cached_region(region_empty),
     _max_capacity(0),
     _cache(),
     _tile_read_only(std::make_unique<Target>(nullptr)) {
@@ -52,19 +51,18 @@ void Layer::ResetTileSize(Size layer_size) {
     // If tile size is changed, reset tile size, clear cached_region and tile_cache.
     _tile_size = new_tile_size;
     _cached_tile_range = region_empty;
-    _cached_region = region_empty;
     _cache.clear();
 }
 
-void Layer::SetCachedRegion(Rect accessible_region, Rect visible_region) {
-    if (!IsVisibleRegionSizeValid(visible_region.size)) {
-        throw std::out_of_range("visible region's size too large");
-    }
-
+void Layer::UpdateCachedTileRegion(Rect accessible_region, Rect visible_region) {
+    if (!IsVisibleRegionSizeValid(visible_region.size)) { throw std::out_of_range("visible region's size too large"); }
     Rect enlarged_region = accessible_region.Intersect(ScaleRegion(visible_region, 2.0));
     _cached_tile_range = RegionToOverlappingTileRange(enlarged_region, _tile_size);
-    _cached_region = ScaleRectBySize(_cached_tile_range, _tile_size);
     SetMaxCapacity(_cached_tile_range.Area());
+}
+
+const Rect Layer::GetCachedTileRegion() {
+    return ScaleRectBySize(_cached_tile_range, _tile_size);
 }
 
 const Target& Layer::ReadTile(TileID tile_id) const {

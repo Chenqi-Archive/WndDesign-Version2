@@ -140,8 +140,8 @@ WNDDESIGNCORE_API DesktopObject& DesktopObject::Get() {
     return desktop_object;
 }
 
-DesktopObjectImpl::DesktopObjectImpl() : DesktopObject(std::make_unique<DesktopBase>(*this)) {
-	SetAccessibleRegion(Rect(point_zero, GetDesktopSize()));
+DesktopObjectImpl::DesktopObjectImpl() :
+	DesktopObject(std::make_unique<DesktopBase>(*this)) {
 }
 
 DesktopObjectImpl::~DesktopObjectImpl() {}
@@ -238,9 +238,12 @@ const std::pair<ref_ptr<DesktopWndFrame>, Point> DesktopObjectImpl::ConvertWndNo
 }
 
 
-const Rect DesktopBase::GetCachedRegion() const {
-	return Rect(point_zero, GetDesktopSize()); 
+DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) {
+	_depth = 0;
+	_accessible_region = _cached_region = Rect(point_zero, GetDesktopSize());
 }
+
+DesktopBase::~DesktopBase() {}
 
 void DesktopBase::AddChild(IWndBase& child_wnd) {
 	WndBase::AddChild(child_wnd);

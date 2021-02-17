@@ -60,6 +60,7 @@ private:
 		bool IsInvalid() const { return height == -1; }
 	};
 	vector<RowContainer> _rows;
+	uint _content_height;
 public:
 	uint GetRowNumber() const { return (uint)_rows.size(); }
 	void SetRowNumber(uint row_number);
@@ -92,7 +93,7 @@ private:
 private:
 	uint _invalid_layout_row_begin;
 private:
-	void ContentLayoutChanged(uint row_begin = 0);
+	void ContentLayoutChanged(uint row_begin);
 	uint GetContentHeight() const;
 	uint HitTestRow(uint y) const;
 private:

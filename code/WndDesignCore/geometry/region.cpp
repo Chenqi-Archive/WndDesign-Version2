@@ -52,9 +52,14 @@ void Region::Sub(const Region& region) {
     CombineRgn(static_cast<HRGN>(rgn), static_cast<HRGN>(rgn), static_cast<HRGN>(region.rgn), RGN_DIFF);
 }
 
+void Region::Xor(const Region& region) {
+    CombineRgn(static_cast<HRGN>(rgn), static_cast<HRGN>(rgn), static_cast<HRGN>(region.rgn), RGN_XOR);
+}
+
 void Region::Union(const Rect& region) { Union(TempRegion(region)); }
 void Region::Intersect(const Rect& region) { Intersect(TempRegion(region)); }
 void Region::Sub(const Rect& region) { Sub(TempRegion(region)); }
+void Region::Xor(const Rect& region) { Xor(TempRegion(region)); }
 
 std::pair<Rect, vector<Rect>> Region::GetRect() const {
     int size = GetRegionData(static_cast<HRGN>(rgn), 0, NULL);

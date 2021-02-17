@@ -43,6 +43,7 @@ ListLayout::ListLayout(unique_ptr<Style> style) :
 	_default_grid_size(),
 	_min_max_grid_height(),
 	_rows(),
+	_content_height(0),
 	_invalid_layout_row_begin(0) {
 }
 
@@ -147,7 +148,7 @@ void ListLayout::ChildRegionMayChange(WndObject& child) {
 	if (GetStyleCalculator(GetStyle()).IsGridHeightAuto()) {
 		uint row = GetChildData(child);
 		_rows[row].Invalidate();
-		ContentLayoutChanged();
+		ContentLayoutChanged(row);
 	}
 }
 
@@ -165,7 +166,6 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 	if (_invalid_layout_row_begin >= GetRowNumber()) {
 		return Rect(point_zero, Size(client_size.width, GetContentHeight()));
 	}
-	uint old_height = GetContentHeight();
 	uint min_grid_height = _min_max_grid_height.width, max_grid_height = _min_max_grid_height.height;
 	auto BoundHeightBetween = [](uint height, uint min_height, uint max_height) -> uint {
 		if (height < min_height) { height = min_height; } if (height > max_height) { height = max_height; } return height;
@@ -191,10 +191,11 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 		}
 		y += height + gridline_width;
 	}
-	uint height = GetContentHeight();
-	Invalidate(Rect(0, (int)y0, client_size.width, max(old_height, height) - y0));
+	uint content_height = GetContentHeight();
+	Invalidate(Rect(0, (int)y0, client_size.width, max(_content_height, content_height) - y0));
+	_content_height = content_height;
 	_invalid_layout_row_begin = -1;
-	return Rect(point_zero, Size(client_size.width, height));
+	return Rect(point_zero, Size(client_size.width, content_height));
 }
 
 void ListLayout::OnChildRegionUpdate(WndObject& child) {

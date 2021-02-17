@@ -40,7 +40,6 @@ public:
 private:
 	Size _tile_size;
 	TileRange _cached_tile_range;
-	Rect _cached_region;
 
 	uint _max_capacity;
 	unordered_map<TileID, Target, TileIDHasher> _cache;
@@ -55,8 +54,8 @@ public:
 	const Size GetTileSize() const { return _tile_size; }
 	void ResetTileSize(Size layer_size);
 
-	const Rect GetCachedRegion() const { return _cached_region; }
-	void SetCachedRegion(Rect accessible_region, Rect visible_region);
+	void UpdateCachedTileRegion(Rect accessible_region, Rect visible_region);
+	const Rect GetCachedTileRegion();
 
 	const Target& ReadTile(TileID tile_id) const;
 	Target& WriteTile(TileID tile_id);

@@ -118,12 +118,10 @@ public:
 
 class DesktopBase : public WndBase {
 public:
-	DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_object) { _depth = 0; }
-	~DesktopBase() {}
+	DesktopBase(DesktopObjectImpl& desktop_object);
+	~DesktopBase();
 private:
 	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }
-private:
-	virtual const Rect GetCachedRegion() const override;
 private:
 	virtual void AddChild(IWndBase& child_wnd) override;
 	virtual void InvalidateChild(WndBase& child, Region& child_invalid_region) override { GetObject().InvalidateChild(child._object, child_invalid_region); }

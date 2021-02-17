@@ -25,7 +25,7 @@ WndBase::WndBase(WndObject& object) :
 	_accessible_region(region_empty),
 	_display_offset(vector_zero),
 	_region_on_parent(region_empty),
-	_visible_region(region_empty),
+	_cached_region(region_empty),
 
 	_reflow_queue_index(),
 	_background(NullBackground::Get()),
@@ -131,6 +131,30 @@ void WndBase::SetRegionOnParent(Rect region_on_parent) {
 	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
 }
 
+void WndBase::SetVisibleRegion(Rect parent_cached_region) {
+	Rect visible_region = (parent_cached_region.Intersect(_region_on_parent) + OffsetFromParent()).Intersect(_accessible_region);
+	if (HasLayer()) {
+		if (!_layer->GetCachedTileRegion().Contains(visible_region)) {
+			_layer->UpdateCachedTileRegion(_accessible_region, visible_region);
+		}
+	}
+
+	Rect cached_region = HasLayer() ? _accessible_region.Intersect(_layer->GetCachedTileRegion()) : visible_region;
+	if (_cached_region == cached_region) { return; }
+
+	Region& invalid_region = Region::Temp(cached_region); invalid_region.Xor(_cached_region);
+	_invalid_region.Union(invalid_region);
+	JoinRedrawQueue();
+
+	_cached_region = cached_region;
+
+	// For object's lazy loading.
+	_object.OnCachedRegionChange(_accessible_region, _cached_region);
+
+	// If cached region changed, set visible region for child windows.
+	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
+}
+
 void WndBase::JoinReflowQueue() {
 	if (IsDepthValid() && !_reflow_queue_index.valid()) {
 		GetReflowQueue().AddWnd(*this);
@@ -157,42 +181,9 @@ void WndBase::UpdateInvalidLayout() {
 
 void WndBase::AllocateLayer() {
 	if (HasLayer()) { return; }
-#pragma message(Remark"May support user-defined layer tiling policy.")
 	_layer = std::make_unique<Layer>();
 	_layer->ResetTileSize(_accessible_region.size);
 	ResetVisibleRegion();
-}
-
-const Rect WndBase::GetCachedRegion() const { 
-	return HasLayer() ? _accessible_region.Intersect(_layer->GetCachedRegion()) : _visible_region;
-}
-
-void WndBase::SetVisibleRegion(Rect parent_cached_region) {
-	Rect visible_region = (parent_cached_region.Intersect(_region_on_parent) + OffsetFromParent()).Intersect(_accessible_region);
-	if (_visible_region == visible_region) { return; }
-	_visible_region = visible_region;
-
-	if (HasLayer()) {
-		Rect old_cached_region = _layer->GetCachedRegion();
-
-	#pragma message(Remark"May support user-defined layer caching policy")
-		if (!old_cached_region.Contains(_visible_region)) {
-			_layer->SetCachedRegion(_accessible_region, _visible_region);
-			// Invalidate new cached region.
-			Rect new_cached_region = _layer->GetCachedRegion().Intersect(_accessible_region);
-			Region& invalid_region = Region::Temp(new_cached_region); invalid_region.Sub(old_cached_region);
-			_invalid_region.Union(new_cached_region);
-			JoinRedrawQueue();
-			// For object's lazy loading.
-			_object.OnCachedRegionChange(_accessible_region, new_cached_region);
-		} else {
-			// Cached region won't change.
-			return;
-		}
-	} 
-
-	// If cached region changed, set visible region for child windows.
-	for (auto child : _child_wnds) { child->SetVisibleRegion(GetCachedRegion()); }
 }
 
 void WndBase::JoinRedrawQueue() {
@@ -232,12 +223,13 @@ void WndBase::UpdateInvalidRegion() {
 	// If has no parent window, clear depth and skip, but not erase the invalid region.
 	if (!HasParent()) { SetDepth(-1); return; }
 
-	// Clip invalid region inside cached region.
-	_invalid_region.Intersect(GetCachedRegion());
-	if (_invalid_region.IsEmpty()) { return; }
-
 	// Draw figure queue to layer.
 	if (HasLayer()) {
+		// Clip invalid region inside layer's cached region rather than cached region, 
+		//   because there may be invalid region not contained in cached region.
+		_invalid_region.Intersect(_layer->GetCachedTileRegion());
+		if (_invalid_region.IsEmpty()) { return; }
+
 		auto [bounding_region, regions] = _invalid_region.GetRect();
 		FigureQueue figure_queue;
 

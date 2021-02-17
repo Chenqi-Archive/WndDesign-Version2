@@ -34,9 +34,10 @@ void EditBox::OnComposite(FigureQueue& figure_queue, Size display_size, Rect inv
 }
 
 void EditBox::HideCaret() {
-	assert(_caret_state != CaretState::Hide);
-	_caret_state = CaretState::Hide;
-	InvalidateCaretRegion();
+	if (_caret_state != CaretState::Hide) {
+		_caret_state = CaretState::Hide;
+		InvalidateCaretRegion();
+	}
 }
 
 void EditBox::StartBlinkingCaret() {
@@ -67,6 +68,7 @@ void EditBox::BlinkCaret() {
 }
 
 void EditBox::UpdateCaret(const HitTestInfo& info) {
+	InvalidateCaretRegion();
 	_caret_text_position = info.text_position;
 	_caret_region.point = info.geometry_region.point;
 	_caret_region.size = Size(caret_width, info.geometry_region.size.height);
@@ -75,13 +77,12 @@ void EditBox::UpdateCaret(const HitTestInfo& info) {
 		_caret_region.point.x += static_cast<int>(info.geometry_region.size.width);
 	}
 	_caret_state = CaretState::Show;
+	InvalidateCaretRegion();
 }
 
 void EditBox::SetCaret(Point mouse_down_position) {
 	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_down_position);
-	InvalidateCaretRegion();
 	UpdateCaret(info);
-	InvalidateCaretRegion();
 	ClearSelection();
 	_mouse_down_text_position = _caret_text_position;
 }
@@ -91,7 +92,6 @@ void EditBox::SetCaret(uint text_position, bool is_trailing_hit) {
 	info.is_trailing_hit = is_trailing_hit;
 	UpdateCaret(info);
 	ClearSelection();
-	InvalidateCaretRegion();
 }
 
 void EditBox::MoveCaret(CaretMoveDirection direction) {
@@ -120,12 +120,13 @@ void EditBox::MoveCaret(CaretMoveDirection direction) {
 
 void EditBox::DoSelection(Point mouse_move_position) {
 	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_move_position);
-	UpdateCaret(info);
+	UpdateCaret(info); HideCaret();
 	_selection_begin = _mouse_down_text_position;
 	_selection_end = _caret_text_position;
 	if (_selection_begin == _selection_end) { ClearSelection(); return; }
 	if (_selection_end < _selection_begin) { std::swap(_selection_begin, _selection_end); }
 	GetTextBlock().HitTestTextRange(_selection_begin, _selection_end - _selection_begin, _selection_info);
+	InvalidateSelectionRegion();
 	_selection_region_union = region_empty;
 	for (auto& it : _selection_info) {
 		_selection_region_union = _selection_region_union.Union(it.geometry_region);
@@ -219,8 +220,10 @@ void EditBox::ImeComposition(const wstring& composition_string) {
 }
 
 void EditBox::Cut() {
-	Copy();
-	Delete(false);
+	if (HasSelection()) {
+		Copy();
+		Delete(false);
+	}
 }
 
 void EditBox::Copy() {

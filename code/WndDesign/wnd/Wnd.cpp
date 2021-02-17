@@ -248,7 +248,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 
 bool Wnd::Handler(Msg msg, Para para) {
 	if (msg == Msg::MouseEnter) {
-		SetCursor(Cursor::Default);
+		SetCursor(GetStyle().cursor._cursor);
 		return true;
 	}
 	if (msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) {

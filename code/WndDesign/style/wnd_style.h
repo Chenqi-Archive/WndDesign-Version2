@@ -146,6 +146,15 @@ struct WndStyle {
 	}background;
 
 
+	// cursor style.
+	struct CursorStyle {
+	public:
+		Cursor _cursor = Cursor::Default;
+	public:
+		void set(Cursor cursor) { _cursor = cursor; }
+	}cursor;
+
+
 	virtual ~WndStyle() {}  // style may contain allocated resources like background or title.
 };
 

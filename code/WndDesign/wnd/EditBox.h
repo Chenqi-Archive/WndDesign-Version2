@@ -20,6 +20,10 @@ public:
 			constexpr EditStyle& caret_color(Color caret_color) { _caret_color = caret_color; return *this; }
 			constexpr EditStyle& disable_edit() { _disable_edit = true; return *this; }
 		}edit;
+
+		Style() { 
+			cursor.set(Cursor::Text); 
+		}
 	};
 
 public:

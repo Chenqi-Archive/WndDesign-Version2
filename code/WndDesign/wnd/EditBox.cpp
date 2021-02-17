@@ -240,9 +240,7 @@ void EditBox::Paste() {
 }
 
 bool EditBox::Handler(Msg msg, Para para) {
-	if (Wnd::Handler(msg, para)) { 
-		return true; 
-	}
+	Wnd::Handler(msg, para);
 
 	switch (msg) {
 	case Msg::LeftDown:
@@ -258,10 +256,6 @@ bool EditBox::Handler(Msg msg, Para para) {
 	case Msg::LeftUp:
 		_has_mouse_down = false;
 		ReleaseCapture();
-		break;
-
-	case Msg::MouseEnter:
-		SetCursor(Cursor::Text);
 		break;
 
 	case Msg::KeyDown:

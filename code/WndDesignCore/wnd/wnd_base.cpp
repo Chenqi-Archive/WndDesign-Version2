@@ -108,7 +108,12 @@ bool WndBase::UpdateDisplayOffset(Vector display_offset) {
 void WndBase::SetAccessibleRegion(Rect accessible_region) {
 	if (_accessible_region == accessible_region) { return; }
 	_accessible_region = accessible_region;
-	if (HasLayer()) { _layer->ResetTileSize(_accessible_region.size); }
+	if (HasLayer()) { 
+		_layer->ResetTileSize(_accessible_region.size); 
+		if (_layer->GetCachedTileRegion() == region_empty) {
+			_cached_region = region_empty;
+		}
+	}
 	UpdateDisplayOffset(GetDisplayOffset());
 	ResetVisibleRegion();
 	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
@@ -127,6 +132,7 @@ void WndBase::SetRegionOnParent(Rect region_on_parent) {
 	if (_region_on_parent.size == region_on_parent.size) { return; }
 	_region_on_parent.size = region_on_parent.size;
 	UpdateDisplayOffset(GetDisplayOffset());
+	SetAccessibleRegion(GetAccessibleRegion().Union(GetDisplayRegion()));
 	ResetVisibleRegion();
 	_object.OnDisplayRegionChange(_accessible_region, GetDisplayRegion());
 }

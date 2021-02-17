@@ -192,7 +192,7 @@ const Rect ListLayout::UpdateContentLayout(Size client_size) {
 		y += height + gridline_width;
 	}
 	uint content_height = GetContentHeight();
-	Invalidate(Rect(0, (int)y0, client_size.width, max(_content_height, content_height) - y0));
+	Invalidate(Rect(0, (int)y0, client_size.width, max(_content_height, content_height) + gridline_width - y0));
 	_content_height = content_height;
 	_invalid_layout_row_begin = -1;
 	return Rect(point_zero, Size(client_size.width, content_height));

@@ -24,7 +24,9 @@ Wnd::~Wnd() {}
 
 const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
-	return style.CalculateMinMaxDisplaySize(parent_size);
+	auto pair = style.CalculateMinMaxDisplaySize(parent_size);
+	_size_min = pair.first; _size_max = pair.second;
+	return pair;
 }
 
 void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
@@ -33,7 +35,7 @@ void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
 }
 
 void Wnd::ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend) {
-	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(old_window_region, margin_to_extend);
+	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(old_window_region, margin_to_extend, _size_min, _size_max);
 	RegionOnParentChanged();
 }
 
@@ -75,6 +77,7 @@ void Wnd::UpdateLayout() {
 }
 
 const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
+	CalculateMinMaxSize(parent_size); // update min max size.
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect region_on_parent = style.CalculateRegionOnParent(parent_size);
 	bool is_region_on_parent_auto = style.IsRegionOnParentAuto();
@@ -82,7 +85,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 		Scrollbar& scrollbar = GetScrollbar(); bool has_margin = scrollbar.HasMargin();
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
 		if (is_region_on_parent_auto) {
-			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent.size, display_size);
+			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(region_on_parent.size, display_size, _size_min, _size_max);
 		}
 		UpdateScrollbar(GetAccessibleRegion(), Rect(point_zero + GetDisplayOffset(), region_on_parent.size));
 		if (bool scrollbar_margin_changed = has_margin ^ scrollbar.HasMargin()) {
@@ -195,8 +198,7 @@ bool Wnd::NonClientHitTest(Size display_size, Point point) const {
 bool Wnd::NonClientHandler(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg& mouse_msg = GetMouseMsg(para);
-		Rect region_on_parent = GetChildRegion(*this); 
-		Size display_size = region_on_parent.size;
+		Size display_size = GetDisplaySize();
 		Rect scrollbar_region = GetScrollbar().GetRegion();
 		// Find the message receiver.
 		do {
@@ -227,7 +229,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		// Send to border, scrollbar or client region.
 		switch (_mouse_track_info._type) {
 		case ElementType::Border: 
-			GetBorderResizer().Handler(*this, region_on_parent, GetStyle().border._width, msg, para); return true;
+			GetBorderResizer().Handler(*this, GetStyleCalculator(GetStyle()).GetRegionOnParent(display_size), GetStyle().border._width, msg, para); return true;
 		case ElementType::Scrollbar: 
 			mouse_msg.point -= scrollbar_region.point - point_zero;
 			GetScrollbar().Handler(*this, msg, para); return true;
@@ -245,6 +247,10 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 }
 
 bool Wnd::Handler(Msg msg, Para para) {
+	if (msg == Msg::MouseEnter) {
+		SetCursor(Cursor::Default);
+		return true;
+	}
 	if (msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) {
 		if (IsScrollable()) {
 			Vector scroll_offset = vector_zero;

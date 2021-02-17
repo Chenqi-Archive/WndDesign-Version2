@@ -87,6 +87,11 @@ public:
 		length._max.ConvertToPixel(parent_length);
 		return length;
 	}
+	static uint BoundLengthBetween(uint normal_length, uint min_length, uint max_length) {
+		if (normal_length < min_length) { normal_length = min_length; }
+		if (normal_length > max_length) { normal_length = max_length; }
+		return normal_length;
+	}
 	static const ValueTag BoundLengthBetween(ValueTag normal_length, ValueTag min_length, ValueTag max_length) {
 		if (normal_length.AsUnsigned() < min_length.AsUnsigned()) { normal_length.Set(min_length.AsUnsigned()); }
 		if (normal_length.AsUnsigned() > max_length.AsUnsigned()) { normal_length.Set(max_length.AsUnsigned()); }
@@ -132,31 +137,37 @@ public:
 			CalculateLength(height, position._top, position._bottom, parent_size.height)
 		);
 	}
+	const Rect GetRegionOnParent(Size display_size) const {
+		// Used only for child windows of Desktop or OverlapLayout whose border can resize.
+		return Rect(Point(position._left.AsSigned(), position._top.AsSigned()), display_size);
+	}
 	void ResetRegionOnParent(Rect region_on_parent, Size parent_size) {
 		Margin margin_to_parent = CalculateRelativeMargin(parent_size, region_on_parent);
 		position.set(px(margin_to_parent.left), px(margin_to_parent.top), px(margin_to_parent.right), px(margin_to_parent.bottom));
-		width.normal(length_auto); height.normal(length_auto);
+		width.normal(px(region_on_parent.size.width)); height.normal(px(region_on_parent.size.height));
 	}
-	void ResetRegionOnParent(Rect old_region_on_parent, Margin margin_to_extend) {
+	void ResetRegionOnParent(Rect old_region_on_parent, Margin margin_to_extend, Size size_min, Size size_max) {
 		if (margin_to_extend.left) {
-			if (position._right.IsAuto()) { throw style_parse_exception; }; 
-			position.left(position_auto);
-			width.normal(px((int)old_region_on_parent.size.width + margin_to_extend.left));
+			uint new_width = (uint)((int)old_region_on_parent.size.width + margin_to_extend.left);
+			new_width = BoundLengthBetween(new_width, size_min.width, size_max.width);
+			int new_left = old_region_on_parent.point.x + (int)old_region_on_parent.size.width - (int)new_width;
+			width.normal(px(new_width)); position.left(px(new_left));
 		}
 		if (margin_to_extend.top) {
-			if (position._bottom.IsAuto()) { throw style_parse_exception; };
-			position.top(position_auto);
-			height.normal(px((int)old_region_on_parent.size.height + margin_to_extend.top));
+			uint new_height = (uint)((int)old_region_on_parent.size.height + margin_to_extend.top);
+			new_height = BoundLengthBetween(new_height, size_min.height, size_max.height);
+			int new_top = old_region_on_parent.point.y + (int)old_region_on_parent.size.height - (int)new_height;
+			height.normal(px(new_height)); position.top(px(new_top));
 		}
 		if (margin_to_extend.right) { 
-			if (position._left.IsAuto()) { throw style_parse_exception; };
-			position.right(position_auto);
-			width.normal(px((int)old_region_on_parent.size.width + margin_to_extend.right)); 
+			uint new_width = (uint)((int)old_region_on_parent.size.width + margin_to_extend.right);
+			new_width = BoundLengthBetween(new_width, size_min.width, size_max.width);
+			width.normal(px(new_width)); position.left(px(old_region_on_parent.point.x));
 		}
 		if (margin_to_extend.bottom) { 
-			if (position._top.IsAuto()) { throw style_parse_exception; };
-			position.bottom(position_auto);
-			height.normal(px((int)old_region_on_parent.size.height + margin_to_extend.bottom));
+			uint new_height = (uint)((int)old_region_on_parent.size.height + margin_to_extend.bottom);
+			new_height = BoundLengthBetween(new_height, size_min.height, size_max.height);
+			height.normal(px(new_height)); position.top(px(old_region_on_parent.point.y));
 		}
 	}
 	bool HasScrollbar() const {
@@ -204,15 +215,9 @@ public:
 		client._height.IsAuto() ? client._height.Set(length_max) : client._height.ConvertToPixel(displayed_client_size.height);
 		return Rect(client._left.AsSigned(), client._top.AsSigned(), client._width.AsUnsigned(), client._height.AsUnsigned());
 	}
-	const Size AutoResizeRegionOnParentToDisplaySize(Size parent_size, Size region_on_parent_size, Size display_size) const {
-		if (IsRegionHorizontalAuto()) {
-			LengthStyle width = this->width; width = ConvertLengthToPixel(width, parent_size.width);
-			region_on_parent_size.width = BoundLengthBetween(px(display_size.width), width._min, width._max).AsUnsigned();
-		}
-		if (IsRegionVerticalAuto()) {
-			LengthStyle height = this->height; height = ConvertLengthToPixel(height, parent_size.height);
-			region_on_parent_size.height = BoundLengthBetween(px(display_size.height), height._min, height._max).AsUnsigned();
-		}
+	const Size AutoResizeRegionOnParentToDisplaySize(Size region_on_parent_size, Size display_size, Size size_min, Size size_max) const {
+		if (IsRegionHorizontalAuto()) { region_on_parent_size.width = BoundLengthBetween(display_size.width, size_min.width, size_max.width); }
+		if (IsRegionVerticalAuto()) { region_on_parent_size.height = BoundLengthBetween(display_size.height, size_min.height, size_max.height); }
 		return region_on_parent_size;
 	}
 	const Rect AutoResizeClientRegionToContent(Rect client_region, Rect content_region) const {

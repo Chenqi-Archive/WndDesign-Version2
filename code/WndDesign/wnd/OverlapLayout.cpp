@@ -32,8 +32,6 @@ void OverlapLayout::UpdateChildRegion(ChildWndContainer& child_container, Size c
 void OverlapLayout::OnChildRegionUpdate(WndObject& child) {
 	ChildWndContainer& child_container = GetChildData(child);
 	UpdateChildRegion(child_container, GetClientSize());
-	//// Reset child region style only when child initiated region update request.
-	//SetChildRegionStyle(child_container.wnd, child_container.region, GetClientSize());
 }
 
 const Rect OverlapLayout::UpdateContentLayout(Size client_size) {

@@ -23,6 +23,8 @@ private:
 protected:
 	Style& GetStyle() { return *_style; }
 	const Style& GetStyle() const { return *_style; }
+private:
+	Size _size_min, _size_max;
 protected:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
 private:

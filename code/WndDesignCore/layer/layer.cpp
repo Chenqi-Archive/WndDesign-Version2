@@ -67,7 +67,11 @@ const Rect Layer::GetCachedTileRegion() {
 
 const Target& Layer::ReadTile(TileID tile_id) const {
     if (auto it = _cache.find(tile_id); it != _cache.end()) {
-        return it->second;
+        if (_cached_tile_range.Contains(tile_id)) {
+            return it->second;
+        } else {
+            const_cast<Layer&>(*this)._cache.erase(it);
+        }
     }
     return *_tile_read_only;
 }

@@ -25,7 +25,9 @@ private:
 		}
 	};
 public:
-	MainWnd() : OverlapLayout(std::make_unique<Style>()) {}
+	MainWnd() : OverlapLayout(std::make_unique<Style>()) {
+		//AllocateLayer();
+	}
 	~MainWnd() {}
 	virtual const wstring GetTitle() const override { return L"OverlapLayout and TextBox test"; }
 };
@@ -40,8 +42,8 @@ private:
 			width.normal(length_auto).min(200px).max(100pct);
 			height.normal(length_auto).min(200px).max(100pct);
 			position.left(0px).top(0px);
-			border.width(10).radius(20).color(ColorSet::BlueViolet);
-			background.setColor(color_transparent);
+			border.width(10).radius(20).color(ColorSet::BlueViolet).setResizer(CreateDefaultBorderResizer());
+			background.setColor(ColorSet::Goldenrod);
 
 			// Default TextBox Style.
 			padding.setAll(50px); //padding.bottom(10px);
@@ -50,7 +52,9 @@ private:
 		}
 	};
 public:
-	MyTextBox() : TextBox(std::make_unique<Style>(), wstring(text)) { /*AllocateLayer();*/ }
+	MyTextBox() : TextBox(std::make_unique<Style>(), wstring(text)) { 
+		AllocateLayer();
+	}
 	~MyTextBox() {}
 };
 

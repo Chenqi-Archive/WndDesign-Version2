@@ -27,7 +27,9 @@ private:
 		}
 	};
 public:
-	MainWnd() : ListLayout(std::make_unique<Style>()) {}
+	MainWnd() : ListLayout(std::make_unique<Style>()) { 
+		//AllocateLayer(); 
+	}
 };
 
 
@@ -45,7 +47,9 @@ private:
 		}
 	};
 public:
-	TextArea(): EditBox(std::make_unique<Style>(), L"Type something here...") {}
+	TextArea(): EditBox(std::make_unique<Style>(), L"Type something here...") {
+		AllocateLayer();
+	}
 };
 
 
@@ -53,8 +57,8 @@ int main() {
 	MainWnd main_wnd;
 	TextArea text_area1, text_area2, text_area3;
 	main_wnd.AppendChild(text_area1);
-	main_wnd.AppendChild(text_area2);
-	main_wnd.AppendChild(text_area3);
+	//main_wnd.AppendChild(text_area2);
+	//main_wnd.AppendChild(text_area3);
 	desktop.AddChild(main_wnd);
 	desktop.MessageLoop();
 	return 0;

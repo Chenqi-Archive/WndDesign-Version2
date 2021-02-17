@@ -173,7 +173,7 @@ FrameIrrelevantMessages:
 
         // Intercept all non-client messages.
     case WM_NCCALCSIZE: break;  // Process the message to set client region the same as the window region.
-    case WM_NCACTIVATE: break;  // Do not draw the nonclient area.
+    case WM_NCACTIVATE: return TRUE;  // Do not draw the nonclient area.
     case WM_NCHITTEST: return HTCLIENT;  // There's no non-client region.
     //case WM_NCCREATE: return TRUE; // Leave the message alone, or title won't get displayed.
     //case WM_NCDESTROY: break; // It doesn't matter.

@@ -53,7 +53,7 @@
 
 ------
 
-以下由WndDesignCore实现（动态库/静态库）
+以下由WndDesignCore实现（动态库）
 
 #### 基础工具（common）
 
@@ -101,7 +101,7 @@ d2d底层接口，3d绘制尚未实现
 
 #### 几何（geometry）
 
-大小，位置，矩形区域的基本定义
+大小，位置，向量，矩形区域的基本定义
 
 
 
@@ -137,23 +137,19 @@ Layer对象及合成样式
 
 并附有这个组合图形对象的位置和变换属性。
 
-由Layer进行解析。
+由Target进行解析。
 
-##### Tile
+##### Target Tile
 
 每个Tile维护了一个D2D位图，作为图形对象的最终绘图目标（RenderTarget）。
-
-##### TileCache
-
-维护了Tile缓存，主要用于巨大的layer进行存取Tile。
 
 ##### Layer
 
 绘图对象的直接绘图目标。
 
-layer内部维护了TileCache作为绘图的最终目标。
+layer内部维护了一些Target作为绘图的最终目标。
 
-layer也可以自己的某个区域作为绘图对象。
+layer也可以将自己的某个区域作为绘图对象。
 
 layer的属性：整个区域、当前缓存区域
 
@@ -169,41 +165,69 @@ layer的属性：整个区域、当前缓存区域
 
 #### 窗口基础（wnd）
 
-WndBase
+##### WndBase
 
-窗口是对绘图和消息处理的综合
-
-子窗口关系在此并不需要
-
-Desktop
+子窗口、绘图、消息处理
 
 
 
-ObjectBase
+##### WndObject
+
+
+
+##### DesktopBase
+
+
+
+##### DesktopWndFrame
+
+
+
+##### DesktopObjectImpl
+
+
 
 
 
 ------
 
-以下由WndDesignHelper实现（静态库）
+以下由WndDesign实现（静态库）
 
 #### 窗口样式（style）
 
-背景
-
-
-
-#### 窗口对象（object）
-
-
-
-#### 小工具（widget）
 
 
 
 
+#### 窗口对象（wnd）
+
+WndObject
+
+Wnd
 
 
+
+OverlapLayout
+
+ListLayout
+
+FlowLayout
+
+SplitLayout
+
+TableLayout
+
+
+
+FinalWnd
+
+TextBox
+
+ImageBox
+
+Button
+
+EditBox
 
 
 
@@ -328,18 +352,4 @@ ObjectBase
 ### 图案
 
 
-
-
-
-### 窗口类型
-
-#### 普通窗口
-
-#### 滚动窗口
-
-#### 文本框
-
-#### 表格
-
-#### 文本编辑框
 

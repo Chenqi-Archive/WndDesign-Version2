@@ -36,7 +36,7 @@ public:
 protected:
 	void RegisterChild(WndObject& child) {
 		assert(child.GetParent() != this);
-		child.parent = this; wnd->AddChild(*child.wnd);
+		wnd->AddChild(*child.wnd); child.parent = this; child.OnAttachToParent();
 	}
 	void UnregisterChild(WndObject& child) {
 		assert(child.GetParent() == this);

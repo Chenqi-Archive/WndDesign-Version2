@@ -85,7 +85,6 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 	_child_wnds.push_front(&child);
 	child.SetParent(this, _child_wnds.begin());
 	child.SetDepth(GetChildDepth());
-	child._object.OnAttachToParent();
 }
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {

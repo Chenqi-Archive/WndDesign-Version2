@@ -60,6 +60,7 @@ int main() {
 	main_wnd.AppendChild(text_area2);
 	main_wnd.AppendChild(text_area3);
 	desktop.AddChild(main_wnd);
+	desktop.AddChild(text_area1);
 	desktop.MessageLoop();
 	return 0;
 }

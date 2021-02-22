@@ -21,7 +21,7 @@ private:
 			height.max(80pct);
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
-			client.height(length_auto);
+			client.width(300px).height(length_auto);
 			background.setColor(ColorSet::LightGray);
 			grid_height.min(100px).max(300px);
 		}
@@ -60,7 +60,6 @@ int main() {
 	main_wnd.AppendChild(text_area2);
 	main_wnd.AppendChild(text_area3);
 	desktop.AddChild(main_wnd);
-	desktop.AddChild(text_area1);
 	desktop.MessageLoop();
 	return 0;
 }

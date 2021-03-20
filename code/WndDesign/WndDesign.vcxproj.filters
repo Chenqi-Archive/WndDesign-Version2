@@ -54,9 +54,6 @@
     <ClCompile Include="style\text_style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wnd\TextBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="figure\text_block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -207,9 +204,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\reference_wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\LightWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="geometry\margin.h">

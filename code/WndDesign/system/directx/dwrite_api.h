@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../style/text_block_style.h"
+#include "../../common/core.h"
 
 
 struct IDWriteFactory;

@@ -25,7 +25,7 @@ Wnd::~Wnd() {}
 const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	auto pair = style.CalculateMinMaxDisplaySize(parent_size);
-	_size_min = pair.first; _size_max = pair.second;
+	std::tie(_size_min, _size_max) = pair;
 	return pair;
 }
 
@@ -81,7 +81,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect region_on_parent = style.CalculateRegionOnParent(parent_size);
 	bool is_region_on_parent_auto = style.IsRegionOnParentAuto();
-	if (_invalid_layout.margin || region_on_parent.size != GetDisplaySize() || is_region_on_parent_auto) {
+	if (_invalid_layout.margin || is_region_on_parent_auto || region_on_parent.size != GetDisplaySize()) {
 		Scrollbar& scrollbar = GetScrollbar(); bool has_margin = scrollbar.HasMargin();
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
 		if (is_region_on_parent_auto) {
@@ -121,7 +121,7 @@ void Wnd::UpdateClientRegion(Size displayed_client_size) {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	Rect client_region = style.CalculateClientRegion(displayed_client_size);
 	bool is_client_auto = style.IsClientRegionAuto();
-	if (_invalid_layout.content_layout == true || client_region.size != GetClientRegion().size || is_client_auto) {
+	if (_invalid_layout.content_layout == true || is_client_auto || client_region.size != GetClientRegion().size) {
 		_invalid_layout.content_layout = false;
 		Rect content_region = UpdateContentLayout(client_region.size);
 		if (is_client_auto) { 

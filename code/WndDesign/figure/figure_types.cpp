@@ -106,7 +106,7 @@ void Ellipse::DrawOn(RenderTarget& target, Vector offset) const {
 void ImageFigure::DrawOn(RenderTarget& target, Vector offset) const {
 	if (!region_on_image.IsEmpty() && opacity > 0) {
 		target.DrawBitmap(
-			&image.GetImageResource().GetD2DBitmap(),
+			reinterpret_cast<ID2D1Bitmap1*>(image.d2d_bitmap),
 			Rect2RECT(Rect(point_zero + offset, region_on_image.size)),
 			Opacity2Float(opacity),
 			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,

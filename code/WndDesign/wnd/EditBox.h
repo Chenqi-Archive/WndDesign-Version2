@@ -47,6 +47,11 @@ private:
 	uint GetCharacterLength(uint text_position);
 
 
+	//// layout update ////
+private:
+	virtual const Rect UpdateContentLayout(Size client_size);
+
+
 	//// painting and composition ////
 private:
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const override;
@@ -83,6 +88,7 @@ private:
 	uint _caret_text_position = 0;
 	Rect _caret_region = region_empty;
 private:
+	void UpdateCaretRegion();
 	void UpdateCaret(const HitTestInfo& info);
 private:
 	void SetCaret(Point mouse_down_position);
@@ -99,6 +105,7 @@ private:
 	Rect _selection_region_union;
 private:
 	void InvalidateSelectionRegion() { NonClientInvalidate(_selection_region_union + ClientToDisplayOffset()); }
+	void UpdateSelectionRegion();
 private:
 	bool HasSelection() const { return _selection_end > _selection_begin; }
 	void DoSelection(Point mouse_move_position);

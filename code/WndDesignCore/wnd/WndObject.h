@@ -68,13 +68,13 @@ protected:
 	}
 
 	//// window region ////
-public:
+protected:
 	const Rect GetAccessibleRegion() const { return wnd->GetAccessibleRegion(); }
-	const Size GetSize() const { return GetAccessibleRegion().size; }
 	const Rect GetDisplayRegion() const { return wnd->GetDisplayRegion(); }
+public:
+	const Size GetSize() const { return GetAccessibleRegion().size; }
 	const Size GetDisplaySize() const { return GetDisplayRegion().size; }
 	const Vector GetDisplayOffset() const { return GetDisplayRegion().point - point_zero; }
-public:
 	const Point ConvertPointToNonClientPoint(Point point) const { return point - GetDisplayOffset(); }
 	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (wnd->GetRegionOnParent().point - point_zero); }
 protected:
@@ -179,7 +179,7 @@ public:
 extern DesktopObject& desktop;  // initialized in WndObject.cpp (both in dll and in lib)
 
 
-inline void WndObject::NotifyDesktopWhenDetached() {desktop.OnWndDetach(*this); }
+inline void WndObject::NotifyDesktopWhenDetached() { desktop.OnWndDetach(*this); }
 inline void WndObject::SetCapture() { desktop.SetCapture(*this); }
 inline void WndObject::ReleaseCapture() { desktop.ReleaseCapture(); }
 inline void WndObject::SetFocus() { desktop.SetFocus(*this); }

@@ -6,13 +6,6 @@
 using namespace WndDesign;
 
 
-#ifdef _DEBUG
-#pragma comment(lib, "..\\build\\x64\\Debug\\WndDesign.lib")
-#else
-#pragma comment(lib, "..\\build\\x64\\Release\\WndDesign.lib")
-#endif // _DEBUG
-
-
 class MainWnd : public ListLayout {
 private:
 	struct Style : ListLayout::Style {

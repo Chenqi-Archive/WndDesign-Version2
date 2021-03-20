@@ -68,6 +68,8 @@ public:
 	///////////////////////////////////////////////////////////
 private:
 	list<ref_ptr<WndBase>> _child_wnds;
+private:
+	void ClearChild();
 public:
 	virtual void AddChild(IWndBase& child_wnd) override;
 	virtual void RemoveChild(IWndBase& child_wnd) override;

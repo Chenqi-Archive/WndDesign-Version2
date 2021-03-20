@@ -13,9 +13,21 @@ EditBox::EditBox(unique_ptr<Style> style, const wstring& text) :
 EditBox::~EditBox() {}
 
 uint EditBox::GetCharacterLength(uint text_position) {
-#pragma message("May use utf-16 encoding information to get the length of the character.")
+#pragma message(Remark"May use utf-16 encoding information to get the length of the character.")
 	HitTestInfo info = GetTextBlock().HitTestTextPosition(text_position);
 	return info.text_length;
+}
+
+const Rect EditBox::UpdateContentLayout(Size client_size) {
+	TextBlock& text_block = GetTextBlock();
+	Size old_size = text_block.GetSize();
+	text_block.AutoResize(client_size);
+	if (text_block.GetSize() != old_size) { 
+		Invalidate(region_infinite); 
+		UpdateCaretRegion();
+		UpdateSelectionRegion();
+	}
+	return Rect(point_zero, text_block.GetSize());
 }
 
 void EditBox::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
@@ -65,6 +77,11 @@ void EditBox::BlinkCaret() {
 		_caret_state = CaretState::BlinkShow;
 		InvalidateCaretRegion();
 	}
+}
+
+void EditBox::UpdateCaretRegion() {
+	HitTestInfo info = GetTextBlock().HitTestTextPosition(_caret_text_position);
+	UpdateCaret(info);
 }
 
 void EditBox::UpdateCaret(const HitTestInfo& info) {
@@ -118,13 +135,7 @@ void EditBox::MoveCaret(CaretMoveDirection direction) {
 	}
 }
 
-void EditBox::DoSelection(Point mouse_move_position) {
-	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_move_position);
-	UpdateCaret(info); HideCaret();
-	_selection_begin = _mouse_down_text_position;
-	_selection_end = _caret_text_position;
-	if (_selection_begin == _selection_end) { ClearSelection(); return; }
-	if (_selection_end < _selection_begin) { std::swap(_selection_begin, _selection_end); }
+void EditBox::UpdateSelectionRegion() {
 	GetTextBlock().HitTestTextRange(_selection_begin, _selection_end - _selection_begin, _selection_info);
 	InvalidateSelectionRegion();
 	_selection_region_union = region_empty;
@@ -132,6 +143,16 @@ void EditBox::DoSelection(Point mouse_move_position) {
 		_selection_region_union = _selection_region_union.Union(it.geometry_region);
 	}
 	InvalidateSelectionRegion();
+}
+
+void EditBox::DoSelection(Point mouse_move_position) {
+	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_move_position);
+	UpdateCaret(info); HideCaret();
+	_selection_begin = _mouse_down_text_position;
+	_selection_end = _caret_text_position;
+	if (_selection_begin == _selection_end) { ClearSelection(); return; }
+	if (_selection_end < _selection_begin) { std::swap(_selection_begin, _selection_end); }
+	UpdateSelectionRegion();
 }
 
 void EditBox::ClearSelection() {

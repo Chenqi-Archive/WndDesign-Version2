@@ -173,7 +173,6 @@
     <ClCompile Include="wnd\EditBox.cpp" />
     <ClCompile Include="wnd\ListLayout.cpp" />
     <ClCompile Include="wnd\OverlapLayout.cpp" />
-    <ClCompile Include="wnd\TextBox.cpp" />
     <ClCompile Include="wnd\Wnd.cpp" />
     <ClCompile Include="wnd\WndObject.cpp" />
   </ItemGroup>
@@ -221,7 +220,6 @@
     <ClInclude Include="wnd\FinalWnd.h" />
     <ClInclude Include="wnd\FlowLayout.h" />
     <ClInclude Include="wnd\ImageBox.h" />
-    <ClInclude Include="wnd\LightWnd.h" />
     <ClInclude Include="wnd\ListLayout.h" />
     <ClInclude Include="wnd\OverlapLayout.h" />
     <ClInclude Include="WndDesign.h" />

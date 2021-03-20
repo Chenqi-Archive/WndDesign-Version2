@@ -83,6 +83,7 @@ inline const Size CalculateTileSize(Size entire_size, Size previous_tile_size) {
 // The vector start from the origin point, and re
 inline const Vector ClipVectorInsideRectangle(int half_width, int half_height, Vector vector) {
 	float shrink_ratio = 1;
+	assert(half_width >= 0 && half_height >= 0);
 	if (vector.x > half_width) { shrink_ratio = min(shrink_ratio, half_width / (float)vector.x); }
 	if (vector.x < -half_width) { shrink_ratio = min(shrink_ratio, -half_width / (float)vector.x); }
 	if (vector.y > half_height) { shrink_ratio = min(shrink_ratio, half_height / (float)vector.y); }

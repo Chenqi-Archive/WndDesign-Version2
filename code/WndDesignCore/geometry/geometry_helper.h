@@ -91,6 +91,7 @@ inline int div_ceil(int a, int b) {
 }
 
 inline const Rect RegionToOverlappingTileRange(Rect region, Size tile_size) {
+	if (tile_size.IsEmpty()) { return region_empty; }
 	Point begin_point(div_floor(region.point.x, tile_size.width), div_floor(region.point.y, tile_size.height));
 	Point end_point(div_ceil(region.right(), tile_size.width), div_ceil(region.bottom(), tile_size.height));
 	Size size = Size(static_cast<uint>(end_point.x - begin_point.x), static_cast<uint>(end_point.y - begin_point.y));

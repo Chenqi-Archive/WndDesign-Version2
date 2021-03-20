@@ -25,7 +25,7 @@ struct SolidColorBackground : Background {
 
 
 struct ImageRepeatBackground : Background {
-	Image image;
+	const Image& image;
 	uchar opacity;
 	Vector offset_on_image;
 

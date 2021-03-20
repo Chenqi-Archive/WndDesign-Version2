@@ -1,41 +1,15 @@
 #pragma once
 
-#include "../../common/uncopyable.h"
-#include "../../geometry/geometry.h"
-#include "../../figure/color.h"
-
-#include <string>
+#include "../../common/core.h"
 
 
-struct IWICFormatConverter;
-struct IWICBitmap;
-struct IWICBitmapLock;
-
-struct ID2D1Bitmap1;
+struct IWICImagingFactory2;
 
 
 BEGIN_NAMESPACE(WndDesign)
 
-using std::wstring;
 
-
-class ImageResource : Uncopyable {
-private:
-	IWICFormatConverter* wic_image;
-	ID2D1Bitmap1* d2d_bitmap;
-
-	void LoadD2DBitmap();
-
-public:
-	ImageResource(const wstring& file_name);
-	ImageResource(void* address, size_t size);
-	~ImageResource();
-
-	bool IsEmpty() const { return wic_image == nullptr; }
-	const Size GetSize() const;
-
-	ID2D1Bitmap1& GetD2DBitmap() const;
-};
+IWICImagingFactory2& GetWICFactory();
 
 
 END_NAMESPACE(WndDesign)

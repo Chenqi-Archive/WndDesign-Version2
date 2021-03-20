@@ -36,6 +36,7 @@ WndBase::WndBase(WndObject& object) :
 }
 
 WndBase::~WndBase() {
+	ClearChild();
 	LeaveReflowQueue();
 	LeaveRedrawQueue();
 	DetachFromParent();
@@ -76,6 +77,12 @@ void WndBase::SetDepth(uint depth) {
 	if (IsDepthValid()) {
 		if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
 		if (_object.HasInvalidLayout()) { JoinReflowQueue(); }
+	}
+}
+
+void WndBase::ClearChild() {
+	while (!_child_wnds.empty()) {
+		RemoveChild(*_child_wnds.front());
 	}
 }
 

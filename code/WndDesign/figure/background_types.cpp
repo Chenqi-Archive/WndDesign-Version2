@@ -25,8 +25,6 @@ void ImageRepeatBackground::Clear(Rect region, RenderTarget& target, Vector offs
 }
 
 void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
-	if (image.IsEmpty()) { return; }
-
 	using RepeatRange = Rect;
 
 	// Calculate the image range that overlaps with the tile region.

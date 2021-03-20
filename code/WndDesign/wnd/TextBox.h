@@ -12,8 +12,10 @@ public:
 	struct Style : FinalWnd::Style, TextBlockStyle {};
 	
 public:
-	TextBox(unique_ptr<Style> style, const wstring& text);
-	~TextBox();
+	TextBox(unique_ptr<Style> style, const wstring& text) :
+		FinalWnd(std::move(style)), _text(text), _text_block(_text, GetStyle()) {
+	}
+	~TextBox() {}
 
 
 	//// style ////
@@ -22,26 +24,27 @@ protected:
 	const Style& GetStyle() const { return static_cast<const Style&>(Wnd::GetStyle()); }
 
 
-	//// text ////
+	//// text layout ////
 private:
 	wstring _text;
-public:
-	wstring& GetText() { return _text; }
-
-
-	//// layout update ////
-private:
 	TextBlock _text_block;
 public:
+	wstring& GetText() { return _text; }
 	TextBlock& GetTextBlock() { return _text_block; }
-	void TextBlockUpdated() { Invalidate(region_infinite); ContentLayoutChanged(); }
-private:
-	virtual const Rect UpdateContentLayout(Size client_size);
-
-
-	//// painting and composition ////
+	void TextBlockUpdated() { 
+		Invalidate(region_infinite); 
+		ContentLayoutChanged(); 
+	}
 protected:
-	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const override;
+	virtual const Rect UpdateContentLayout(Size client_size) {
+		Size old_size = _text_block.GetSize();
+		_text_block.AutoResize(client_size);
+		if (_text_block.GetSize() != old_size) { Invalidate(region_infinite); }
+		return Rect(point_zero, _text_block.GetSize());
+	}
+	virtual void OnClientPaint(FigureQueue& figure_queue, Rect client_region, Rect invalid_client_region) const override {
+		figure_queue.Append(point_zero, new TextBlockFigure(_text_block));
+	}
 };
 
 

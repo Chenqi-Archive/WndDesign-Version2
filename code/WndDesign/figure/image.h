@@ -2,36 +2,27 @@
 
 #include "figure_base.h"
 #include "color.h"
+#include "../common/uncopyable.h"
 
 #include <string>
-#include <memory>
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 using std::wstring;
-using std::shared_ptr;
-
-class ImageResource;
 
 
-class Image {
+class Image : Uncopyable {
 private:
-	shared_ptr<ImageResource> image;
-
+	friend struct ImageFigure;
+	alloc_ptr<void> wic_image;
+	alloc_ptr<void> d2d_bitmap;
+private:
+	void LoadD2DBitmap();
 public:
-	Image() : image(nullptr) {}
-	Image(const wstring& file_name): image(nullptr) { Load(file_name); }
-	Image(void* address, size_t size): image(nullptr) { Load(address, size); }
-	~Image() {}
-
-	void Load(const wstring& file_name);
-	void Load(void* address, size_t size);
-
-	void Clear() { image.reset(); }
-	bool IsEmpty() const;
-
-	const ImageResource& GetImageResource() const { return *image; }
+	Image(const wstring& file_name);
+	Image(void* address, size_t size);
+	~Image();
 	const Size GetSize() const;
 };
 

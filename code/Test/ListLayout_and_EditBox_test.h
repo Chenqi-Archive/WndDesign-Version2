@@ -13,7 +13,7 @@ private:
 			width.max(70pct);
 			height.max(80pct);
 			position.setHorizontalCenter().setVerticalCenter();
-			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
+			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateAeroSnapBorderResizer());
 			client.height(length_auto);
 			background.setColor(ColorSet::LightGray);
 			grid_height.min(100px).max(300px);

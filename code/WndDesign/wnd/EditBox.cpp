@@ -24,7 +24,7 @@ const Rect EditBox::UpdateContentLayout(Size client_size) {
 	text_block.AutoResize(client_size);
 	if (text_block.GetSize() != old_size) { 
 		Invalidate(region_infinite); 
-		UpdateCaretRegion();
+		UpdateCaretRegion(GetTextBlock().HitTestTextPosition(_caret_text_position));
 		UpdateSelectionRegion();
 	}
 	return Rect(point_zero, text_block.GetSize());
@@ -79,12 +79,7 @@ void EditBox::BlinkCaret() {
 	}
 }
 
-void EditBox::UpdateCaretRegion() {
-	HitTestInfo info = GetTextBlock().HitTestTextPosition(_caret_text_position);
-	UpdateCaret(info);
-}
-
-void EditBox::UpdateCaret(const HitTestInfo& info) {
+void EditBox::UpdateCaretRegion(const HitTestInfo& info) {
 	InvalidateCaretRegion();
 	_caret_text_position = info.text_position;
 	_caret_region.point = info.geometry_region.point;
@@ -93,13 +88,12 @@ void EditBox::UpdateCaret(const HitTestInfo& info) {
 		_caret_text_position += info.text_length;
 		_caret_region.point.x += static_cast<int>(info.geometry_region.size.width);
 	}
-	_caret_state = CaretState::Show;
 	InvalidateCaretRegion();
 }
 
 void EditBox::SetCaret(Point mouse_down_position) {
 	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_down_position);
-	UpdateCaret(info);
+	UpdateCaretRegion(info); _caret_state = CaretState::Show;
 	ClearSelection();
 	_mouse_down_text_position = _caret_text_position;
 }
@@ -107,7 +101,7 @@ void EditBox::SetCaret(Point mouse_down_position) {
 void EditBox::SetCaret(uint text_position, bool is_trailing_hit) {
 	HitTestInfo info = GetTextBlock().HitTestTextPosition(text_position);
 	info.is_trailing_hit = is_trailing_hit;
-	UpdateCaret(info);
+	UpdateCaretRegion(info); _caret_state = CaretState::Show;
 	ClearSelection();
 }
 
@@ -147,7 +141,7 @@ void EditBox::UpdateSelectionRegion() {
 
 void EditBox::DoSelection(Point mouse_move_position) {
 	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_move_position);
-	UpdateCaret(info); HideCaret();
+	UpdateCaretRegion(info); HideCaret();
 	_selection_begin = _mouse_down_text_position;
 	_selection_end = _caret_text_position;
 	if (_selection_begin == _selection_end) { ClearSelection(); return; }

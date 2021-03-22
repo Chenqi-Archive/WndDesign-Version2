@@ -2,8 +2,6 @@
 
 #include "wnd/WndObject.h"
 #include "figure/figure_types.h"
-#include "style/border_resizer.h"
-#include "style/scrollbar.h"
 
 #include <vector>
 #include <string>

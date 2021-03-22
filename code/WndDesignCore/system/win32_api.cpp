@@ -12,6 +12,13 @@ BEGIN_NAMESPACE(WndDesign)
 
 BEGIN_NAMESPACE(Anonymous)
 
+void CommitQueue() {
+    static ReflowQueue& reflow_queue = GetReflowQueue();
+    static RedrawQueue& redraw_queue = GetRedrawQueue();
+    reflow_queue.Commit();
+    redraw_queue.Commit();
+}
+
 static const wchar_t wnd_class_name[] = L"WndDesignFrame";
 HINSTANCE hInstance = NULL;
 
@@ -21,6 +28,7 @@ inline bool IsKeyboardMsg(UINT msg) { return WM_KEYFIRST <= msg && msg <= WM_KEY
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     static int window_cnt = 0;
     static bool mouse_leave_tracked = false;
+    static bool size_move_entered = false;
 
     // Get the attached frame.
     DesktopWndFrame* frame = reinterpret_cast<DesktopWndFrame*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
@@ -115,6 +123,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             break;
 
             //// region message //// 
+        case WM_ENTERSIZEMOVE:
+            size_move_entered = true;
+            break;
+        case WM_EXITSIZEMOVE:
+            size_move_entered = false;
+            break;
         case WM_GETMINMAXINFO: {
                 if (frame == nullptr) { break; }
                 MINMAXINFO* min_max_info = reinterpret_cast<MINMAXINFO*>(lParam);
@@ -124,11 +138,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 min_max_info->ptMinTrackSize = { static_cast<LONG>(min_size.width), static_cast<LONG>(min_size.height) };
                 min_max_info->ptMaxTrackSize = { static_cast<LONG>(max_size.width), static_cast<LONG>(max_size.height) };
             }break;
+        case WM_WINDOWPOSCHANGING:
+            break;
         case WM_WINDOWPOSCHANGED: {
                 WINDOWPOS* position = reinterpret_cast<WINDOWPOS*>(lParam);
                 if ((position->flags & SWP_NOSIZE) && (position->flags & SWP_NOMOVE)) { break; }  // Filter out other messages.
                 Rect rect(Point(position->x, position->y), Size(static_cast<uint>(position->cx), static_cast<uint>(position->cy)));
                 frame->SetRegion(rect);
+                if (size_move_entered) { CommitQueue(); }
             }break;
         case WM_PAINT: {
                 PAINTSTRUCT ps;
@@ -155,7 +172,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 case SB_LINEDOWN:case SB_PAGEDOWN:wheel_delta = -WHEEL_DELTA; break;
                 default:assert(0);
                 }
-                return SendMessageW(
+                return WndProc(
                     hWnd, msg == WM_HSCROLL ? WM_MOUSEHWHEEL : WM_MOUSEWHEEL,
                     (wheel_delta << 16) | key_state, ((short)cursor_position.y << 16) | (short)cursor_position.x
                 );
@@ -252,9 +269,6 @@ void ReleaseFocus() {
 }
 
 int MessageLoop() {
-    // Initialize reflow queue and redraw queue.
-    ReflowQueue& reflow_queue = GetReflowQueue();
-    RedrawQueue& redraw_queue = GetRedrawQueue();
     MSG msg;
     while (true) {
         GetMessageW(&msg, nullptr, 0, 0);
@@ -266,10 +280,7 @@ int MessageLoop() {
             DispatchMessageW(&msg);
         } while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE));
 
-    #pragma message(Remark"Could also set an update interval, may be 40ms, to avoid update frequently.")
-        // Commit reflow queue and redraw queue when there are no more messages.
-        reflow_queue.Commit();
-        redraw_queue.Commit();
+        CommitQueue();
     }
     assert(false); return 0;
 }

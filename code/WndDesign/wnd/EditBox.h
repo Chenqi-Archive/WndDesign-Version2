@@ -88,8 +88,7 @@ private:
 	uint _caret_text_position = 0;
 	Rect _caret_region = region_empty;
 private:
-	void UpdateCaretRegion();
-	void UpdateCaret(const HitTestInfo& info);
+	void UpdateCaretRegion(const HitTestInfo& info);
 private:
 	void SetCaret(Point mouse_down_position);
 	void SetCaret(uint text_position, bool is_trailing_hit);

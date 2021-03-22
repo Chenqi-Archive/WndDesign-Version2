@@ -29,6 +29,7 @@ protected:
 
 unique_ptr<BorderResizer> CreateEmptyBorderResizer();
 unique_ptr<BorderResizer> CreateDefaultBorderResizer();
+unique_ptr<BorderResizer> CreateAeroSnapBorderResizer();
 
 
 END_NAMESPACE(WndDesign)

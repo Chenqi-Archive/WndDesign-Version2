@@ -17,7 +17,7 @@ Wnd::Wnd(unique_ptr<Style> style) :
 	_mouse_track_info({ ElementType::None, nullptr })
 {
 	if (_style == nullptr) { throw std::invalid_argument("style can't be null"); }
-	SetBackground(_style->background.get());
+	SetBackground(_style->background.Get());
 }
 
 Wnd::~Wnd() {}

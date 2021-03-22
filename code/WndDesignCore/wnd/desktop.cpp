@@ -172,10 +172,12 @@ void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {
 void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Rect region = UpdateChildRegion(child, GetSize());
-	frame.OnRegionChange(region);
-	Win32::MoveWnd(frame._hwnd, region);
-	SetChildRegion(child, region);
-	SetChildRegionStyle(child, region);
+	if (region != frame._wnd.GetRegionOnParent()) {
+		frame.OnRegionChange(region);
+		SetChildRegion(child, region);
+		SetChildRegionStyle(child, region);
+		Win32::MoveWnd(frame._hwnd, region);
+	}
 }
 
 void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {

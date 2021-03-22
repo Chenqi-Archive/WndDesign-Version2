@@ -159,7 +159,6 @@
     <ClCompile Include="figure\figure_types.cpp" />
     <ClCompile Include="figure\image.cpp" />
     <ClCompile Include="figure\text_block.cpp" />
-    <ClCompile Include="message\timer.cpp" />
     <ClCompile Include="style\border_resizer.cpp" />
     <ClCompile Include="style\scrollbar.cpp" />
     <ClCompile Include="style\text_style.cpp" />

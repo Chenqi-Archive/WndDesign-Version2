@@ -63,7 +63,9 @@ private:
 			int slider_offset = (int)round((double)display_size.height * _display_offset.y / _entire_length);
 			_slider_region = Rect((int)(display_size.width - width), slider_offset, width, slider_length);
 		}
-		InvalidateWnd(wnd, _frame_region);
+		if (HasMargin()) {
+			InvalidateWnd(wnd, _frame_region);
+		}
 	}
 public:
 	virtual bool IsVisible() const override { return HasMargin(); }

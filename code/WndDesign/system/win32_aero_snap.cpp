@@ -11,9 +11,6 @@ void AeroSnapDraggingEffect(WndObject& wnd, Point point) {
 	auto [hwnd, new_point] = ConvertPointToDesktopWndPoint(wnd, point);
 	if (hwnd == nullptr) { return; }
 	SendMessageW((HWND)hwnd, WM_NCLBUTTONDOWN, HTCAPTION, ((short)new_point.y << 16) | (short)new_point.x);
-
-#pragma message(Remark"When mouse is dragging, it seems that DefWindowProc will use its \
-independent message loop and reflow queue won't get committed.")
 }
 
 void AeroSnapBorderResizingEffect(WndObject& wnd, Point point, BorderPosition border_position) {

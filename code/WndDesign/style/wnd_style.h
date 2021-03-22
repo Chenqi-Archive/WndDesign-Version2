@@ -134,6 +134,7 @@ struct WndStyle {
 	struct BackgroundStyle {
 	public:
 		shared_ptr<Background> _resource = GetNullBackground();
+		const Background& Get() const { return *_resource; }
 	public:
 		void setColor(Color color) { _resource.reset(new SolidColorBackground(color)); }
 		void setImage(const wstring& image_file, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
@@ -142,7 +143,7 @@ struct WndStyle {
 		void setImage(const Image& image, uchar opacity = 0xFF, Vector offset_on_image = vector_zero) {
 			_resource.reset(new ImageRepeatBackground(image, opacity, offset_on_image));
 		}
-		const Background& get() const { return *_resource; }
+		void set(shared_ptr<Background> resource) { _resource = resource; }
 	}background;
 
 

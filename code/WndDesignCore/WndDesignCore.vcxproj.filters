@@ -141,6 +141,9 @@
     <ClInclude Include="wnd\reflow_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="system\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="layer\layer.cpp">
@@ -189,6 +192,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="system\ime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

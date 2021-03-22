@@ -43,10 +43,10 @@ protected:
 		return true;
 	}
 protected:
-	virtual void OnHover() { SetBackground(*GetStyle().background_hover._resource); }
-	virtual void OnPress() { SetBackground(*GetStyle().background_press._resource); }
-	virtual void OnClick() { SetBackground(*GetStyle().background_hover._resource); }
-	virtual void OnLeave() { SetBackground(*GetStyle().background._resource); }
+	virtual void OnHover() { SetBackground(GetStyle().background_hover.Get()); }
+	virtual void OnPress() { SetBackground(GetStyle().background_press.Get()); }
+	virtual void OnClick() { SetBackground(GetStyle().background_hover.Get()); }
+	virtual void OnLeave() { SetBackground(GetStyle().background.Get()); }
 };
 
 

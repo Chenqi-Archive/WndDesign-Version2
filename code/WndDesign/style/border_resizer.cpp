@@ -1,5 +1,6 @@
 #include "border_resizer.h"
 #include "border_helper.h"
+#include "../system/win32_aero_snap.h"
 #include "../wnd/Wnd.h"
 
 
@@ -14,6 +15,20 @@ void BorderResizer::ResizeWnd(Wnd& wnd, Rect old_window_region, Margin margin_to
 }
 void BorderResizer::SetWndCapture(Wnd& wnd) { wnd.SetBorderCapture(); }
 void BorderResizer::ReleaseWndCapture(Wnd& wnd) { wnd.ReleaseCapture(); }
+
+
+inline void SetCursorDependingOnBorderPosition(BorderPosition border_position) {
+	switch (border_position) {
+	case BorderPosition::Left: SetCursor(Cursor::Resize0); break;
+	case BorderPosition::Top: SetCursor(Cursor::Resize90); break;
+	case BorderPosition::Right: SetCursor(Cursor::Resize0); break;
+	case BorderPosition::Bottom: SetCursor(Cursor::Resize90); break;
+	case BorderPosition::LeftTop: SetCursor(Cursor::Resize135); break;
+	case BorderPosition::RightTop: SetCursor(Cursor::Resize45); break;
+	case BorderPosition::LeftBottom: SetCursor(Cursor::Resize45); break;
+	case BorderPosition::RightBottom: SetCursor(Cursor::Resize135); break;
+	}
+}
 
 
 class DefaultBorderResizer : public BorderResizer {
@@ -35,16 +50,7 @@ public:
 		switch (msg) {
 		case Msg::MouseMove:
 			if (!_has_mouse_down) {
-				switch (border_position) {
-				case BorderPosition::Left: SetCursor(Cursor::Resize0); break;
-				case BorderPosition::Top: SetCursor(Cursor::Resize90); break;
-				case BorderPosition::Right: SetCursor(Cursor::Resize0); break;
-				case BorderPosition::Bottom: SetCursor(Cursor::Resize90); break;
-				case BorderPosition::LeftTop: SetCursor(Cursor::Resize135); break;
-				case BorderPosition::RightTop: SetCursor(Cursor::Resize45); break;
-				case BorderPosition::LeftBottom: SetCursor(Cursor::Resize45); break;
-				case BorderPosition::RightBottom: SetCursor(Cursor::Resize135); break;
-				}
+				SetCursorDependingOnBorderPosition(border_position);
 			} else {
 				Point current_mouse_position = mouse_msg.point;
 				Margin margin_to_extend = {};
@@ -95,8 +101,26 @@ public:
 };
 
 
+class AeroSnapBorderResizer : public BorderResizer {
+public:
+	AeroSnapBorderResizer() {}
+	~AeroSnapBorderResizer() {}
+private:
+	virtual void Handler(Wnd& wnd, Rect window_region, uint border_width, Msg msg, Para para) override {
+		if (IsMouseMsg(msg)) {
+			MouseMsg& mouse_msg = GetMouseMsg(para);
+			BorderPosition border_position = HitTestBorderPosition(window_region.size, border_width, mouse_msg.point);
+			SetCursorDependingOnBorderPosition(border_position);
+			if (msg == Msg::LeftDown) {
+				AeroSnapBorderResizingEffect(wnd, mouse_msg.point, border_position);
+			}
+		}
+	}
+};
+
 unique_ptr<BorderResizer> CreateEmptyBorderResizer() { return std::make_unique<BorderResizer>(); }
 unique_ptr<BorderResizer> CreateDefaultBorderResizer() { return std::make_unique<DefaultBorderResizer>(); }
+unique_ptr<BorderResizer> CreateAeroSnapBorderResizer() { return std::make_unique<AeroSnapBorderResizer>(); }
 
 
 END_NAMESPACE(WndDesign)

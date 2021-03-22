@@ -7,11 +7,7 @@ using std::vector;
 using std::wstring;
 
 
-#ifdef _DEBUG
-#pragma comment(lib, "..\\build\\x64\\Debug\\WndDesignCore.lib")
-#else
-#pragma comment(lib, "..\\build\\x64\\Release\\WndDesignCore.lib")
-#endif // _DEBUG
+#pragma comment(lib, "WndDesignCore.lib")
 
 
 extern int main();

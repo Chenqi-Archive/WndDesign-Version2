@@ -2,6 +2,7 @@
 
 #include "TextBox.h"
 #include "../message/timer.h"
+#include "../message/mouse_tracker.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -108,6 +109,7 @@ private:
 private:
 	bool HasSelection() const { return _selection_end > _selection_begin; }
 	void DoSelection(Point mouse_move_position);
+	void SelectAll();
 	void ClearSelection();
 
 
@@ -136,9 +138,8 @@ private:
 
 	//// message handling ////
 private:
-	bool _has_mouse_down = false;
-	bool _has_ctrl_down = false;
-	Point _mouse_down_position = point_zero;
+	MouseTracker _mouse_tracker;
+	bool _is_ctrl_down = false;
 protected:
 	virtual bool Handler(Msg msg, Para para) override;
 };

@@ -135,7 +135,7 @@ private:
 
 
 	//// message handling ////
-protected:
+public:
 	void SetCapture();
 	void ReleaseCapture();
 	void SetFocus();

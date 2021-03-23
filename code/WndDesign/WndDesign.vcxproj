@@ -200,7 +200,7 @@
     <ClInclude Include="geometry\interval.h" />
     <ClInclude Include="geometry\rect_point_iterator.h" />
     <ClInclude Include="message\message.h" />
-    <ClInclude Include="message\mouse_msg_tracker.h" />
+    <ClInclude Include="message\mouse_tracker.h" />
     <ClInclude Include="style\border_helper.h" />
     <ClInclude Include="style\style_helper.h" />
     <ClInclude Include="style\wnd_style.h" />

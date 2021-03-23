@@ -7,7 +7,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 
 EditBox::EditBox(unique_ptr<Style> style, const wstring& text) :
-	TextBox(std::move(style), text) {
+	TextBox(std::move(style), text), _mouse_tracker(*this) {
 }
 
 EditBox::~EditBox() {}
@@ -149,6 +149,12 @@ void EditBox::DoSelection(Point mouse_move_position) {
 	UpdateSelectionRegion();
 }
 
+void EditBox::SelectAll() {
+	_selection_begin = 0;
+	_selection_end = (uint)GetText().size();
+	UpdateSelectionRegion(); HideCaret();
+}
+
 void EditBox::ClearSelection() {
 	_selection_begin = _selection_end = 0;
 	_selection_info.clear();
@@ -257,22 +263,18 @@ void EditBox::Paste() {
 bool EditBox::Handler(Msg msg, Para para) {
 	Wnd::Handler(msg, para);
 
-	switch (msg) {
-	case Msg::LeftDown:
-		SetCapture();
-		SetFocus();
-		_has_mouse_down = true;
-		_mouse_down_position = GetMouseMsg(para).point;
-		SetCaret(_mouse_down_position);
-		break;
-	case Msg::MouseMove:
-		if (_has_mouse_down) { DoSelection(GetMouseMsg(para).point); }
-		break;
-	case Msg::LeftUp:
-		_has_mouse_down = false;
-		ReleaseCapture();
-		break;
+	switch (_mouse_tracker.Track(msg, para)) {
+	case MouseTrackMsg::LeftDown: SetFocus(); SetCaret(GetMouseMsg(para).point); break;
+	case MouseTrackMsg::LeftDoubleClick: break;  /* to implement: select current word */
+	case MouseTrackMsg::LeftTripleClick: SelectAll(); break;
+	case MouseTrackMsg::LeftDrag: DoSelection(GetMouseMsg(para).point); break;
+	case MouseTrackMsg::LeftUp:
+	case MouseTrackMsg::MouseMove:
+	case MouseTrackMsg::LeftClick:
+	default: break;
+	}
 
+	switch (msg) {
 	case Msg::KeyDown:
 		switch (GetKeyMsg(para).key) {
 		case Key::Left: MoveCaret(CaretMoveDirection::Left); break;
@@ -288,19 +290,20 @@ bool EditBox::Handler(Msg msg, Para para) {
 		case Key::Backspace: Delete(true); break;
 		case Key::Delete: Delete(false); break;
 
-		case Key::Ctrl: _has_ctrl_down = true; break;
-		case CharKey('X'): if (_has_ctrl_down) { Cut(); } break;
-		case CharKey('C'): if (_has_ctrl_down) { Copy(); } break;
-		case CharKey('V'): if (_has_ctrl_down) { Paste(); } break;
+		case Key::Ctrl: _is_ctrl_down = true; break;
+		case CharKey('A'): if (_is_ctrl_down) { SelectAll(); } break;
+		case CharKey('X'): if (_is_ctrl_down) { Cut(); } break;
+		case CharKey('C'): if (_is_ctrl_down) { Copy(); } break;
+		case CharKey('V'): if (_is_ctrl_down) { Paste(); } break;
 		}
 		break;
 	case Msg::KeyUp:
 		switch (GetKeyMsg(para).key) {
-		case Key::Ctrl: _has_ctrl_down = false; break;
+		case Key::Ctrl: _is_ctrl_down = false; break;
 		}
 		break;
 	case Msg::Char:
-		if (_has_ctrl_down) { break; }
+		if (_is_ctrl_down) { break; }
 		if (wchar ch = GetCharMsgFiltered(para); ch != 0) {
 			Insert(ch);
 		};

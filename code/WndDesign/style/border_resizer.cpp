@@ -37,7 +37,7 @@ public:
 	~DefaultBorderResizer() {}
 
 private:
-	bool _has_mouse_down = false;
+	bool _is_mouse_down = false;
 	Point _mouse_down_position = point_zero;
 	BorderPosition _mouse_down_border_position = BorderPosition::None;
 	Rect _mouse_down_window_region = region_empty;
@@ -46,10 +46,10 @@ public:
 		if (!IsMouseMsg(msg)) { return; }
 		MouseMsg& mouse_msg = GetMouseMsg(para);
 		BorderPosition border_position;
-		if (!_has_mouse_down) { border_position = HitTestBorderPosition(window_region.size, border_width, mouse_msg.point); }
+		if (!_is_mouse_down) { border_position = HitTestBorderPosition(window_region.size, border_width, mouse_msg.point); }
 		switch (msg) {
 		case Msg::MouseMove:
-			if (!_has_mouse_down) {
+			if (!_is_mouse_down) {
 				SetCursorDependingOnBorderPosition(border_position);
 			} else {
 				Point current_mouse_position = mouse_msg.point;
@@ -82,17 +82,17 @@ public:
 			}
 			break;
 		case Msg::LeftDown:
-			assert(!_has_mouse_down);
+			assert(!_is_mouse_down);
 			assert(border_position != BorderPosition::None);
-			_has_mouse_down = true;
+			_is_mouse_down = true;
 			_mouse_down_position = mouse_msg.point;
 			_mouse_down_border_position = border_position;
 			_mouse_down_window_region = window_region;
 			SetWndCapture(wnd);
 			break;
 		case Msg::LeftUp:
-			if (_has_mouse_down) {
-				_has_mouse_down = false;
+			if (_is_mouse_down) {
+				_is_mouse_down = false;
 				ReleaseWndCapture(wnd);
 			}
 			break;

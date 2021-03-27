@@ -38,10 +38,10 @@ public:
 		return scrollbar._resource->IsMarginAuto();
 	}
 	static bool IsClientRelative(const ClientStyle& client) {
-		return client._left.IsPercent() || client._top.IsPercent() || client._width.IsPercent() || client._height.IsPercent();
+		return client._left.IsPercent() || client._top.IsPercent() || IsLengthRelative(client.width) || IsLengthRelative(client.height);
 	}
 	static bool IsClientAuto(const ClientStyle& client) {
-		return client._width.IsAuto() || client._height.IsAuto();
+		return IsLengthAuto(client.width) || IsLengthAuto(client.height);
 	}
 public:
 	bool IsRegionHorizontalAuto() const {
@@ -87,15 +87,27 @@ public:
 		length._max.ConvertToPixel(parent_length);
 		return length;
 	}
-	static uint BoundLengthBetween(uint normal_length, uint min_length, uint max_length) {
+	static uint Clamp(uint normal_length, uint min_length, uint max_length) {
 		if (normal_length < min_length) { normal_length = min_length; }
 		if (normal_length > max_length) { normal_length = max_length; }
 		return normal_length;
 	}
-	static const ValueTag BoundLengthBetween(ValueTag normal_length, ValueTag min_length, ValueTag max_length) {
+	static const ValueTag Clamp(ValueTag normal_length, ValueTag min_length, ValueTag max_length) {
 		if (normal_length.AsUnsigned() < min_length.AsUnsigned()) { normal_length.Set(min_length.AsUnsigned()); }
 		if (normal_length.AsUnsigned() > max_length.AsUnsigned()) { normal_length.Set(max_length.AsUnsigned()); }
 		return normal_length;
+	}
+	static const uint CalculatePosition(ValueTag position_low, ValueTag position_high, uint parent_length, uint length) {
+		if (position_low.IsAuto() || position_low.IsCenter()) {
+			if (position_low.IsCenter()) {
+				position_low.Set((((int)parent_length) - (int)length) / 2);
+			} else if (!position_high.IsAuto()) {
+				position_low.Set((int)parent_length - position_high.AsSigned() - (int)length);
+			} else {
+				throw style_parse_exception;
+			}
+		}
+		return position_low.AsSigned();
 	}
 	static const Interval CalculateLength(LengthStyle length, ValueTag position_low, ValueTag position_high, uint parent_length) {
 		if (parent_length == 0) { return Interval(0, 0); }
@@ -115,17 +127,9 @@ public:
 				normal_length.Set((int)parent_length - position_low.AsSigned() - position_high.AsSigned());
 			}
 		}
-		normal_length = BoundLengthBetween(normal_length, min_length, max_length);
-		if (position_low.IsAuto() || position_low.IsCenter()) {
-			if (position_low.IsCenter()) {
-				position_low.Set((static_cast<int>(parent_length) - normal_length.AsSigned()) / 2);
-			} else if (!position_high.IsAuto()) {
-				position_low.Set(static_cast<int>(parent_length) - position_high.AsSigned() - normal_length.AsSigned());
-			} else {
-				throw style_parse_exception;
-			}
-		}
-		return Interval(position_low.AsSigned(), normal_length.AsUnsigned());
+		normal_length = Clamp(normal_length, min_length, max_length);
+		int position = CalculatePosition(position_low, position_high, parent_length, normal_length.AsUnsigned());
+		return Interval(position, normal_length.AsUnsigned());
 	}
 	static auto MakeRectFromInterval(Interval horizontal, Interval vertical) -> const Rect {
 		return Rect(horizontal.begin, vertical.begin, horizontal.length, vertical.length);
@@ -137,10 +141,6 @@ public:
 			CalculateLength(height, position._top, position._bottom, parent_size.height)
 		);
 	}
-	const Rect GetRegionOnParent(Size display_size) const {
-		// Used only for child windows of Desktop or OverlapLayout whose border can resize.
-		return Rect(Point(position._left.AsSigned(), position._top.AsSigned()), display_size);
-	}
 	void ResetRegionOnParent(Rect region_on_parent, Size parent_size) {
 		Margin margin_to_parent = CalculateRelativeMargin(parent_size, region_on_parent);
 		position.set(px(margin_to_parent.left), px(margin_to_parent.top), px(margin_to_parent.right), px(margin_to_parent.bottom));
@@ -149,24 +149,24 @@ public:
 	void ResetRegionOnParent(Rect old_region_on_parent, Margin margin_to_extend, Size size_min, Size size_max) {
 		if (margin_to_extend.left) {
 			uint new_width = (uint)((int)old_region_on_parent.size.width + margin_to_extend.left);
-			new_width = BoundLengthBetween(new_width, size_min.width, size_max.width);
+			new_width = Clamp(new_width, size_min.width, size_max.width);
 			int new_left = old_region_on_parent.point.x + (int)old_region_on_parent.size.width - (int)new_width;
 			width.normal(px(new_width)); position.left(px(new_left));
 		}
 		if (margin_to_extend.top) {
 			uint new_height = (uint)((int)old_region_on_parent.size.height + margin_to_extend.top);
-			new_height = BoundLengthBetween(new_height, size_min.height, size_max.height);
+			new_height = Clamp(new_height, size_min.height, size_max.height);
 			int new_top = old_region_on_parent.point.y + (int)old_region_on_parent.size.height - (int)new_height;
 			height.normal(px(new_height)); position.top(px(new_top));
 		}
 		if (margin_to_extend.right) { 
 			uint new_width = (uint)((int)old_region_on_parent.size.width + margin_to_extend.right);
-			new_width = BoundLengthBetween(new_width, size_min.width, size_max.width);
+			new_width = Clamp(new_width, size_min.width, size_max.width);
 			width.normal(px(new_width)); position.left(px(old_region_on_parent.point.x));
 		}
 		if (margin_to_extend.bottom) { 
 			uint new_height = (uint)((int)old_region_on_parent.size.height + margin_to_extend.bottom);
-			new_height = BoundLengthBetween(new_height, size_min.height, size_max.height);
+			new_height = Clamp(new_height, size_min.height, size_max.height);
 			height.normal(px(new_height)); position.top(px(old_region_on_parent.point.y));
 		}
 	}
@@ -211,20 +211,36 @@ public:
 		ClientStyle client = this->client;
 		client._left.ConvertToPixel(displayed_client_size.width);   
 		client._top.ConvertToPixel(displayed_client_size.height);   
-		client._width.IsAuto() ? client._width.Set(length_max) : client._width.ConvertToPixel(displayed_client_size.width);  
-		client._height.IsAuto() ? client._height.Set(length_max) : client._height.ConvertToPixel(displayed_client_size.height);
-		return Rect(client._left.AsSigned(), client._top.AsSigned(), client._width.AsUnsigned(), client._height.AsUnsigned());
+		LengthStyle width = ConvertLengthToPixel(client.width, displayed_client_size.width);
+		LengthStyle height = ConvertLengthToPixel(client.height, displayed_client_size.height);
+		if (width._normal.IsAuto()) { width._normal = width._max; }
+		width._normal = Clamp(width._normal, width._min, width._max);
+		if (height._normal.IsAuto()) { height._normal = height._max; }
+		height._normal = Clamp(height._normal, height._min, height._max);
+		return Rect(client._left.AsSigned(), client._top.AsSigned(), width._normal.AsUnsigned(), height._normal.AsUnsigned());
 	}
-	const Size AutoResizeRegionOnParentToDisplaySize(Size region_on_parent_size, Size display_size, Size size_min, Size size_max) const {
-		if (IsRegionHorizontalAuto()) { region_on_parent_size.width = BoundLengthBetween(display_size.width, size_min.width, size_max.width); }
-		if (IsRegionVerticalAuto()) { region_on_parent_size.height = BoundLengthBetween(display_size.height, size_min.height, size_max.height); }
-		return region_on_parent_size;
+	const Rect AutoResizeRegionOnParentToDisplaySize(Size parent_size, Rect region_on_parent, Size display_size, Size size_min, Size size_max) const {
+		if (IsRegionHorizontalAuto()) { 
+			region_on_parent.size.width = Clamp(display_size.width, size_min.width, size_max.width); 
+			region_on_parent.point.x = CalculatePosition(position._left, position._right, parent_size.width, region_on_parent.size.width);
+		}
+		if (IsRegionVerticalAuto()) {
+			region_on_parent.size.height = Clamp(display_size.height, size_min.height, size_max.height);
+			region_on_parent.point.y = CalculatePosition(position._top, position._bottom, parent_size.height, region_on_parent.size.height);
+		}
+		return region_on_parent;
 	}
-	const Rect AutoResizeClientRegionToContent(Rect client_region, Rect content_region) const {
+	const Rect AutoResizeClientRegionToContent(Size displayed_client_size, Rect client_region, Rect content_region) const {
 		if (client._left.IsAuto()) { client_region.point.x = content_region.point.x; }
 		if (client._top.IsAuto()) { client_region.point.y = content_region.point.y; }
-		if (client._width.IsAuto()) { client_region.size.width = content_region.size.width; }
-		if (client._height.IsAuto()) { client_region.size.height = content_region.size.height; }
+		if (client.width._normal.IsAuto()) { 
+			LengthStyle width = ConvertLengthToPixel(client.width, displayed_client_size.width);
+			client_region.size.width = Clamp(content_region.size.width, width._min.AsUnsigned(), width._max.AsUnsigned());
+		}
+		if (client.height._normal.IsAuto()) { 
+			LengthStyle height = ConvertLengthToPixel(client.height, displayed_client_size.height);
+			client_region.size.height = Clamp(content_region.size.height, height._min.AsUnsigned(), height._max.AsUnsigned());
+		}
 		return client_region;
 	}
 };

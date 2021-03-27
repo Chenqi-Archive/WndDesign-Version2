@@ -29,12 +29,56 @@ private:
 	wstring _text;
 	TextBlock _text_block;
 public:
-	wstring& GetText() { return _text; }
-	TextBlock& GetTextBlock() { return _text_block; }
-	void TextBlockUpdated() { 
+	const wstring& GetText() const { return _text; }
+	const TextBlock& GetTextBlock() const { return _text_block; }
+private:
+	void TextLayoutChanged() { 
 		Invalidate(region_infinite); 
 		ContentLayoutChanged(); 
 	}
+protected:
+	virtual void OnTextChange() { TextLayoutChanged(); }
+
+
+	// std::wstring wrapper functions
+public:
+	void SetText(wstring&& text) {
+		uint old_length = (uint)_text.length(), new_length = (uint)text.length();
+		_text.assign(std::move(text));
+		_text_block.TextReplacedWithoutStyle(0, old_length, new_length);
+		OnTextChange();
+	}
+	void SetText(const wstring& text) { 
+		wstring temp_text = text;
+		SetText(std::move(temp_text));
+	}
+	void InsertText(uint pos, wchar ch) {
+		_text.insert(pos, 1, ch);
+		_text_block.TextInsertedWithoutStyle(pos, 1);
+		OnTextChange();
+	}
+	void InsertText(uint pos, const wstring& str) {
+		_text.insert(pos, str);
+		_text_block.TextInsertedWithoutStyle(pos, (uint)str.length());
+		OnTextChange();
+	}
+	void ReplaceText(uint begin, uint length, wchar ch) {
+		_text.replace(begin, length, 1, ch);
+		_text_block.TextReplacedWithoutStyle(begin, length, 1);  // length may be out of range, but it doesn't matter
+		OnTextChange();
+	}
+	void ReplaceText(uint begin, uint length, const wstring& str) {
+		_text.replace(begin, length, str);
+		_text_block.TextReplacedWithoutStyle(begin, length, (uint)str.length());
+		OnTextChange();
+	}
+	void DeleteText(uint begin, uint length) {
+		_text.erase(begin, length);
+		_text_block.TextDeleted(begin, length);
+		OnTextChange();
+	}
+
+
 protected:
 	virtual const Rect UpdateContentLayout(Size client_size) {
 		Size old_size = _text_block.GetSize();

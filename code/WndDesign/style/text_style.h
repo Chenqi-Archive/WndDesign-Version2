@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../figure/color.h"
 #include "../common/uncopyable.h"
+#include "../figure/color.h"
+#include "../geometry/text_range.h"
 
 #include <memory>
 #include <string>
@@ -15,18 +16,6 @@ using std::wstring;
 using std::list;
 
 struct TextLayout;  // An alias for IDWriteTextLayout.
-
-
-struct TextRange {
-	uint begin;
-	uint length;
-
-	uint left() const { return begin; }
-	uint right() const { return begin + length; }
-
-	bool IsEmpty() const { return length == 0; }
-	bool Contains(uint pos) const { return pos >= left() && pos < right(); }
-};
 
 
 struct ABSTRACT_BASE TextStyleBase {

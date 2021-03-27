@@ -3,6 +3,7 @@
 #include "TextBox.h"
 #include "../message/timer.h"
 #include "../message/mouse_tracker.h"
+#include "../common/unicode_helper.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -45,16 +46,20 @@ private:
 public:
 	using HitTestInfo = TextBlockHitTestInfo;
 private:
-	uint GetCharacterLength(uint text_position);
+	WordBreakIterator word_break_iterator;
+private:
+	uint GetCharacterLength(uint text_position) {
+		const wstring& text = GetText();
+		assert(text_position < text.length());
+		return GetUTF16CharLength(text[text_position]);
+	}
+public:
+	virtual void OnTextChange();
 
 
-	//// layout update ////
+	//// layout update and composition ////
 private:
 	virtual const Rect UpdateContentLayout(Size client_size);
-
-
-	//// painting and composition ////
-private:
 	virtual void OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const override;
 
 
@@ -109,6 +114,7 @@ private:
 private:
 	bool HasSelection() const { return _selection_end > _selection_begin; }
 	void DoSelection(Point mouse_move_position);
+	void SelectWord();
 	void SelectAll();
 	void ClearSelection();
 

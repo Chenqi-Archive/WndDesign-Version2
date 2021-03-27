@@ -44,7 +44,7 @@ void TextBlock::TextChanged() {
 	ApplyAllStyles();
 }
 
-void TextBlock::UpdateSize() {
+void TextBlock::UpdateSize() const {
 	DWRITE_TEXT_METRICS metrics;
 	_layout->GetMetrics(&metrics);
 	_size = Size(
@@ -53,7 +53,7 @@ void TextBlock::UpdateSize() {
 	);
 }
 
-void TextBlock::AutoResize(Size max_size) {
+void TextBlock::AutoResize(Size max_size) const {
 	if (_max_size == max_size) { return; }
 
 	if (_max_size.width != max_size.width) {

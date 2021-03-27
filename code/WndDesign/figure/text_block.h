@@ -27,17 +27,17 @@ private:
 private:
 	alloc_ptr<TextLayout> _format;
 	alloc_ptr<TextLayout> _layout;
-	Size _max_size;
-	Size _size;
+	mutable Size _max_size;
+	mutable Size _size;
 public:
 	const Size GetSize() const { return _size; }
 	TextLayout& GetLayout() const { return *_layout; }
 	const TextBlockStyle& GetDefaultStyle() const { return _style; }
 private:
 	void TextChanged();
-	void UpdateSize();
+	void UpdateSize() const;
 public:
-	void AutoResize(Size max_size);
+	void AutoResize(Size max_size) const;
 public:
 	const TextBlockHitTestInfo HitTestPoint(Point point) const;
 	const TextBlockHitTestInfo HitTestTextPosition(uint text_position) const;

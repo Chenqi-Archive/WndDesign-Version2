@@ -31,7 +31,6 @@ const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 
 void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
 	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(parent_specified_region, parent_size);
-	RegionOnParentChanged();
 }
 
 void Wnd::ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend) {
@@ -85,7 +84,7 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 		Scrollbar& scrollbar = GetScrollbar(); bool has_margin = scrollbar.HasMargin();
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
 		if (is_region_on_parent_auto) {
-			region_on_parent.size = style.AutoResizeRegionOnParentToDisplaySize(region_on_parent.size, display_size, _size_min, _size_max);
+			region_on_parent = style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent, display_size, _size_min, _size_max);
 		}
 		UpdateScrollbar(GetAccessibleRegion(), Rect(point_zero + GetDisplayOffset(), region_on_parent.size));
 		if (bool scrollbar_margin_changed = has_margin ^ scrollbar.HasMargin()) {
@@ -125,7 +124,7 @@ void Wnd::UpdateClientRegion(Size displayed_client_size) {
 		_invalid_layout.content_layout = false;
 		Rect content_region = UpdateContentLayout(client_region.size);
 		if (is_client_auto) { 
-			client_region = style.AutoResizeClientRegionToContent(client_region, content_region); 
+			client_region = style.AutoResizeClientRegionToContent(displayed_client_size, client_region, content_region);
 		}
 	}
 	_client_region = client_region; 
@@ -231,7 +230,7 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		// Send to border, scrollbar or client region.
 		switch (_mouse_track_info._type) {
 		case ElementType::Border: 
-			GetBorderResizer().Handler(*this, GetStyleCalculator(GetStyle()).GetRegionOnParent(display_size), GetStyle().border._width, msg, para); return true;
+			GetBorderResizer().Handler(*this, WndObject::GetChildRegion(*this), GetStyle().border._width, msg, para); return true;
 		case ElementType::Scrollbar: 
 			mouse_msg.point -= scrollbar_region.point - point_zero;
 			GetScrollbar().Handler(*this, msg, para); return true;

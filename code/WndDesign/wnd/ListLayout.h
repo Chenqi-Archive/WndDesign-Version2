@@ -36,13 +36,12 @@ protected:
 
 private:
 	Size _default_grid_size;
-	Size _min_max_grid_height;  // stored two uint number in Size
+	std::pair<uint, uint> _min_max_grid_height;
 private:
-	const Size GetDefaultGridSize() { return _default_grid_size; }
 	bool UpdateDefaultGridSize(Size grid_size) {
 		return _default_grid_size == grid_size ? false : (_default_grid_size = grid_size, true);
 	}
-	bool UpdateMinMaxGridHeight(Size min_max_grid_height) {
+	bool UpdateMinMaxGridHeight(std::pair<uint, uint> min_max_grid_height) {
 		return _min_max_grid_height == min_max_grid_height ? false : (_min_max_grid_height = min_max_grid_height, true);
 	}
 
@@ -54,13 +53,16 @@ private:
 	struct RowContainer {
 		uint y = 0;
 		uint height = -1;
+		uint width = 0;
 		ref_ptr<WndObject> wnd = nullptr;
 	public:
 		void Invalidate() { height = -1; }
 		bool IsInvalid() const { return height == -1; }
 	};
 	vector<RowContainer> _rows;
-	uint _content_height;
+	Size _content_size;
+private:
+	uint HitTestRow(uint y) const;
 public:
 	uint GetRowNumber() const { return (uint)_rows.size(); }
 	void SetRowNumber(uint row_number);
@@ -94,8 +96,6 @@ private:
 	uint _invalid_layout_row_begin;
 private:
 	void ContentLayoutChanged(uint row_begin);
-	uint GetContentHeight() const;
-	uint HitTestRow(uint y) const;
 private:
 	virtual void ChildRegionMayChange(WndObject& child) override;
 	virtual const Rect UpdateContentLayout(Size client_size);

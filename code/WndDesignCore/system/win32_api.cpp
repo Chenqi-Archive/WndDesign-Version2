@@ -144,8 +144,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 WINDOWPOS* position = reinterpret_cast<WINDOWPOS*>(lParam);
                 if ((position->flags & SWP_NOSIZE) && (position->flags & SWP_NOMOVE)) { break; }  // Filter out other messages.
                 Rect rect(Point(position->x, position->y), Size(static_cast<uint>(position->cx), static_cast<uint>(position->cy)));
-                frame->SetRegion(rect);
-                if (size_move_entered) { CommitQueue(); }
+                if (size_move_entered) { frame->SetRegion(rect); CommitQueue(); }
             }break;
         case WM_PAINT: {
                 PAINTSTRUCT ps;

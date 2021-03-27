@@ -175,7 +175,6 @@ void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	if (region != frame._wnd.GetRegionOnParent()) {
 		frame.OnRegionChange(region);
 		SetChildRegion(child, region);
-		SetChildRegionStyle(child, region);
 		Win32::MoveWnd(frame._hwnd, region);
 	}
 }

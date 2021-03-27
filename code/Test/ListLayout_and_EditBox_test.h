@@ -14,7 +14,6 @@ private:
 			height.max(80pct);
 			position.setHorizontalCenter().setVerticalCenter();
 			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateAeroSnapBorderResizer());
-			client.height(length_auto);
 			background.setColor(ColorSet::LightGray);
 			grid_height.min(100px).max(300px);
 		}
@@ -34,7 +33,6 @@ private:
 			height.max(100pct);
 			border.width(3).color(ColorSet::Honeydew);
 			padding.set(20px, 10px, 20px, 10px);
-			client.height(length_auto);
 			background.setColor(ColorSet::YellowGreen);
 			font.size(20px);
 		}

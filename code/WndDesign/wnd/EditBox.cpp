@@ -12,14 +12,14 @@ EditBox::EditBox(unique_ptr<Style> style, const wstring& text) :
 
 EditBox::~EditBox() {}
 
-uint EditBox::GetCharacterLength(uint text_position) {
-#pragma message(Remark"May use utf-16 encoding information to get the length of the character.")
-	HitTestInfo info = GetTextBlock().HitTestTextPosition(text_position);
-	return info.text_length;
+void EditBox::OnTextChange() {
+	TextBox::OnTextChange();
+	const wstring& text = GetText();
+	word_break_iterator.SetText(text.c_str(), (uint)text.length());
 }
 
 const Rect EditBox::UpdateContentLayout(Size client_size) {
-	TextBlock& text_block = GetTextBlock();
+	const TextBlock& text_block = GetTextBlock();
 	Size old_size = text_block.GetSize();
 	text_block.AutoResize(client_size);
 	if (text_block.GetSize() != old_size) { 
@@ -149,6 +149,10 @@ void EditBox::DoSelection(Point mouse_move_position) {
 	UpdateSelectionRegion();
 }
 
+void EditBox::SelectWord() {
+
+}
+
 void EditBox::SelectAll() {
 	_selection_begin = 0;
 	_selection_end = (uint)GetText().size();
@@ -165,36 +169,29 @@ void EditBox::ClearSelection() {
 void EditBox::Insert(wchar ch) {
 	if (IsEditDisabled()) { return; }
 	if (HasSelection()) {
-		GetText().replace(_selection_begin, _selection_end - _selection_begin, 1, ch);
-		GetTextBlock().TextReplacedWithoutStyle(_selection_begin, _selection_end - _selection_begin, 1);
+		ReplaceText(_selection_begin, _selection_end - _selection_begin, ch);
 		SetCaret(_selection_begin + 1, false);
 	} else {
-		GetText().insert(_caret_text_position, 1, ch);
-		GetTextBlock().TextInsertedWithoutStyle(_caret_text_position, 1);
+		InsertText(_caret_text_position, ch);
 		SetCaret(_caret_text_position + 1, false);
 	}
-	TextBlockUpdated();
 }
 
 void EditBox::Insert(const wstring& str) {
 	if (IsEditDisabled()) { return; }
 	if (HasSelection()) {
-		GetText().replace(_selection_begin, _selection_end - _selection_begin, str);
-		GetTextBlock().TextReplacedWithoutStyle(_selection_begin, _selection_end - _selection_begin, (uint)str.length());
+		ReplaceText(_selection_begin, _selection_end - _selection_begin, str);
 		SetCaret(_selection_begin + (uint)str.length(), false);
 	} else {
-		GetText().insert(_caret_text_position, str);
-		GetTextBlock().TextInsertedWithoutStyle(_caret_text_position, (uint)str.length());
+		InsertText(_caret_text_position, str);
 		SetCaret(_caret_text_position + (uint)str.length(), false);
 	}
-	TextBlockUpdated();
 }
 
 void EditBox::Delete(bool is_backspace) {
 	if (IsEditDisabled()) { return; }
 	if (HasSelection()) {
-		GetText().erase(_selection_begin, _selection_end - _selection_begin);
-		GetTextBlock().TextDeleted(_selection_begin, _selection_end - _selection_begin);
+		DeleteText(_selection_begin, _selection_end - _selection_begin);
 		SetCaret(_selection_begin, false);
 	} else {
 		if (is_backspace) {
@@ -202,17 +199,14 @@ void EditBox::Delete(bool is_backspace) {
 			uint previous_caret_position = _caret_text_position;
 			SetCaret(previous_caret_position - 1, false);
 			uint character_length = previous_caret_position - _caret_text_position;
-			GetText().erase(_caret_text_position, character_length);
-			GetTextBlock().TextDeleted(_caret_text_position, character_length);
+			DeleteText(_caret_text_position, character_length);
 		} else {
 			if (_caret_text_position >= GetText().length()) { return; }
 			uint character_length = GetCharacterLength(_caret_text_position);
 			if (character_length == 0) { return; }
-			GetText().erase(_caret_text_position, character_length);
-			GetTextBlock().TextDeleted(_caret_text_position, character_length);
+			DeleteText(_caret_text_position, character_length);
 		}
 	}
-	TextBlockUpdated();
 }
 
 void EditBox::ImeCompositionBegin() {
@@ -233,11 +227,9 @@ void EditBox::ImeCompositionBegin() {
 
 void EditBox::ImeComposition(const wstring& composition_string) {
 	if (IsEditDisabled()) { return; }
-	GetText().replace(_ime_composition_begin, _ime_composition_end - _ime_composition_begin, composition_string);
-	GetTextBlock().TextReplacedWithoutStyle(_ime_composition_begin, _ime_composition_end - _ime_composition_begin, (uint)composition_string.length());
+	ReplaceText(_ime_composition_begin, _ime_composition_end - _ime_composition_begin, composition_string);
 	_ime_composition_end = _ime_composition_begin + (uint)composition_string.length();
 	SetCaret(_ime_composition_end, false);
-	TextBlockUpdated();
 }
 
 void EditBox::Cut() {
@@ -265,7 +257,7 @@ bool EditBox::Handler(Msg msg, Para para) {
 
 	switch (_mouse_tracker.Track(msg, para)) {
 	case MouseTrackMsg::LeftDown: SetFocus(); SetCaret(GetMouseMsg(para).point); break;
-	case MouseTrackMsg::LeftDoubleClick: break;  /* to implement: select current word */
+	case MouseTrackMsg::LeftDoubleClick: SelectWord(); break;
 	case MouseTrackMsg::LeftTripleClick: SelectAll(); break;
 	case MouseTrackMsg::LeftDrag: DoSelection(GetMouseMsg(para).point); break;
 	case MouseTrackMsg::LeftUp:

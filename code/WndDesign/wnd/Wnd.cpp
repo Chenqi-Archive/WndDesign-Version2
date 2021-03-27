@@ -31,6 +31,7 @@ const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 
 void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
 	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(parent_specified_region, parent_size);
+	RegionOnParentChanged();
 }
 
 void Wnd::ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend) {

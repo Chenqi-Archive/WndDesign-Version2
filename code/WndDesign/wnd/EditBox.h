@@ -46,7 +46,7 @@ private:
 public:
 	using HitTestInfo = TextBlockHitTestInfo;
 private:
-	WordBreakIterator word_break_iterator;
+	WordBreakIterator _word_break_iterator;
 private:
 	uint GetCharacterLength(uint text_position) {
 		const wstring& text = GetText();
@@ -146,6 +146,7 @@ private:
 private:
 	MouseTracker _mouse_tracker;
 	bool _is_ctrl_down = false;
+	bool _is_shift_down = false;
 protected:
 	virtual bool Handler(Msg msg, Para para) override;
 };

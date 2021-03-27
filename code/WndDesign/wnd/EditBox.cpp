@@ -8,6 +8,7 @@ BEGIN_NAMESPACE(WndDesign)
 
 EditBox::EditBox(unique_ptr<Style> style, const wstring& text) :
 	TextBox(std::move(style), text), _mouse_tracker(*this) {
+	OnTextChange();
 }
 
 EditBox::~EditBox() {}
@@ -15,7 +16,7 @@ EditBox::~EditBox() {}
 void EditBox::OnTextChange() {
 	TextBox::OnTextChange();
 	const wstring& text = GetText();
-	word_break_iterator.SetText(text.c_str(), (uint)text.length());
+	_word_break_iterator.SetText(text.c_str(), (uint)text.length());
 }
 
 const Rect EditBox::UpdateContentLayout(Size client_size) {
@@ -123,9 +124,18 @@ void EditBox::MoveCaret(CaretMoveDirection direction) {
 			SetCaret(_caret_text_position, true);
 		}
 		break;
-
-		// Up, down, Home and End are not implemented yet.
-
+	case CaretMoveDirection::Up:
+		SetCaret(_caret_region.Center() - Vector(0, _caret_region.size.height));
+		break;
+	case CaretMoveDirection::Down:
+		SetCaret(_caret_region.Center() + Vector(0, _caret_region.size.height));
+		break;
+	case CaretMoveDirection::Home:
+		SetCaret(Point(0, _caret_region.Center().y));
+		break;
+	case CaretMoveDirection::End:
+		SetCaret(Point(position_max, _caret_region.Center().y));
+		break;
 	}
 }
 
@@ -150,7 +160,10 @@ void EditBox::DoSelection(Point mouse_move_position) {
 }
 
 void EditBox::SelectWord() {
-
+	if (_caret_text_position >= GetText().length()) { return; }
+	TextRange word_range = _word_break_iterator.Seek(_caret_text_position);
+	_selection_begin = word_range.left(); _selection_end = word_range.right();
+	UpdateSelectionRegion(); HideCaret();
 }
 
 void EditBox::SelectAll() {
@@ -283,6 +296,8 @@ bool EditBox::Handler(Msg msg, Para para) {
 		case Key::Delete: Delete(false); break;
 
 		case Key::Ctrl: _is_ctrl_down = true; break;
+		case Key::Shift: _is_shift_down = true; break;
+
 		case CharKey('A'): if (_is_ctrl_down) { SelectAll(); } break;
 		case CharKey('X'): if (_is_ctrl_down) { Cut(); } break;
 		case CharKey('C'): if (_is_ctrl_down) { Copy(); } break;
@@ -292,6 +307,7 @@ bool EditBox::Handler(Msg msg, Para para) {
 	case Msg::KeyUp:
 		switch (GetKeyMsg(para).key) {
 		case Key::Ctrl: _is_ctrl_down = false; break;
+		case Key::Shift: _is_shift_down = false; break;
 		}
 		break;
 	case Msg::Char:

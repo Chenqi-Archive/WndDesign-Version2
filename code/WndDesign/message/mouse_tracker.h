@@ -53,7 +53,7 @@ public:
 			case 0: default: ret = MouseTrackMsg::LeftDown; hit_count = 0; break;
 			}
 			if (SquareDistance(GetMouseMsg(para).point, mouse_down_position) > Square(move_tolerate_range)) {
-				ret = MouseTrackMsg::LeftDown;
+				ret = MouseTrackMsg::LeftDown; hit_count = 0;
 			}
 			hit_count++; timer.Set();
 			is_mouse_down = true;

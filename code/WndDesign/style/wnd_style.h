@@ -118,7 +118,8 @@ struct WndStyle {
 		LengthStyle height;
 		constexpr ClientStyle& left(ValueTag left) { _left = left; return *this; }
 		constexpr ClientStyle& top(ValueTag top) { _top = top; return *this; }
-		ClientStyle() { width.max(100pct); }
+	public:
+		ClientStyle() { width.setFixed(100pct); height.setFixed(100pct); }
 	}client;
 
 

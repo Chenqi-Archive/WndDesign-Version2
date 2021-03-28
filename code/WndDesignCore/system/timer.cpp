@@ -16,7 +16,7 @@ std::unordered_map<HANDLE, Timer&> timer_sync_map;
 void TimerCallbackSync(HWND Arg1, UINT Arg2, UINT_PTR Arg3, DWORD Arg4) {
     auto it = timer_sync_map.find(reinterpret_cast<HANDLE>(Arg3));
     if (it == timer_sync_map.end()) { return; }
-    it->second.OnAlert();
+    it->second.callback();
     if (size_move_entered) { CommitQueue(); }
 }
 

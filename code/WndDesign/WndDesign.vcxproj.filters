@@ -242,5 +242,11 @@
     <ClInclude Include="geometry\text_range.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="widget\ToolTip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="widget\MessageBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

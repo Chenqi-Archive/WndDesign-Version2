@@ -42,7 +42,7 @@ public:
 	bool HasParent() const { return _parent != nullptr; }
 private:
 	/* called by new parent window */
-	void SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent);
+	void SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent, uint depth);
 	/* called by old parent window */
 	void ClearParent();
 	/* called by myself */

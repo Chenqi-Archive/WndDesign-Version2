@@ -9,7 +9,12 @@ BEGIN_NAMESPACE(WndDesign)
 
 class TextBox : public FinalWnd {
 public:
-	struct Style : FinalWnd::Style, TextBlockStyle {};
+	struct Style : FinalWnd::Style, TextBlockStyle {
+		Style() {
+			client.height.min(0px).normal(length_auto).max(length_max_tag);
+			client.width.min(0px).normal(length_auto).max(100pct);
+		}
+	};
 	
 public:
 	TextBox(unique_ptr<Style> style, const wstring& text) :

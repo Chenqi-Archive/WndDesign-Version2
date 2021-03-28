@@ -20,21 +20,17 @@ enum class MouseTrackMsg {
 };
 
 
-class MouseTracker {
+class MouseTracker : Uncopyable {
 public:
-	MouseTracker(WndObject& wnd) : wnd(wnd), timer(*this), hit_count(0), is_mouse_down(false), mouse_down_position() {}
+	MouseTracker(WndObject& wnd) : wnd(wnd), hit_count(0), is_mouse_down(false), mouse_down_position() {}
 	~MouseTracker() {}
 private:
 	WndObject& wnd;
 private:
-	static constexpr uint timer_interval = 500;  // 500ms
-	struct TrackerTimer : public Timer {
-		MouseTracker& tracker; TrackerTimer(MouseTracker& tracker) : tracker(tracker) {}
-		void Set() { Timer::Set(timer_interval); }
-		virtual void OnAlert() override { tracker.hit_count = 0; Stop(); }
-	};
-	TrackerTimer timer;
 	uint hit_count;
+	static constexpr uint timer_interval = 500;  // 500ms
+	Timer timer = Timer([&]() {TimerCallback(); });
+	void TimerCallback() { hit_count = 0; timer.Stop(); }
 public:
 	bool is_mouse_down;
 	Point mouse_down_position;
@@ -55,7 +51,7 @@ public:
 			if (SquareDistance(GetMouseMsg(para).point, mouse_down_position) > Square(move_tolerate_range)) {
 				ret = MouseTrackMsg::LeftDown; hit_count = 0;
 			}
-			hit_count++; timer.Set();
+			hit_count++; timer.Set(timer_interval);
 			is_mouse_down = true;
 			mouse_down_position = GetMouseMsg(para).point;
 			wnd.SetCapture();

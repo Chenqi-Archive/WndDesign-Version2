@@ -42,13 +42,17 @@ WndBase::~WndBase() {
 	DetachFromParent();
 }
 
-void WndBase::SetParent(ref_ptr<WndBase> parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
+void WndBase::SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent, uint depth) {
 	DetachFromParent();
-	_parent = parent; _index_on_parent = index_on_parent;
+	_parent = &parent; _index_on_parent = index_on_parent;
+	SetDepth(depth); assert(IsDepthValid());
+	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
+	JoinReflowQueue();
 }
 
 void WndBase::ClearParent() {
 	_parent = nullptr; _index_on_parent = {};
+	_region_on_parent = region_empty;
 }
 
 void WndBase::DetachFromParent() {
@@ -72,12 +76,6 @@ void WndBase::SetDepth(uint depth) {
 
 	// Set depth for child windows.
 	for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
-
-	// If depth != -1, join redraw queue if has invalid region, and always join reflow queue to update region.
-	if (IsDepthValid()) {
-		if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
-		JoinReflowQueue();
-	}
 }
 
 void WndBase::ClearChild() {
@@ -90,8 +88,7 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
 	assert(child._parent != this);
 	_child_wnds.push_front(&child);
-	child.SetParent(this, _child_wnds.begin());
-	child.SetDepth(GetChildDepth());
+	child.SetParent(*this, _child_wnds.begin(), GetChildDepth());
 }
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {

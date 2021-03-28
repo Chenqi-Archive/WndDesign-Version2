@@ -217,6 +217,8 @@
     <ClInclude Include="system\ime.h" />
     <ClInclude Include="system\win32.h" />
     <ClInclude Include="system\win32_aero_snap.h" />
+    <ClInclude Include="widget\MessageBox.h" />
+    <ClInclude Include="widget\ToolTip.h" />
     <ClInclude Include="wnd\Button.h" />
     <ClInclude Include="wnd\EditBox.h" />
     <ClInclude Include="wnd\FinalWnd.h" />

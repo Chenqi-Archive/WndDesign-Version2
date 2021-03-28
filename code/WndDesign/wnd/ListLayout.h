@@ -22,6 +22,11 @@ public:
 		}gridline;
 
 		LengthStyle grid_height;
+
+		Style() {
+			client.height.min(0px).normal(length_auto).max(length_max_tag);
+			client.width.min(0px).normal(length_auto).max(100pct);
+		}
 	};
 
 public:

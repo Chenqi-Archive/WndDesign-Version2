@@ -68,14 +68,8 @@ private:
 	inline static const uint caret_blink_period = 500;
 	inline static const uint caret_blink_expire_time = 20000;
 	enum class CaretState { Hide, Show, BlinkHide, BlinkShow };
-	class CaretTimer : public Timer {
-		EditBox& edit_box;
-		virtual void OnAlert() override { edit_box.BlinkCaret(); }
-	public:
-		CaretTimer(EditBox& edit_box) : edit_box(edit_box) {}
-	};
 private:
-	CaretTimer _timer = CaretTimer(*this);
+	Timer _timer = Timer(std::bind(&EditBox::BlinkCaret, this));
 	CaretState _caret_state = CaretState::Hide;
 	uint _caret_blink_time = 0;
 private:

@@ -13,7 +13,7 @@ IDWriteTextLayout** AsTextLayout(TextLayout** text_layout) { return reinterpret_
 
 
 TextBlock::TextBlock(wstring& text, TextBlockStyle& style) :
-	_text(text), _style(style), _format(nullptr), _layout(nullptr), _max_size(), _size() {
+	_text(text), _style(style), _format(nullptr), _layout(nullptr), _max_size(size_max), _size() {
 	hr = GetDWriteFactory().CreateTextFormat(
 		style.font._family.c_str(),
 		NULL,
@@ -32,6 +32,15 @@ TextBlock::~TextBlock() {
 	SafeRelease(AsTextLayout(&_layout));
 }
 
+void TextBlock::UpdateSize() const {
+	DWRITE_TEXT_METRICS metrics;
+	_layout->GetMetrics(&metrics);
+	_size = Size(
+		static_cast<uint>(ceil(metrics.widthIncludingTrailingWhitespace)),  // Round up the size.
+		static_cast<uint>(ceil(metrics.height))
+	);
+}
+
 void TextBlock::TextChanged() {
 	SafeRelease(AsTextLayout(&_layout));
 	hr = GetDWriteFactory().CreateTextLayout(
@@ -42,15 +51,6 @@ void TextBlock::TextChanged() {
 	);
 	UpdateSize();
 	ApplyAllStyles();
-}
-
-void TextBlock::UpdateSize() const {
-	DWRITE_TEXT_METRICS metrics;
-	_layout->GetMetrics(&metrics);
-	_size = Size(
-		static_cast<uint>(ceil(metrics.widthIncludingTrailingWhitespace)),  // Round up the size.
-		static_cast<uint>(ceil(metrics.height))
-	);
 }
 
 void TextBlock::AutoResize(Size max_size) const {

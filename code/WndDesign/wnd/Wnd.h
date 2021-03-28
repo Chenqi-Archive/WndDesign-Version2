@@ -63,10 +63,6 @@ private:
 		bool content_layout;
 	};
 	InvalidLayout _invalid_layout;
-	virtual bool HasInvalidLayout() const override {
-		return _invalid_layout.region_on_parent || _invalid_layout.margin ||
-			_invalid_layout.client_region || _invalid_layout.content_layout;
-	}
 	WndObject::InvalidateLayout;
 protected:
 	void RegionOnParentChanged() { _invalid_layout.region_on_parent = true; InvalidateLayout(); }

@@ -73,10 +73,10 @@ void WndBase::SetDepth(uint depth) {
 	// Set depth for child windows.
 	for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
 
-	// If depth != -1, join redraw queue and reflow queue if has invalid region or invalid layout.
+	// If depth != -1, join redraw queue if has invalid region, and always join reflow queue to update region.
 	if (IsDepthValid()) {
 		if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
-		if (_object.HasInvalidLayout()) { JoinReflowQueue(); }
+		JoinReflowQueue();
 	}
 }
 

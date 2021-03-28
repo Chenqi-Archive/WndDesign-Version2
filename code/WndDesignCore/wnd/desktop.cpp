@@ -169,9 +169,17 @@ void DesktopObjectImpl::OnChildTitleChange(WndObject& child) {
 	Win32::SetWndTitle(frame._hwnd, child.GetTitle());
 }
 
+inline const Size CheckWndSize(Size size) {
+	static Size max_window_size = []() { Size size = GetDesktopSize(); size.width *= 2; size.height *= 2; return size; }();
+	if (size.width > max_window_size.width) { size.width = max_window_size.width; }
+	if (size.height > max_window_size.height) { size.height = max_window_size.height; }
+	return size;
+}
+
 void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Rect region = UpdateChildRegion(child, GetSize());
+	region.size = CheckWndSize(region.size);
 	if (region != frame._wnd.GetRegionOnParent()) {
 		frame.OnRegionChange(region);
 		SetChildRegion(child, region);

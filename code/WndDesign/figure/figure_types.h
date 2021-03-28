@@ -75,8 +75,14 @@ struct Ellipse : Figure {
 	float border_width;
 	Color border_color;
 
-	Ellipse(uint radius_x, uint radius_y, float border_width, Color border_color, Color fill_color) :
-		radius_x(radius_x), radius_y(radius_y), border_width(border_width), border_color(border_color), fill_color(fill_color) {
+	Ellipse(uint radius_x, uint radius_y, Color fill_color, float border_width, Color border_color) :
+		radius_x(radius_x), radius_y(radius_y), fill_color(fill_color), border_width(border_width), border_color(border_color) {
+	}
+	Ellipse(uint radius_x, uint radius_y, Color fill_color) :
+		Ellipse(radius_x, radius_y, fill_color, 0, color_transparent) {
+	}
+	Ellipse(uint radius_x, uint radius_y, float border_width, Color border_color) :
+		Ellipse(radius_x, radius_y, color_transparent, border_width, border_color) {
 	}
 
 	// The center point of the ellipse will be drawn at "offset" of the target.
@@ -84,6 +90,18 @@ struct Ellipse : Figure {
 		return Rect(-static_cast<int>(radius_x), -static_cast<int>(radius_y), 2 * radius_x, 2 * radius_y);
 	}
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override;
+};
+
+struct Circle : public Ellipse {
+	Circle(uint radius, Color fill_color, float border_width, Color border_color) :
+		Ellipse(radius, radius, fill_color, border_width, border_color) {
+	}
+	Circle(uint radius, Color fill_color) :
+		Ellipse(radius, radius, fill_color, 0, color_transparent) {
+	}
+	Circle(uint radius, float border_width, Color border_color) :
+		Ellipse(radius, radius, color_transparent, border_width, border_color) {
+	}
 };
 
 

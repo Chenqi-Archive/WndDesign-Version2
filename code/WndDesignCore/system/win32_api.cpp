@@ -10,7 +10,7 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
-BEGIN_NAMESPACE(Anonymous)
+bool size_move_entered = false;  // referenced in timer.cpp
 
 void CommitQueue() {
     static ReflowQueue& reflow_queue = GetReflowQueue();
@@ -18,6 +18,9 @@ void CommitQueue() {
     reflow_queue.Commit();
     redraw_queue.Commit();
 }
+
+
+BEGIN_NAMESPACE(Anonymous)
 
 static const wchar_t wnd_class_name[] = L"WndDesignFrame";
 HINSTANCE hInstance = NULL;
@@ -28,7 +31,6 @@ inline bool IsKeyboardMsg(UINT msg) { return WM_KEYFIRST <= msg && msg <= WM_KEY
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     static int window_cnt = 0;
     static bool mouse_leave_tracked = false;
-    static bool size_move_entered = false;
 
     // Get the attached frame.
     DesktopWndFrame* frame = reinterpret_cast<DesktopWndFrame*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));

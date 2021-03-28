@@ -34,9 +34,9 @@ public:
 	TextLayout& GetLayout() const { return *_layout; }
 	const TextBlockStyle& GetDefaultStyle() const { return _style; }
 private:
-	void TextChanged();
 	void UpdateSize() const;
 public:
+	void TextChanged();
 	void AutoResize(Size max_size) const;
 public:
 	const TextBlockHitTestInfo HitTestPoint(Point point) const;

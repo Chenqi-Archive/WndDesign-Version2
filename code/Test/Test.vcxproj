@@ -158,6 +158,7 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="figure_test.h" />
     <ClInclude Include="Wnd_and_Desktop_test.h" />
     <ClInclude Include="OverlapLayout_and_TextBox_test.h" />
     <ClInclude Include="ListLayout_and_EditBox_test.h" />

@@ -29,5 +29,8 @@
     <ClInclude Include="ListLayout_and_EditBox_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="figure_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

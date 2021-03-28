@@ -95,10 +95,9 @@ protected:
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
 	static const Rect GetChildRegion(WndObject& child) { return child.wnd->GetRegionOnParent(); }
 private:
-	virtual bool HasInvalidLayout() const { return false; }
 	virtual bool MayRegionOnParentChange() { return false; }
 	virtual void ChildRegionMayChange(WndObject& child) {}
-	virtual void UpdateLayout() {}
+	virtual void UpdateLayout() { UpdateRegionOnParent(); }
 private:
 	virtual void SetRegionStyle(Rect parent_specified_region, Size parent_size) {}
 	virtual void OnChildRegionUpdate(WndObject& child) {}

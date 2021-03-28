@@ -20,6 +20,9 @@ struct Color {
     constexpr Color(uint rgb, uchar alpha) :
         blue(rgb & 0xFF), green((rgb >> 8) & 0xFF), red((rgb >> 16) & 0xFF), alpha(alpha) {
     }
+    constexpr Color(uchar blue, uchar green, uchar red, uchar alpha = 0xFF) :
+        blue(blue), green(green), red(red), alpha(alpha) {
+    }
     constexpr Color(ColorSet color, uchar alpha = 0xFF) :
         Color(static_cast<uint>(color), alpha) {
     }

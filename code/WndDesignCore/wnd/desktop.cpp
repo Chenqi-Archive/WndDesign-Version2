@@ -55,7 +55,7 @@ void DesktopWndFrame::Invalidate(Rect region) {
 	Invalidate(Region::Temp(region));
 }
 
-void DesktopWndFrame::UpdateInvalidRegion() {
+void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	_invalid_region.Intersect(Rect(point_zero, _wnd.GetRegionOnParent().size));
 	if (_invalid_region.IsEmpty()) { return; }
 
@@ -64,7 +64,6 @@ void DesktopWndFrame::UpdateInvalidRegion() {
 	// A little tricky here. 
 	// Figures are drawn in desktop's coordinates, but the target is in window's coordinates, so first
 	//   push the group as the desktop relative to the target.
-	FigureQueue figure_queue;
 	Vector offset_from_desktop = point_zero - _wnd.GetRegionOnParent().point;
 	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, _wnd.GetRegionOnParent());
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);

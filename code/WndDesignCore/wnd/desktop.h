@@ -42,7 +42,7 @@ public:
 	void Invalidate(Region& region);
 	void Invalidate(Rect region);
 public:
-	void UpdateInvalidRegion();
+	void UpdateInvalidRegion(FigureQueue& figure_queue);
 	void Present();
 
 private:

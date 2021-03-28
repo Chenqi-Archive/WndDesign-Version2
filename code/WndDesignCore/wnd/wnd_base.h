@@ -156,7 +156,7 @@ private:
 public:
 	virtual void Invalidate(Rect region) override;
 	/* called by redraw queue at commit time */
-	void UpdateInvalidRegion();
+	void UpdateInvalidRegion(FigureQueue& figure_queue);
 	/* called by parent window (WndObject) , the coordinate space of figure_queue now is parent's client region */
 	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const override;
 };

@@ -231,7 +231,7 @@ void WndBase::Invalidate(Rect region) {
 	}
 }
 
-void WndBase::UpdateInvalidRegion() {
+void WndBase::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	// If has no parent window, clear depth and skip, but not erase the invalid region.
 	if (!HasParent()) { SetDepth(-1); return; }
 
@@ -243,8 +243,6 @@ void WndBase::UpdateInvalidRegion() {
 		if (_invalid_region.IsEmpty()) { return; }
 
 		auto [bounding_region, regions] = _invalid_region.GetRect();
-		FigureQueue figure_queue;
-
 		uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
 		figure_queue.Append(bounding_region.point, new BackgroundFigure(_background, bounding_region, true));
 		_object.OnPaint(figure_queue, _accessible_region, bounding_region);

@@ -44,7 +44,7 @@ void RedrawQueue::Commit() {
 	while (next_depth > 0) {
 		while (!_queue[next_depth].empty()) {
 			WndBase& wnd = *_queue[next_depth].front();
-			wnd.UpdateInvalidRegion();
+			wnd.UpdateInvalidRegion(figure_queue); figure_queue.Clear();
 			wnd.LeaveRedrawQueue();
 		}
 		next_depth--;
@@ -55,7 +55,7 @@ void RedrawQueue::Commit() {
 	_has_invalid_frame = false;
 	for (auto wnd : _queue[next_depth]) {
 		DesktopWndFrame& frame = *reinterpret_cast<DesktopWndFrame*>(wnd);
-		frame.UpdateInvalidRegion();
+		frame.UpdateInvalidRegion(figure_queue); figure_queue.Clear();
 	}
 
 	EndDraw();

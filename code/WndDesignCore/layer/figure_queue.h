@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../figure/figure_base.h"
+#include "../common/uncopyable.h"
 
 #include <vector>
 #include <memory>
@@ -12,7 +13,18 @@ using std::unique_ptr;
 using std::vector;
 
 
-class FigureQueue {
+class FigureQueue : public Uncopyable {
+private:
+	friend class RedrawQueue;
+	FigureQueue() {}
+	~FigureQueue() {}
+	void Clear() {
+		figures.clear();
+		groups.clear();
+		offset = vector_zero;
+	}
+
+
 public:
 	struct FigureContainer {
 		Vector offset;

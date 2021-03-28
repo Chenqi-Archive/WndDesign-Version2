@@ -149,13 +149,13 @@ void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invali
 void Wnd::OnComposite(FigureQueue& figure_queue, Size display_size, Rect invalid_display_region) const {
 	// Draw border and scroll bar.
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
-	if (style.HasBorder()) {
-		figure_queue.Append(point_zero, style.GetBorder(display_size));
-	}
 	if (style.HasScrollbar()) {
 		Vector offset = figure_queue.PushOffset(GetScrollbar().GetRegion().point - point_zero);
 		style.scrollbar._resource->OnPaint(figure_queue);
 		figure_queue.PopOffset(offset);
+	}
+	if (style.HasBorder()) {
+		figure_queue.Append(point_zero, style.GetBorder(display_size));
 	}
 }
 

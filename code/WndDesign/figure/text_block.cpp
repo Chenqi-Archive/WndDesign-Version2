@@ -14,22 +14,12 @@ IDWriteTextLayout** AsTextLayout(TextLayout** text_layout) { return reinterpret_
 
 TextBlock::TextBlock(wstring& text, TextBlockStyle& style) :
 	_text(text), _style(style), _format(nullptr), _layout(nullptr), _max_size(size_max), _size() {
-	hr = GetDWriteFactory().CreateTextFormat(
-		style.font._family.c_str(),
-		NULL,
-		static_cast<DWRITE_FONT_WEIGHT>(style.font._weight),
-		static_cast<DWRITE_FONT_STYLE>(style.font._style),
-		static_cast<DWRITE_FONT_STRETCH>(style.font._stretch),
-		static_cast<FLOAT>(style.font._size),
-		style.font._locale.c_str(),
-		AsTextFormat(&_format)
-	);
 	TextChanged();
 }
 
 TextBlock::~TextBlock() {
-	SafeRelease(AsTextFormat(&_format));
 	SafeRelease(AsTextLayout(&_layout));
+	SafeRelease(AsTextFormat(&_format));
 }
 
 void TextBlock::UpdateSize() const {
@@ -42,15 +32,45 @@ void TextBlock::UpdateSize() const {
 }
 
 void TextBlock::TextChanged() {
+	// Recreate TextFormat and TextLayout.
 	SafeRelease(AsTextLayout(&_layout));
+	SafeRelease(AsTextFormat(&_format));
+	hr = GetDWriteFactory().CreateTextFormat(
+		_style.font._family.c_str(),
+		NULL,
+		static_cast<DWRITE_FONT_WEIGHT>(_style.font._weight),
+		static_cast<DWRITE_FONT_STYLE>(_style.font._style),
+		static_cast<DWRITE_FONT_STRETCH>(_style.font._stretch),
+		static_cast<FLOAT>(_style.font._size),
+		_style.font._locale.c_str(),
+		AsTextFormat(&_format)
+	);
 	hr = GetDWriteFactory().CreateTextLayout(
 		_text.c_str(), static_cast<UINT>(_text.length()),
 		AsTextFormat(_format),
 		(FLOAT)_max_size.width, (FLOAT)_max_size.height,
 		AsTextLayout(&_layout)
 	);
-	UpdateSize();
+
+	// Set paragraph styles.
+	_layout->SetTextAlignment(static_cast<DWRITE_TEXT_ALIGNMENT>(_style.paragraph._text_align));
+	_layout->SetParagraphAlignment(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(_style.paragraph._paragraph_align));
+	_layout->SetFlowDirection(static_cast<DWRITE_FLOW_DIRECTION>(_style.paragraph._flow_direction));
+	_layout->SetReadingDirection(static_cast<DWRITE_READING_DIRECTION>(_style.paragraph._read_direction));
+	_layout->SetWordWrapping(static_cast<DWRITE_WORD_WRAPPING>(_style.paragraph._word_wrap));
+	ValueTag line_height = _style.paragraph._line_height;
+	if (line_height.IsPixel()) {
+		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, static_cast<FLOAT>(line_height.AsUnsigned()), 0.7F * line_height.AsUnsigned());
+	} else if (line_height.IsPercent()) {
+		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height.AsUnsigned() / 100.0F, 1.1F);
+	} else {
+		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0F, 0.0F);  // The last two parameters are ignored.
+	}
+	if (_style.paragraph._tab_size != 0) { _layout->SetIncrementalTabStop(static_cast<FLOAT>(_style.paragraph._tab_size)); }
+
+	// Set text range styles and update layout size.
 	ApplyAllStyles();
+	UpdateSize();
 }
 
 void TextBlock::AutoResize(Size max_size) const {

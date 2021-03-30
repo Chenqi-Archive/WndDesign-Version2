@@ -81,6 +81,9 @@
     <ClCompile Include="system\win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="widget\MessageBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">

@@ -114,7 +114,7 @@ struct TextBlockStyle {
 	// Default font format.
 	struct FontFormat {
 	public:
-		wstring _family = L"Arial";
+		wstring _family = L"Segoe UI";
 		wstring _locale = L"";
 		FontWeight _weight = FontWeight::Normal;
 		FontStyle _style = FontStyle::Normal;
@@ -129,7 +129,7 @@ struct TextBlockStyle {
 		constexpr FontFormat& weight(FontWeight weight) { _weight = weight; return *this; }
 		constexpr FontFormat& style(FontStyle style) { _style = style; return *this; }
 		constexpr FontFormat& stretch(FontStretch stretch) { _stretch = stretch; return *this; }
-		constexpr FontFormat& size(ValueTag size) { _size = static_cast<ushort>(size.AsUnsigned()); return *this; }
+		constexpr FontFormat& size(float size) { _size = size; return *this; }
 		constexpr FontFormat& color(Color color) { _color = color; return *this; }
 		constexpr FontFormat& underline(bool underline) { _underline = underline; return *this; }
 		constexpr FontFormat& strikeline(bool strikeline) { _strikeline = strikeline; return *this; }

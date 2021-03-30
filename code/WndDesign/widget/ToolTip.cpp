@@ -15,9 +15,11 @@ struct ToolTipStyle : public TextBox::Style {
 	ToolTipStyle() {
 		width.max(200px);
 		height.max(500px);
+		composite.z_index(127);  // always topmost
 		border.width(1).color(ColorSet::Gray);
 		padding.setAll(3px);
 		background.setColor(0xF1F2F7);
+		font.size(14);
 	}
 };
 
@@ -77,7 +79,7 @@ void ToolTip::Hide() {
 	HideWnd(hwnd);
 }
 
-void ToolTip::Handler(Msg msg, Para para) {
+void ToolTip::NonClientHandler(Msg msg, Para para) {
 	if (msg == Msg::LoseFocus) { Hide(); }
 }
 

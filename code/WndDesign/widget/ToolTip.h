@@ -28,7 +28,7 @@ private:
 	void Hide();
 
 private:
-	virtual void Handler(Msg msg, Para para) override;
+	virtual void NonClientHandler(Msg msg, Para para) override;
 
 public:
 	void OnMouseEnter(const wchar text[]);

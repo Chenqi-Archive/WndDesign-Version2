@@ -171,6 +171,7 @@
     <ClCompile Include="system\win32.cpp" />
     <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
+    <ClCompile Include="widget\MessageBox.cpp" />
     <ClCompile Include="widget\ToolTip.cpp" />
     <ClCompile Include="wnd\EditBox.cpp" />
     <ClCompile Include="wnd\ListLayout.cpp" />

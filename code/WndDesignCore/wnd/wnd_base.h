@@ -42,7 +42,7 @@ public:
 	bool HasParent() const { return _parent != nullptr; }
 private:
 	/* called by new parent window */
-	void SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent, uint depth);
+	void SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent);
 	/* called by old parent window */
 	void ClearParent();
 	/* called by myself */
@@ -158,7 +158,7 @@ public:
 	/* called by redraw queue at commit time */
 	void UpdateInvalidRegion(FigureQueue& figure_queue);
 	/* called by parent window (WndObject) , the coordinate space of figure_queue now is parent's client region */
-	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const override;
+	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region, CompositeEffect composite_effect) const override;
 };
 
 

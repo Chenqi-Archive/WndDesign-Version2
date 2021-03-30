@@ -27,6 +27,7 @@ private:
 	Size _size_min, _size_max;
 protected:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) override;
+	virtual const CompositeEffect GetCompositeEffect() const override { return GetStyle().composite; }
 private:
 	/* called by parent window when region is specified by parent window */
 	virtual void SetRegionStyle(Rect parent_specified_region, Size parent_size) override;
@@ -159,7 +160,7 @@ protected:
 
 protected:
 	virtual bool NonClientHitTest(Size display_size, Point point) const override;
-	virtual bool NonClientHandler(Msg msg, Para para) override;
+	virtual void NonClientHandler(Msg msg, Para para) override;
 
 protected:
 	struct HitTestInfo {
@@ -168,7 +169,7 @@ protected:
 	};
 protected:
 	virtual const HitTestInfo ClientHitTest(Size client_size, Point point) const { return {}; }
-	virtual bool Handler(Msg msg, Para para);
+	virtual void Handler(Msg msg, Para para);
 };
 
 

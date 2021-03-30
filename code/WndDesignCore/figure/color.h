@@ -10,14 +10,14 @@ enum class ColorSet : uint;
 
 
 struct Color {
+public:
     uchar blue;
     uchar green;
     uchar red;
     uchar alpha;
-    constexpr Color(uint argb) :
-        blue(argb & 0xFF), green((argb >> 8) & 0xFF), red((argb >> 16) & 0xFF), alpha((argb >> 24) & 0xFF) {
-    }
-    constexpr Color(uint rgb, uchar alpha) :
+
+public:
+    constexpr Color(uint rgb, uchar alpha = 0xFF) :
         blue(rgb & 0xFF), green((rgb >> 8) & 0xFF), red((rgb >> 16) & 0xFF), alpha(alpha) {
     }
     constexpr Color(uchar blue, uchar green, uchar red, uchar alpha = 0xFF) :
@@ -37,7 +37,7 @@ struct Color {
 };
 
 
-constexpr Color color_transparent = Color(0x00000000);
+constexpr Color color_transparent = Color(0x000000, 0x00);
 
 
 inline const Color BlendColorWithOpacity(Color color, uchar opacity) {

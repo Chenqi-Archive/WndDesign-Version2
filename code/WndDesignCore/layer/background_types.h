@@ -12,7 +12,7 @@ private:
 public:
 	static const NullBackground& Get();
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
-	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const override {}
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset) const override {}
 };
 
 

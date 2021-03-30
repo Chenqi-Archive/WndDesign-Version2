@@ -265,7 +265,7 @@ void EditBox::Paste() {
 	if (!str.empty()) { Insert(str); }
 }
 
-bool EditBox::Handler(Msg msg, Para para) {
+void EditBox::Handler(Msg msg, Para para) {
 	Wnd::Handler(msg, para);
 
 	switch (_mouse_tracker.Track(msg, para)) {
@@ -320,7 +320,7 @@ bool EditBox::Handler(Msg msg, Para para) {
 	case Msg::LoseFocus:
 		ClearSelection();
 		HideCaret();
-		return true;
+		break;
 
 		// For IME message.
 	case Msg::ImeCompositionBegin: ImeCompositionBegin(); break;
@@ -329,7 +329,6 @@ bool EditBox::Handler(Msg msg, Para para) {
 	}
 
 	StartBlinkingCaret();
-	return true;
 }
 
 

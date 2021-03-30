@@ -75,6 +75,12 @@
     <ClCompile Include="common\unicode_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="widget\ToolTip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="system\win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -194,9 +200,6 @@
     <ClInclude Include="wnd\SplitLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\FinalWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="wnd\TabLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,6 +249,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="widget\MessageBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message\fade_animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

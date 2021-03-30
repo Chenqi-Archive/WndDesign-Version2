@@ -123,7 +123,7 @@ private:
 	}
 
 protected:
-	virtual bool Handler(Msg msg, Para para) override { return true; }
+	virtual void Handler(Msg msg, Para para) override { return true; }
 };
 
 

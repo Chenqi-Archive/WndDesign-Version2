@@ -1,19 +1,19 @@
 #pragma once
 
-#include "FinalWnd.h"
+#include "Wnd.h"
 #include "../figure/image.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class ImageBox : public FinalWnd {
+class ImageBox : public Wnd {
 public:
-	using Style = FinalWnd::Style;
+	using Style = Wnd::Style;
 
 public:
 	ImageBox(unique_ptr<Style> style, unique_ptr<Image> image) :
-		FinalWnd(std::move(style)), _image(std::move(image)) {
+		Wnd(std::move(style)), _image(std::move(image)) {
 	}
 	~ImageBox() {}
 

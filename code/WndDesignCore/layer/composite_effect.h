@@ -7,16 +7,13 @@ BEGIN_NAMESPACE(WndDesign)
 
 
 struct CompositeEffect {
-	uchar opacity = 0xFF;
-	// shadow effect.
-	// blur effect.
+	uchar _opacity = 0xFF;
+	uchar _blur_radius = 0;
+	char _z_index = 0;  // -128 ~ 127 (bottom ~ topmost)
+	bool _mouse_penetrate = false;
 
-	bool HasEffect() const {
-		return 
-			opacity != 0xFF ||
-			// other effects.
-			false;
-	}
+	bool IsTopmost() const { return _z_index == (char)0x7F; }
+	bool IsBottom() const { return _z_index == (char)0x80; }
 };
 
 

@@ -65,9 +65,9 @@ void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	// Figures are drawn in desktop's coordinates, but the target is in window's coordinates, so first
 	//   push the group as the desktop relative to the target.
 	Vector offset_from_desktop = point_zero - _wnd.GetRegionOnParent().point;
-	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, _wnd.GetRegionOnParent());
-	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop);
-	figure_queue.EndGroup(group_begin);
+	figure_queue.PushOffset(offset_from_desktop);
+	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop, CompositeEffect{});
+	figure_queue.PopOffset(offset_from_desktop);
 
 	Target& target = _resource.GetTarget();
 	for (auto& region : regions) {
@@ -146,7 +146,7 @@ DesktopObjectImpl::DesktopObjectImpl() :
 DesktopObjectImpl::~DesktopObjectImpl() {}
 
 void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
-	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle());
+	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle(), child_object.GetCompositeEffect());
 	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
 	frame._desktop_index = _child_wnds.begin();
 	SetChildFrame(child_object, frame);
@@ -184,6 +184,11 @@ void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 		SetChildRegion(child, region);
 		Win32::MoveWnd(frame._hwnd, region);
 	}
+}
+
+void DesktopObjectImpl::OnChildCompositeEffectChange(WndObject& child) {
+	DesktopWndFrame& frame = GetChildFrame(child);
+	Win32::SetWndCompositeEffect(frame._hwnd, child.GetCompositeEffect());
 }
 
 void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {

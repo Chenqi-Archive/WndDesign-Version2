@@ -168,8 +168,10 @@
     <ClCompile Include="system\directx\d2d_api.cpp" />
     <ClCompile Include="system\directx\dwrite_api.cpp" />
     <ClCompile Include="system\directx\wic_api.cpp" />
+    <ClCompile Include="system\win32.cpp" />
     <ClCompile Include="system\win32_aero_snap.cpp" />
     <ClCompile Include="system\WinMain.cpp" />
+    <ClCompile Include="widget\ToolTip.cpp" />
     <ClCompile Include="wnd\EditBox.cpp" />
     <ClCompile Include="wnd\ListLayout.cpp" />
     <ClCompile Include="wnd\OverlapLayout.cpp" />
@@ -192,6 +194,7 @@
     <ClInclude Include="figure\text_block.h" />
     <ClInclude Include="geometry\margin.h" />
     <ClInclude Include="geometry\text_range.h" />
+    <ClInclude Include="message\fade_animation.h" />
     <ClInclude Include="message\msg_base.h" />
     <ClInclude Include="message\timer.h" />
     <ClInclude Include="style\border_resizer.h" />
@@ -221,7 +224,6 @@
     <ClInclude Include="widget\ToolTip.h" />
     <ClInclude Include="wnd\Button.h" />
     <ClInclude Include="wnd\EditBox.h" />
-    <ClInclude Include="wnd\FinalWnd.h" />
     <ClInclude Include="wnd\FlowLayout.h" />
     <ClInclude Include="wnd\ImageBox.h" />
     <ClInclude Include="wnd\ListLayout.h" />

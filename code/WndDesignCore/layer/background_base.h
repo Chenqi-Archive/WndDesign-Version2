@@ -13,8 +13,7 @@ struct ABSTRACT_BASE Background {
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const pure;
 
 	// Drawn as a figure.
-	// "opacity" is only used at composition time when tile is not allocated.
-	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity = 0xFF) const pure;
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset) const pure;
 
 	// Background may contain allocated resources, like Image.
 	virtual ~Background() pure {}

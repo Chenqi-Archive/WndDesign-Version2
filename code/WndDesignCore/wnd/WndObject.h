@@ -30,16 +30,18 @@ protected:
 private:
 	ref_ptr<WndObject> parent;
 public:
-	ref_ptr<WndObject> GetParent() const { return parent; }
 	bool HasParent() const { return GetParent() != nullptr; }
-	bool IsMyChild(WndObject& child) const { return child.GetParent() == this; }
+	ref_ptr<WndObject> GetParent() const { return parent; }
 protected:
+	bool IsMyChild(WndObject& child) const { 
+		return child.GetParent() == this; 
+	}
 	void RegisterChild(WndObject& child) {
-		assert(child.GetParent() != this);
+		if (child.GetParent() == this) { throw std::invalid_argument("child already registered"); }
 		wnd->AddChild(*child.wnd); child.parent = this; child.OnAttachToParent();
 	}
 	void UnregisterChild(WndObject& child) {
-		assert(child.GetParent() == this);
+		if (child.GetParent() != this) { throw std::invalid_argument("child not registered"); }
 		wnd->RemoveChild(*child.wnd); child.parent = nullptr;
 		child.NotifyDesktopWhenDetached();
 	}
@@ -66,6 +68,7 @@ protected:
 		static_assert(sizeof(Data) == sizeof(T));
 		return *reinterpret_cast<T*>(&child.data);
 	}
+
 
 	//// window region ////
 protected:
@@ -108,10 +111,13 @@ private:
 public:
 	virtual const pair<Size, Size> CalculateMinMaxSize(Size parent_size) { return { size_min, size_max }; }
 	virtual const wstring GetTitle() const { return L""; }
+	virtual const CompositeEffect GetCompositeEffect() const { return {}; }
 protected:
 	void TitleChanged() { if (HasParent()) { GetParent()->OnChildTitleChange(*this); } }
+	void CompositeEffectChanged() { if (HasParent()) { GetParent()->OnChildCompositeEffectChange(*this); } }
 private:
 	virtual void OnChildTitleChange(WndObject& child) {}
+	virtual void OnChildCompositeEffectChange(WndObject& child) { InvalidateChild(child, region_infinite); }
 
 
 	//// painting and composition ////
@@ -124,7 +130,8 @@ protected:
 	}
 protected:
 	static void CompositeChild(const WndObject& child, FigureQueue& figure_queue, Rect parent_invalid_region) {
-		child.wnd->Composite(figure_queue, parent_invalid_region);
+		CompositeEffect composite_effect = child.GetCompositeEffect(); if (composite_effect._opacity == 0) { return; }
+		child.wnd->Composite(figure_queue, parent_invalid_region, composite_effect);
 	}
 private:
 	void InvalidateChild(WndObject& child, Rect child_invalid_region) { wnd->InvalidateChild(*child.wnd, child_invalid_region); }
@@ -134,17 +141,20 @@ private:
 
 
 	//// message handling ////
-public:
+protected:
 	void SetCapture();
 	void ReleaseCapture();
 	void SetFocus();
 public:
-	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
-	virtual bool NonClientHandler(Msg msg, Para para) { 
-		if (IsMouseMsg(msg)) { GetMouseMsg(para).point += GetDisplayOffset(); } 
-		return Handler(msg, para);
+	virtual bool NonClientHitTest(Size display_size, Point point) const { 
+		CompositeEffect composite_effect = GetCompositeEffect();
+		if (composite_effect._opacity == 0 || (composite_effect._opacity < 0xFF && composite_effect._mouse_penetrate)) { return false; }
+		return true; 
 	}
-	virtual bool Handler(Msg msg, Para para) { return true; }
+	virtual void NonClientHandler(Msg msg, Para para) { 
+		if (IsMouseMsg(msg)) { GetMouseMsg(para).point += GetDisplayOffset(); } return Handler(msg, para);
+	}
+	virtual void Handler(Msg msg, Para para) {}
 };
 
 
@@ -156,14 +166,10 @@ protected:
 public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
-	//// child windows ////
+public:
 	void AddChild(WndObject& child) { RegisterChild(child); }
 	WndObject::RemoveChild;
 
-	//// window region ////
-	WndObject::GetSize;
-
-	//// message handling ////
 private:
 	friend class WndObject;
 	virtual void OnWndDetach(WndObject& wnd) pure;

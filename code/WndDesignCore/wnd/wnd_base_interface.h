@@ -2,6 +2,7 @@
 
 #include "../geometry/geometry.h"
 #include "../message/msg_base.h"
+#include "../layer/composite_effect.h"
 
 #include <memory>
 
@@ -42,7 +43,7 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void AllocateLayer() pure;
 	virtual void Invalidate(Rect region) pure;
 	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) pure;
-	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const pure;
+	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region, CompositeEffect composite_effect) const pure;
 };
 
 

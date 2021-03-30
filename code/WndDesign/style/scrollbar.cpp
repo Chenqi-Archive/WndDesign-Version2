@@ -129,7 +129,7 @@ public:
 		if (!HasMargin()) { return false; }
 		return _frame_region.Contains(point);
 	}
-	virtual bool Handler(Wnd& wnd, Msg msg, Para para) override {
+	virtual void Handler(Wnd& wnd, Msg msg, Para para) override {
 		switch (msg) {
 		case Msg::MouseEnter: 
 			SetCursor(Cursor::Default);
@@ -147,7 +147,6 @@ public:
 			SliderHandler(wnd, msg, para);
 			break;
 		}
-		return true;
 	}
 };
 

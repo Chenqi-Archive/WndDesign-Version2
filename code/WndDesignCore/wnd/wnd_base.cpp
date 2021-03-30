@@ -42,17 +42,14 @@ WndBase::~WndBase() {
 	DetachFromParent();
 }
 
-void WndBase::SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent, uint depth) {
+void WndBase::SetParent(WndBase& parent, list<ref_ptr<WndBase>>::iterator index_on_parent) {
 	DetachFromParent();
 	_parent = &parent; _index_on_parent = index_on_parent;
-	SetDepth(depth); assert(IsDepthValid());
-	if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
-	JoinReflowQueue();
+	_region_on_parent = region_empty;
 }
 
 void WndBase::ClearParent() {
 	_parent = nullptr; _index_on_parent = {};
-	_region_on_parent = region_empty;
 }
 
 void WndBase::DetachFromParent() {
@@ -62,20 +59,25 @@ void WndBase::DetachFromParent() {
 }
 
 void WndBase::SetDepth(uint depth) {
-	if (_depth == depth) { return; }
+	if (_depth != depth) {
+		if (depth > max_wnd_depth && depth != -1) {
+			throw std::invalid_argument("window hierarchy too deep");
+		}
 
-	if (depth > max_wnd_depth && depth != -1) {
-		throw std::invalid_argument("window hierarchy too deep");
+		// Depth will be reset, leave redraw queue and reflow queue.
+		LeaveRedrawQueue();
+		LeaveReflowQueue();
+
+		_depth = depth;
+
+		// Set depth for child windows.
+		for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
 	}
 
-	// Depth will be reset, leave redraw queue and reflow queue.
-	LeaveRedrawQueue();
-	LeaveReflowQueue();
-
-	_depth = depth;
-
-	// Set depth for child windows.
-	for (auto child : _child_wnds) { child->SetDepth(GetChildDepth()); }
+	if (IsDepthValid()) {
+		if (!_invalid_region.IsEmpty()) { JoinRedrawQueue(); }
+		JoinReflowQueue();
+	}
 }
 
 void WndBase::ClearChild() {
@@ -88,7 +90,8 @@ void WndBase::AddChild(IWndBase& child_wnd) {
 	WndBase& child = static_cast<WndBase&>(child_wnd);
 	assert(child._parent != this);
 	_child_wnds.push_front(&child);
-	child.SetParent(*this, _child_wnds.begin(), GetChildDepth());
+	child.SetParent(*this, _child_wnds.begin());
+	child.SetDepth(GetChildDepth());
 }
 
 void WndBase::RemoveChild(IWndBase& child_wnd) {
@@ -257,29 +260,28 @@ void WndBase::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	_invalid_region.Clear();
 }
 
-void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region) const {
+void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region, CompositeEffect composite_effect) const {
 	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
 	assert(_region_on_parent.Contains(parent_invalid_region)); // intersection should have been done by parent.
 
-	// Composite client region.
-	// Convert parent invalid region to my invalid region.
-	Vector coordinate_offset = OffsetFromParent();
-	Rect invalid_region = parent_invalid_region + coordinate_offset;
-	if (HasLayer()) {
-		// Draw layer directly in parent's coordinates, no need to create figure group.
-		figure_queue.Append(parent_invalid_region.point, new LayerFigure(*_layer, _background, invalid_region, {}));
-	} else {
-		// figure in my coordinates - coordinate_offset = figure in parent's coordinates.
-		uint group_begin = figure_queue.BeginGroup(vector_zero - coordinate_offset, invalid_region);
-		figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_region, false));
-		_object.OnPaint(figure_queue, _accessible_region, invalid_region);
-		figure_queue.EndGroup(group_begin);
-	}
-
 	// Composite non-client region.
 	Vector display_region_offset = _region_on_parent.point - point_zero;
-	uint group_begin = figure_queue.BeginGroup(display_region_offset, parent_invalid_region - display_region_offset);
-	_object.OnComposite(figure_queue, _region_on_parent.size, parent_invalid_region - display_region_offset);
+	Rect invalid_region = parent_invalid_region - display_region_offset;
+	uint group_begin = figure_queue.BeginGroup(display_region_offset, invalid_region, composite_effect);
+	{
+		// Composite client region.
+		Vector client_offset = vector_zero - _display_offset;
+		Rect invalid_client_region = invalid_region - client_offset;
+		if (HasLayer()) {
+			figure_queue.Append(invalid_region.point, new LayerFigure(*_layer, _background, invalid_client_region));
+		} else {
+			figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_client_region, false));
+			figure_queue.PushOffset(client_offset);
+			_object.OnPaint(figure_queue, _accessible_region, invalid_client_region);
+			figure_queue.PopOffset(client_offset);
+		}
+	}
+	_object.OnComposite(figure_queue, _region_on_parent.size, invalid_region);
 	figure_queue.EndGroup(group_begin);
 }
 

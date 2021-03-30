@@ -1,6 +1,7 @@
 #include "../WndDesign/WndDesign.h"
 #include "../WndDesign/wnd/Wnd.h"
 #include "../WndDesign/system/win32_aero_snap.h"
+#include "../WndDesign/widget/ToolTip.h"
 
 
 using namespace WndDesign;
@@ -22,11 +23,11 @@ public:
 	~MainWnd() {}
 
 private:
-	virtual bool NonClientHandler(Msg msg, Para para) override {
-		if (msg == Msg::LeftDown) {
-			AeroSnapDraggingEffect(*this, GetMouseMsg(para).point);
-		}
-		return true;
+	virtual void NonClientHandler(Msg msg, Para para) override {
+		Wnd::NonClientHandler(msg, para);
+		if (msg == Msg::LeftDown) { AeroSnapDraggingEffect(*this, GetMouseMsg(para).point); }
+		if (msg == Msg::MouseEnter) { GetToolTip().OnMouseEnter(L"Main Window"); }
+		if (msg == Msg::MouseLeave) { GetToolTip().OnMouseLeave(); }
 	}
 };
 

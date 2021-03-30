@@ -224,7 +224,7 @@ END_NAMESPACE(Anonymous)
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(Rect region, const wstring& title) {
+HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect) {
     RegisterWndClass(); 
     HWND hWnd = CreateWindowExW(
         NULL, wnd_class_name, title.c_str(),
@@ -233,6 +233,7 @@ HANDLE CreateWnd(Rect region, const wstring& title) {
         NULL, NULL, hInstance, NULL
     );
     assert(hWnd != NULL);
+    SetWndCompositeEffect(hWnd, composite_effect);
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     return hWnd;
 }
@@ -251,6 +252,21 @@ void MoveWnd(HANDLE hWnd, Rect region) {
 
 void SetWndTitle(HANDLE hWnd, const wstring& title) {
     SetWindowTextW((HWND)hWnd, title.c_str());
+}
+
+void SetWndCompositeEffect(HANDLE hWnd, CompositeEffect composite_effect) {
+    LONG old_style = GetWindowLong((HWND)hWnd, GWL_EXSTYLE);
+    if ((old_style & WS_EX_LAYERED) == 0) {
+        SetWindowLong((HWND)hWnd, GWL_EXSTYLE, old_style | WS_EX_LAYERED);
+    }
+    SetLayeredWindowAttributes((HWND)hWnd, RGB(0xFF, 0xFF, 0xFF), composite_effect._opacity, LWA_ALPHA);
+
+    if (composite_effect.IsTopmost()) {
+        SetWindowPos((HWND)hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    }
+    if (composite_effect.IsBottom()) {
+        SetWindowPos((HWND)hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    }
 }
 
 void SetCapture(HANDLE hWnd) {

@@ -53,6 +53,16 @@ struct WndStyle {
 	}position;
 
 
+	// The composite effect of the window.
+	struct CompositeStyle : public CompositeEffect {
+	public:
+		constexpr CompositeStyle& opacity(uchar opacity) { _opacity = opacity; return *this; }
+		constexpr CompositeStyle& blur_radius(uchar blur_radius) { _blur_radius = blur_radius; return *this; }
+		constexpr CompositeStyle& z_index(char z_index) { _z_index = z_index; return *this; }
+		constexpr CompositeStyle& mouse_penetrate(bool mouse_penetrate) { _mouse_penetrate = mouse_penetrate; return *this; }
+	}composite;
+
+
 	////
 	//// styles related with non-client region
 	//// 

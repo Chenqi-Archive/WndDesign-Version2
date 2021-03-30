@@ -32,6 +32,7 @@ void NullBackground::Clear(Rect region, RenderTarget& target, Vector offset) con
 	target.Clear(Color2COLOR(ColorSet::White));
 }
 
+
 ///////////////////////////////////////////////////////////
 ////                      layer.h                      ////
 ///////////////////////////////////////////////////////////
@@ -48,7 +49,7 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 			target.DrawBitmap(
 				&source_target.GetBitmap(),
 				Rect2RECT(region_on_tile + tile_offset - (region.point - point_zero) + offset),
-				composite_effect.opacity,
+				0xFF,
 				D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
 				Rect2RECT(region_on_tile)
 			);
@@ -56,8 +57,7 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 			background.DrawOn(
 				region_on_tile + tile_offset,
 				target,
-				offset,
-				composite_effect.opacity
+				offset
 			);
 		}
 	}
@@ -68,13 +68,17 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 ////                     d2d_api.h                     ////
 ///////////////////////////////////////////////////////////
 
+inline bool IsCompositeEffectNontrivial(CompositeEffect composite_effect) {
+    return composite_effect._opacity != 0xFF;
+}
+
 void Target::DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rect clip_region) {
+    if (!figure_queue.CheckGroupOffsetStack()) { throw std::invalid_argument("figure queue groups mismatch"); }
     ID2D1DeviceContext& device_context = GetD2DDeviceContext(); device_context.SetTarget(&GetBitmap());
     auto& groups = figure_queue.GetFigureGroups();
     auto& figures = figure_queue.GetFigures();
     uint figure_index = 0;
     clip_region = clip_region.Intersect(Rect(point_zero, SIZE2Size(bitmap->GetSize())));
-    uint group_depth = 0;  // used for debug
     for (uint group_index = 0; group_index < groups.size(); ++group_index) {
         auto& group = groups[group_index];
         for (; figure_index < group.figure_index; ++figure_index) {
@@ -101,17 +105,27 @@ void Target::DrawFigureQueue(const FigureQueue& figure_queue, Vector offset, Rec
             // Set new offset and clip region.
             offset = new_offset;
             clip_region = new_clip_region;
-            device_context.PushAxisAlignedClip(Rect2RECT(clip_region), D2D1_ANTIALIAS_MODE_ALIASED);
-            group_depth++;
+            if (IsCompositeEffectNontrivial(group.composite_effect)) {
+                group_end.composite_effect_nontrivial = true;
+                D2D1_LAYER_PARAMETERS layer = {};
+                layer.contentBounds = Rect2RECT(clip_region);
+                layer.opacity = Opacity2Float(group.composite_effect._opacity);
+                device_context.PushLayer(layer, NULL);
+            } else {
+                group_end.composite_effect_nontrivial = false;
+                device_context.PushAxisAlignedClip(Rect2RECT(clip_region), D2D1_ANTIALIAS_MODE_ALIASED);
+            }
         } else {
             // Restore to previous offset and clip region.
             offset = group.prev_offset;
             clip_region = group.prev_clip_region;
-            device_context.PopAxisAlignedClip();
-            group_depth--;
+            if (group.composite_effect_nontrivial) {
+                device_context.PopLayer();
+            } else {
+                device_context.PopAxisAlignedClip();
+            }
         }
     }
-    assert(group_depth == 0);
 }
 
 

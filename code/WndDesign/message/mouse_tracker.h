@@ -22,22 +22,30 @@ enum class MouseTrackMsg {
 
 class MouseTracker : Uncopyable {
 public:
-	MouseTracker(WndObject& wnd) : wnd(wnd), hit_count(0), is_mouse_down(false), mouse_down_position() {}
+	MouseTracker(WndObject& wnd) :
+		wnd(static_cast<WndObjectHelper&>(wnd)), hit_count(0), is_mouse_down(false), mouse_down_position() {
+	}
 	~MouseTracker() {}
+
 private:
-	WndObject& wnd;
+	struct WndObjectHelper : public WndObject { public: WndObject::SetCapture; WndObject::ReleaseCapture; };
+	WndObjectHelper& wnd;
+
 private:
 	uint hit_count;
 	static constexpr uint timer_interval = 500;  // 500ms
 	Timer timer = Timer([&]() {TimerCallback(); });
 	void TimerCallback() { hit_count = 0; timer.Stop(); }
+
 public:
 	bool is_mouse_down;
 	Point mouse_down_position;
+
 private:
 	static constexpr uint move_tolerate_range = 5;  // 5px
 	static uint Square(int x) { return static_cast<uint>(x * x); };
 	static uint SquareDistance(const Point& a, const Point& b) { return Square(a.x - b.x) + Square(a.y - b.y); }
+
 public:
 	MouseTrackMsg Track(Msg msg, Para para) {
 		MouseTrackMsg ret;

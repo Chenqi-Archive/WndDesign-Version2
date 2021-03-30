@@ -142,7 +142,7 @@ private:
 	bool _is_ctrl_down = false;
 	bool _is_shift_down = false;
 protected:
-	virtual bool Handler(Msg msg, Para para) override;
+	virtual void Handler(Msg msg, Para para) override;
 };
 
 

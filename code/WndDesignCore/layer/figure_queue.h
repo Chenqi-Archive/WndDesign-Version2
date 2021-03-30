@@ -2,6 +2,7 @@
 
 #include "../figure/figure_base.h"
 #include "../common/uncopyable.h"
+#include "../layer/composite_effect.h"
 
 #include <vector>
 #include <memory>
@@ -20,8 +21,9 @@ private:
 	~FigureQueue() {}
 	void Clear() {
 		figures.clear();
-		groups.clear();
 		offset = vector_zero;
+		assert(CheckGroupOffsetStack());
+		groups.clear();
 	}
 
 
@@ -43,6 +45,16 @@ public:
 	}
 
 
+private:
+	Vector offset = vector_zero;
+	vector<Vector> group_offset_stack;
+public:
+	bool CheckGroupOffsetStack() const { return group_offset_stack.empty(); }
+
+	const Vector PushOffset(Vector offset) { this->offset += offset; return offset; }
+	void PopOffset(Vector offset) { this->offset -= offset; }
+
+
 public:
 	struct FigureGroup {
 		union {
@@ -52,6 +64,7 @@ public:
 				uint figure_index;
 				Vector coordinate_offset;
 				Rect bounding_region;
+				CompositeEffect composite_effect;
 			};
 			// as group end
 			struct {
@@ -59,10 +72,9 @@ public:
 				uint figure_index;
 				mutable Vector prev_offset;
 				mutable Rect prev_clip_region;
+				mutable bool composite_effect_nontrivial;
 			};
 		};
-		Vector prev_group_offset; // for temporary use
-
 		bool IsBegin() const { return group_end_index != (uint)-1; }
 	};
 private:
@@ -70,24 +82,17 @@ private:
 public:
 	const vector<FigureGroup>& GetFigureGroups() const { return groups; }
 
-	uint BeginGroup(Vector coordinate_offset, Rect bounding_region) {
+	uint BeginGroup(Vector coordinate_offset, Rect bounding_region, CompositeEffect composite_effect = {}) {
 		uint group_begin_index = (uint)groups.size();
-		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), coordinate_offset + offset, bounding_region, offset});
-		offset = vector_zero;  // store current offset in group begin and clear to zero
+		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), coordinate_offset + offset, bounding_region, composite_effect});
+		group_offset_stack.push_back(offset); offset = vector_zero;
 		return group_begin_index;
 	}
 	void EndGroup(uint group_begin_index) {
 		groups[group_begin_index].group_end_index = (uint)groups.size();
-		offset = groups[group_begin_index].prev_group_offset;  // restore previous offset
-		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), vector_zero, region_empty, vector_zero });
+		offset = group_offset_stack.back(); group_offset_stack.pop_back();
+		groups.push_back(FigureGroup{ (uint)-1, (uint)figures.size(), vector_zero, region_empty, {}});
 	}
-
-
-private:
-	Vector offset = vector_zero;
-public:
-	const Vector PushOffset(Vector offset) { this->offset += offset; return offset; }
-	void PopOffset(Vector offset) { this->offset -= offset; }
 };
 
 

@@ -3,7 +3,6 @@
 #include "../common/uncopyable.h"
 #include "../geometry/geometry.h"
 #include "figure_queue.h"
-#include "composite_effect.h"
 
 #include <unordered_map>
 #include <memory>
@@ -75,10 +74,9 @@ struct LayerFigure : Figure {
 	const Layer& layer;
 	const Background& background;
 	Rect region;
-	CompositeEffect composite_effect;
 
-	LayerFigure(const Layer& layer, const Background& background, Rect region, CompositeEffect composite_effect) :
-		layer(layer), background(background), region(region), composite_effect(composite_effect) {
+	LayerFigure(const Layer& layer, const Background& background, Rect region) :
+		layer(layer), background(background), region(region) {
 	}
 	virtual const Rect GetRegion() const override { return Rect(point_zero, region.size); }
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp

@@ -40,7 +40,7 @@ public:
 	// hit-testing and message handling
 public:
 	virtual bool HitTest(Point point) { return false; }
-	virtual bool Handler(Wnd& wnd, Msg msg, Para para) { return false; }
+	virtual void Handler(Wnd& wnd, Msg msg, Para para) {}
 
 	// Wnd functions
 private:

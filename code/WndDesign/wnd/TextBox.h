@@ -1,15 +1,15 @@
 #pragma once
 
-#include "FinalWnd.h"
+#include "Wnd.h"
 #include "../figure/text_block.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-class TextBox : public FinalWnd {
+class TextBox : public Wnd {
 public:
-	struct Style : FinalWnd::Style, TextBlockStyle {
+	struct Style : Wnd::Style, TextBlockStyle {
 		Style() {
 			client.height.min(0px).normal(length_auto).max(length_max_tag);
 			client.width.min(0px).normal(length_auto).max(100pct);
@@ -18,7 +18,7 @@ public:
 	
 public:
 	TextBox(unique_ptr<Style> style, const wstring& text) :
-		FinalWnd(std::move(style)), _text(text), _text_block(_text, GetStyle()) {
+		Wnd(std::move(style)), _text(text), _text_block(_text, GetStyle()) {
 	}
 	~TextBox() {}
 
@@ -53,9 +53,11 @@ public:
 		_text_block.TextReplacedWithoutStyle(0, old_length, new_length);
 		OnTextChange();
 	}
-	void SetText(const wstring& text) { 
-		wstring temp_text = text;
-		SetText(std::move(temp_text));
+	void SetText(const wstring& text) {
+		uint old_length = (uint)_text.length(), new_length = (uint)text.length();
+		_text.assign(text);
+		_text_block.TextReplacedWithoutStyle(0, old_length, new_length);
+		OnTextChange();
 	}
 	void InsertText(uint pos, wchar ch) {
 		_text.insert(pos, 1, ch);

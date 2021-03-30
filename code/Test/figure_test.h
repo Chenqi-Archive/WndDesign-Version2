@@ -14,14 +14,6 @@ using namespace WndDesign;
 
 class MainWnd : public WndObject {
 private:
-	class AnimationTimer : public Timer {
-		MainWnd& main_wnd;
-	public:
-		AnimationTimer(MainWnd& main_wnd) : main_wnd(main_wnd) { Set(40); }
-		virtual void OnAlert() { main_wnd.UpdateParticle(); }
-	} timer = AnimationTimer(*this);
-
-private:
 	static constexpr Rect region = Rect(200, 100, 800, 500);
 private:
 	virtual const Rect UpdateRegionOnParent(Size parent_size) override { return region; }
@@ -46,7 +38,9 @@ private:
 			radius(CalculateParticleRadius(velocity)) {
 		}
 	};
+private:
 	std::vector<ParticleData> particles;
+	Timer timer = Timer([&]() {UpdateParticle(); });
 private:
 	void AddParticle(Point point) {
 		for (int i = 0; i < 10; ++i) {
@@ -97,10 +91,9 @@ private:
 
 		figure_queue.Append(point_zero, new TextBlockFigure(text_block));
 	}
-	virtual bool NonClientHandler(Msg msg, Para para) {
+	virtual void NonClientHandler(Msg msg, Para para) override {
 		if (msg == Msg::LeftDown) { AeroSnapDraggingEffect(*this, GetMouseMsg(para).point); }
 		if (msg == Msg::RightDown) { AddParticle(GetMouseMsg(para).point); }
-		return true;
 	}
 };
 

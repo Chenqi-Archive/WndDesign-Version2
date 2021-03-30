@@ -197,7 +197,7 @@ bool Wnd::NonClientHitTest(Size display_size, Point point) const {
 	return style.IsPointInside(display_size, point);
 }
 
-bool Wnd::NonClientHandler(Msg msg, Para para) {
+void Wnd::NonClientHandler(Msg msg, Para para) {
 	if (IsMouseMsg(msg)) {
 		MouseMsg& mouse_msg = GetMouseMsg(para);
 		Size display_size = GetDisplaySize();
@@ -231,27 +231,26 @@ bool Wnd::NonClientHandler(Msg msg, Para para) {
 		// Send to border, scrollbar or client region.
 		switch (_mouse_track_info._type) {
 		case ElementType::Border: 
-			GetBorderResizer().Handler(*this, WndObject::GetChildRegion(*this), GetStyle().border._width, msg, para); return true;
+			GetBorderResizer().Handler(*this, WndObject::GetChildRegion(*this), GetStyle().border._width, msg, para); return;
 		case ElementType::Scrollbar: 
 			mouse_msg.point -= scrollbar_region.point - point_zero;
-			GetScrollbar().Handler(*this, msg, para); return true;
+			GetScrollbar().Handler(*this, msg, para); return;
 		case ElementType::Client:
 			mouse_msg.point -= ClientToDisplayOffset();
 			return Handler(msg, para);
 		}
 		assert(false); 
 	}
-	if (msg == Msg::MouseEnter) { return true; }
-	if (msg == Msg::LoseCapture) { LoseCapture(); return true; }
-	if (msg == Msg::MouseLeave) { MouseLeave(); return true; }
+	if (msg == Msg::MouseEnter) { return; }
+	if (msg == Msg::LoseCapture) { LoseCapture(); return; }
+	if (msg == Msg::MouseLeave) { MouseLeave(); return; }
 	if (IsKeyboardMsg(msg) || msg == Msg::LoseFocus) { return Handler(msg, para); }
-	assert(false); return true; // never reached, there are no more message types
+	assert(false); // never reached, there are no more message types
 }
 
-bool Wnd::Handler(Msg msg, Para para) {
+void Wnd::Handler(Msg msg, Para para) {
 	if (msg == Msg::MouseEnter) {
 		SetCursor(GetStyle().cursor._cursor);
-		return true;
 	}
 	if (msg == Msg::MouseWheel || msg == Msg::MouseWheelHorizontal) {
 		if (IsScrollable()) {
@@ -260,9 +259,7 @@ bool Wnd::Handler(Msg msg, Para para) {
 			if (msg == Msg::MouseWheelHorizontal) { scroll_offset.x -= GetMouseMsg(para).wheel_delta; }
 			SetDisplayOffset(GetDisplayOffset() + scroll_offset);
 		}
-		return true;
 	}
-	return false;
 }
 
 

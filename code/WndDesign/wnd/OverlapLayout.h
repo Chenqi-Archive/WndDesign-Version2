@@ -39,9 +39,16 @@ private:
 		return *WndObject::GetChildData<ChildWndContainer*>(child);
 	}
 
+private:
+	void InsertChild(WndObject& child, Rect region, char z_index);
+	const Rect EraseChild(WndObject& child);
+
 public:
 	void AddChild(WndObject& child);
+
+protected:
 	virtual void OnChildDetach(WndObject& child) override;
+	virtual void OnChildCompositeEffectChange(WndObject& child);
 
 
 	//// layout update ////

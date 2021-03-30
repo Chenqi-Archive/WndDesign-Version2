@@ -12,19 +12,19 @@ shared_ptr<Background> GetNullBackground() {
 }
 
 
-void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
-	Rectangle rectangle(region.size, BlendColorWithOpacity(color, opacity));
+void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offset) const {
+	Rectangle rectangle(region.size, color);
 	rectangle.DrawOn(target, offset);
 }
 
 
 void ImageRepeatBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	SolidColorBackground solid_color(color_transparent);
-	solid_color.Clear(region, target, offset);  // First clear the region to be transparent.
-	DrawOn(region, target, offset, 0xFF);
+	// First clear the region to be transparent.
+	SolidColorBackground solid_color(color_transparent); solid_color.Clear(region, target, offset);  
+	DrawOn(region, target, offset);
 }
 
-void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const {
+void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector offset) const {
 	using RepeatRange = Rect;
 
 	// Calculate the image range that overlaps with the tile region.
@@ -37,7 +37,7 @@ void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector off
 	if (repeat_range.IsEmpty()) { return; }
 
 	// Draw every single image tile on the target.
-	ImageFigure image_figure(image, opacity * this->opacity / 0xFF);
+	ImageFigure image_figure(image, opacity);
 	for (RectPointIterator it(repeat_range); !it.Finished(); ++it) {
 		Vector tile_offset = ScalePointBySize(it.Item(), image_size) - point_zero;
 		Rect drawing_region_on_image_space = Rect(point_zero + tile_offset, image_size).Intersect(region_on_image_space);

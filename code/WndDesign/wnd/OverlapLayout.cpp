@@ -5,18 +5,38 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
+void OverlapLayout::InsertChild(WndObject& child, Rect region, char z_index) {
+	auto next_iter_pos = std::find_if(
+		_child_wnds.begin(), _child_wnds.end(),
+		[=](const ChildWndContainer& child_container) { return child_container.wnd.GetCompositeEffect()._z_index <= z_index; }
+	);
+	auto iter_pos = _child_wnds.emplace(next_iter_pos, ChildWndContainer{ child, region });
+	iter_pos->list_index = iter_pos;
+	SetChildData(child, *iter_pos);
+}
+
+const Rect OverlapLayout::EraseChild(WndObject& child) {
+	ChildWndContainer& child_container = GetChildData(child);
+	Rect region = child_container.region;
+	_child_wnds.erase(child_container.list_index);
+	return region;
+}
+
 void OverlapLayout::AddChild(WndObject& child) {
 	RegisterChild(child);
-	ChildWndContainer& child_container = _child_wnds.emplace_front(ChildWndContainer{ child, region_empty });
-	child_container.list_index = _child_wnds.begin();
-	SetChildData(child, child_container);
+	InsertChild(child, region_empty, child.GetCompositeEffect()._z_index);
 }
 
 void OverlapLayout::OnChildDetach(WndObject& child) {
 	Wnd::OnChildDetach(child);
-	ChildWndContainer& child_container = GetChildData(child);
-	Invalidate(child_container.region);
-	_child_wnds.erase(child_container.list_index);
+	Rect region = EraseChild(child);
+	Invalidate(region);
+}
+
+void OverlapLayout::OnChildCompositeEffectChange(WndObject& child) {
+	Rect region = EraseChild(child);
+	InsertChild(child, region, child.GetCompositeEffect()._z_index);
+	Invalidate(region);
 }
 
 void OverlapLayout::UpdateChildRegion(ChildWndContainer& child_container, Size client_size) {

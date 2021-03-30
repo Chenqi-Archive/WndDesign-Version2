@@ -32,7 +32,7 @@ protected:
 private:
 	enum class State { Normal, Hover, Down } _state = State::Normal;
 protected:
-	bool Handler(Msg msg, Para para) override {
+	void Handler(Msg msg, Para para) override {
 		switch (msg) {
 		case Msg::MouseEnter: assert(_state == State::Normal); _state = State::Hover; OnHover(); break;
 		case Msg::LeftDown: assert(_state == State::Hover); _state = State::Down; OnPress(); break;
@@ -40,7 +40,6 @@ protected:
 		case Msg::MouseLeave: _state = State::Normal; OnLeave(); break;
 		default:break;
 		}
-		return true;
 	}
 protected:
 	virtual void OnHover() { SetBackground(GetStyle().background_hover.Get()); }

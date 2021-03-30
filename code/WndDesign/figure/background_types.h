@@ -20,7 +20,7 @@ struct SolidColorBackground : Background {
 
 	SolidColorBackground(Color color) : color(color) {}
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
-	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const override;
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset) const override;
 };
 
 
@@ -33,7 +33,7 @@ struct ImageRepeatBackground : Background {
 		image(image), opacity(opacity), offset_on_image(offset_on_image) {
 	}
 	virtual void Clear(Rect region, RenderTarget& target, Vector offset) const override;
-	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset, uchar opacity) const override;
+	virtual void DrawOn(Rect region, RenderTarget& target, Vector offset) const override;
 };
 
 

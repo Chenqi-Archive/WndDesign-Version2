@@ -10,7 +10,7 @@ BEGIN_NAMESPACE(WndDesign)
 using std::pair;
 
 
-class DesktopWndFrame : public Uncopyable{
+class DesktopWndFrame : public Uncopyable {
 private:
 	WndBase& _wnd;
 	WndObject& _wnd_object;
@@ -47,7 +47,7 @@ public:
 
 private:
 	Point _capture_wnd_offset_from_desktop;
-	ref_ptr<WndObject> _capture_wnd = nullptr; 
+	ref_ptr<WndObject> _capture_wnd = nullptr;
 	ref_ptr<WndObject> _focus_wnd = nullptr;
 private:
 	void OnWndDetach(WndObject& wnd);
@@ -83,11 +83,8 @@ public:
 public:
 	void SetChildRegionStyle(WndObject& child, Rect parent_specified_region);
 	virtual void OnChildTitleChange(WndObject& child) override;
-
-public:
 	virtual void OnChildRegionUpdate(WndObject& child) override;
-
-public:
+	virtual void OnChildCompositeEffectChange(WndObject& child) override;
 	void InvalidateChild(WndObject& child, Region& child_invalid_region) { GetChildFrame(child).Invalidate(child_invalid_region); }
 
 public:
@@ -105,7 +102,7 @@ private:
 	ref_ptr<DesktopWndFrame> GetWndFrame(WndObject& wnd) const;
 	const std::pair<ref_ptr<DesktopWndFrame>, Point> ConvertWndNonClientPointToFramePoint(WndObject& wnd, Point point) const;
 public:
-	HANDLE GetWndHandle(WndObject& wnd) const { 
+	HANDLE GetWndHandle(WndObject& wnd) const {
 		if (auto frame = GetWndFrame(wnd); frame != nullptr) { return frame->_hwnd; }
 		return nullptr;
 	}

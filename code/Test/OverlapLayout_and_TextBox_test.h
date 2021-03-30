@@ -13,8 +13,9 @@ private:
 			width.normal(500px).max(100pct);
 			height.normal(400px).max(100pct);
 			position.setHorizontalCenter().setVerticalCenter();
+			//composite.opacity(0x7F);
 			border.width(5).color(ColorSet::DarkGreen).setResizer(CreateDefaultBorderResizer());
-			background.setColor(ColorSet::LightGray);
+			background.setColor(ColorSet::Goldenrod);
 		}
 	};
 public:
@@ -35,18 +36,15 @@ private:
 			width.normal(length_auto).min(200px).max(100pct);
 			height.normal(length_auto).min(200px).max(100pct);
 			position.left(0px).top(0px);
+			composite.opacity(0x7F);
 			border.width(10).radius(20).color(ColorSet::BlueViolet).setResizer(CreateDefaultBorderResizer());
-			background.setColor(ColorSet::Goldenrod);
-
-			// Default TextBox Style.
-			padding.setAll(50px); //padding.bottom(10px);
-			client.height(length_auto);
-
+			background.setColor(ColorSet::LightGray);
+			padding.setAll(50px);
 		}
 	};
 public:
 	MyTextBox() : TextBox(std::make_unique<Style>(), wstring(text)) { 
-		AllocateLayer();
+		//AllocateLayer();
 	}
 	~MyTextBox() {}
 };

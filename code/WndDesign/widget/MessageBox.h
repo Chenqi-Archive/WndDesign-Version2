@@ -31,7 +31,7 @@ public:
 
 inline MessageBox& GetMessageBox() { return MessageBox::Get(); }
 
-inline void ShowMessage(const wchar message[]) { GetMessageBox().ShowMessage(message); }
+inline void ShowMessageBox(const wchar message[]) { GetMessageBox().ShowMessage(message); }
 
 
 END_NAMESPACE(WndDesign)

@@ -16,8 +16,8 @@ struct ToolTipStyle : public TextBox::Style {
 		width.max(200px);
 		height.max(500px);
 		composite.z_index(127);  // always topmost
-		border.width(1).color(ColorSet::Gray);
-		padding.setAll(3px);
+		border.width(1).color(ColorSet::Silver);
+		padding.setAll(5px);
 		background.setColor(0xF1F2F7);
 		font.size(14);
 	}

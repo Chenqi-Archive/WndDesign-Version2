@@ -225,16 +225,12 @@
     <ClInclude Include="widget\ToolTip.h" />
     <ClInclude Include="wnd\Button.h" />
     <ClInclude Include="wnd\EditBox.h" />
-    <ClInclude Include="wnd\FlowLayout.h" />
     <ClInclude Include="wnd\ImageBox.h" />
     <ClInclude Include="wnd\ListLayout.h" />
     <ClInclude Include="wnd\OverlapLayout.h" />
     <ClInclude Include="WndDesign.h" />
     <ClInclude Include="common\reference_wrapper.h" />
-    <ClInclude Include="wnd\TabLayout.h" />
     <ClInclude Include="wnd\Wnd.h" />
-    <ClInclude Include="wnd\SplitLayout.h" />
-    <ClInclude Include="wnd\TableLayout.h" />
     <ClInclude Include="wnd\TextBox.h" />
     <ClInclude Include="wnd\WndObject.h" />
   </ItemGroup>

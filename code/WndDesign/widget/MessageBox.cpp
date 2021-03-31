@@ -17,8 +17,7 @@ struct MessageBoxStyle : public TextBox::Style {
 		height.max(250px);
 		position.setHorizontalCenter().setVerticalCenter();
 		padding.setAll(30px);
-		background.setColor(ColorSet::MediumPurple);
-
+		background.setColor(ColorSet::DarkGray);
 		paragraph.text_align(TextAlign::Center);
 		font.size(20);
 	}
@@ -44,6 +43,7 @@ void MessageBox::Hide() {
 void MessageBox::NonClientHandler(Msg msg, Para para) {
 	if (msg == Msg::LoseFocus) { Hide(); }
 	if (msg == Msg::KeyDown && GetKeyMsg(para).key == Key::Escape) { Hide(); }
+	if (IsMouseMsg(msg)) { timer.Set(expire_time); }
 }
 
 void MessageBox::ShowMessage(const wchar message[]) {

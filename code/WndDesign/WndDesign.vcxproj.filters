@@ -188,22 +188,10 @@
     <ClInclude Include="system\cursor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wnd\FlowLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="wnd\OverlapLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wnd\ListLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\TableLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\SplitLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wnd\TabLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wnd\Wnd.h">

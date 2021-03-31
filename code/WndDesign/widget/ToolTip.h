@@ -37,5 +37,8 @@ public:
 
 inline ToolTip& GetToolTip() { return ToolTip::Get(); }
 
+inline void ShowToolTip(const wchar text[]) { GetToolTip().OnMouseEnter(text); }
+inline void HideToolTip() { GetToolTip().OnMouseLeave(); }
+
 
 END_NAMESPACE(WndDesign)

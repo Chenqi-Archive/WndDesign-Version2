@@ -84,13 +84,17 @@ const Rect Wnd::UpdateRegionOnParent(Size parent_size) {
 	if (_invalid_layout.margin || is_region_on_parent_auto || region_on_parent.size != GetDisplaySize()) {
 		Scrollbar& scrollbar = GetScrollbar(); bool has_margin = scrollbar.HasMargin();
 		Size display_size = UpdateMarginAndClientRegion(region_on_parent.size);
-		if (is_region_on_parent_auto) {
-			region_on_parent = style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent, display_size, _size_min, _size_max);
-		}
-		UpdateScrollbar(GetAccessibleRegion(), Rect(point_zero + GetDisplayOffset(), region_on_parent.size));
+		Rect assumed_region_on_parent = is_region_on_parent_auto ?
+			style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent, display_size, _size_min, _size_max) :
+			region_on_parent;
+		UpdateScrollbar(GetAccessibleRegion(), Rect(point_zero + GetDisplayOffset(), assumed_region_on_parent.size));
 		if (bool scrollbar_margin_changed = has_margin ^ scrollbar.HasMargin()) {
-			UpdateMarginAndClientRegion(display_size);
+			display_size = UpdateMarginAndClientRegion(region_on_parent.size);
+			assumed_region_on_parent = is_region_on_parent_auto ?
+				style.AutoResizeRegionOnParentToDisplaySize(parent_size, region_on_parent, display_size, _size_min, _size_max) :
+				region_on_parent;
 		}
+		region_on_parent = assumed_region_on_parent;
 	}
 	_invalid_layout.region_on_parent = false;
 	return region_on_parent;

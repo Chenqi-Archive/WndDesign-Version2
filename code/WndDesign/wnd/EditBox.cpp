@@ -151,12 +151,12 @@ void EditBox::UpdateSelectionRegion() {
 
 void EditBox::DoSelection(Point mouse_move_position) {
 	HitTestInfo info = GetTextBlock().HitTestPoint(mouse_move_position);
-	UpdateCaretRegion(info); HideCaret();
+	UpdateCaretRegion(info);
 	_selection_begin = _mouse_down_text_position;
 	_selection_end = _caret_text_position;
 	if (_selection_begin == _selection_end) { ClearSelection(); return; }
 	if (_selection_end < _selection_begin) { std::swap(_selection_begin, _selection_end); }
-	UpdateSelectionRegion();
+	UpdateSelectionRegion(); HideCaret();
 }
 
 void EditBox::SelectWord() {

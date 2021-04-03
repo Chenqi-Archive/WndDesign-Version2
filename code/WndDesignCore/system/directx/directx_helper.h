@@ -6,8 +6,6 @@
 #include <d2d1_1.h>
 #include <dxgi1_4.h>
 #include <d3d11.h>
-#include <wincodec.h>
-#include <dwrite.h>
 
 
 BEGIN_NAMESPACE(WndDesign)

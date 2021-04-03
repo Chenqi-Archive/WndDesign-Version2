@@ -98,8 +98,8 @@ struct TextBlockStyle {
 		FlowDirection _flow_direction = FlowDirection::TopToBottom;
 		ReadDirection _read_direction = ReadDirection::LeftToRight;
 		WordWrap _word_wrap = WordWrap::Wrap;
-		ValueTag _line_height = length_auto;	// pct is relative to the font size.
-		uchar _tab_size = 0;
+		ValueTag _line_height = 120pct;  // relative to the font size
+		ValueTag _tab_size = 200pct;
 	public:
 		constexpr ParagraphFormat& text_align(TextAlign text_align) { _text_align = text_align; return *this; }
 		constexpr ParagraphFormat& paragraph_align(ParagraphAlign paragraph_align) { _paragraph_align = paragraph_align; return *this; }
@@ -107,7 +107,7 @@ struct TextBlockStyle {
 		constexpr ParagraphFormat& read_direction(ReadDirection read_direction) { _read_direction = read_direction; return *this; }
 		constexpr ParagraphFormat& word_wrap(WordWrap word_wrap) { _word_wrap = word_wrap; return *this; }
 		constexpr ParagraphFormat& line_height(ValueTag line_height) { _line_height = line_height; return *this; }
-		constexpr ParagraphFormat& tab_size(uchar tab_size) { _tab_size = tab_size; return *this; }
+		constexpr ParagraphFormat& tab_size(ValueTag tab_size) { _tab_size = tab_size; return *this; }
 	}paragraph;
 
 

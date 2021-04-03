@@ -46,6 +46,7 @@ void DesktopWndFrame::LeaveRedrawQueue() {
 
 void DesktopWndFrame::Invalidate(Region& region) {
 	_invalid_region.Union(region);
+	_invalid_region.Intersect(Rect(point_zero, _wnd.GetRegionOnParent().size));
 	if (!_invalid_region.IsEmpty()) {
 		JoinRedrawQueue();
 	}
@@ -78,7 +79,9 @@ void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 }
 
 void DesktopWndFrame::Present() { 
-	_resource.Present(_invalid_region.GetRect().second);
+	auto [bounding_region, regions] = _invalid_region.GetRect();
+	if (bounding_region.IsEmpty()) { return; }
+	_resource.Present(std::move(regions));
 	_invalid_region.Clear();
 }
 

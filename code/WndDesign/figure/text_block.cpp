@@ -23,11 +23,11 @@ TextBlock::~TextBlock() {
 }
 
 void TextBlock::UpdateSize() const {
-	DWRITE_TEXT_METRICS metrics;
+	DWRITE_TEXT_METRICS1 metrics;
 	_layout->GetMetrics(&metrics);
 	_size = Size(
 		static_cast<uint>(ceil(metrics.widthIncludingTrailingWhitespace)),  // Round up the size.
-		static_cast<uint>(ceil(metrics.height))
+		static_cast<uint>(ceil(metrics.heightIncludingTrailingWhitespace))
 	);
 }
 
@@ -62,11 +62,16 @@ void TextBlock::TextChanged() {
 	if (line_height.IsPixel()) {
 		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, static_cast<FLOAT>(line_height.AsUnsigned()), 0.7F * line_height.AsUnsigned());
 	} else if (line_height.IsPercent()) {
-		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height.AsUnsigned() / 100.0F, 1.1F);
+		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, line_height.AsUnsigned() / 100.0F, line_height.AsUnsigned() / 110.0F);
 	} else {
 		_layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0F, 0.0F);  // The last two parameters are ignored.
 	}
-	if (_style.paragraph._tab_size != 0) { _layout->SetIncrementalTabStop(static_cast<FLOAT>(_style.paragraph._tab_size)); }
+	ValueTag tab_size = _style.paragraph._tab_size;
+	if (tab_size.IsPixel()) {
+		_layout->SetIncrementalTabStop(static_cast<FLOAT>(tab_size.AsUnsigned()));
+	} 	else if (tab_size.IsPercent()) {
+		_layout->SetIncrementalTabStop(static_cast<FLOAT>(tab_size.AsUnsigned()) * _style.font._size / 100.0F);
+	}
 
 	// Set text range styles and update layout size.
 	ApplyAllStyles();
@@ -86,38 +91,40 @@ void TextBlock::AutoResize(Size max_size) const {
 	UpdateSize();
 }
 
+
+inline const TextBlockHitTestInfo HitTestMetricsToInfo(const DWRITE_HIT_TEST_METRICS& metrics, bool is_inside, bool is_trailing_hit) {
+	Point left_top = Point((int)roundf(metrics.left), (int)roundf(metrics.top));
+	Point right_bottom = Point((int)roundf(metrics.left + metrics.width), (int)roundf(metrics.top + metrics.height));
+	assert(right_bottom >= left_top);
+	return TextBlockHitTestInfo{
+		metrics.textPosition,
+		metrics.length,
+		is_inside,
+		is_trailing_hit,
+		Rect(left_top, Size(uint(right_bottom.x - left_top.x), uint(right_bottom.y - left_top.y)))
+	};
+}
+
 const TextBlockHitTestInfo TextBlock::HitTestPoint(Point point) const {
 	BOOL isTrailingHit;
 	BOOL isInside;
 	DWRITE_HIT_TEST_METRICS metrics;
 	_layout->HitTestPoint(static_cast<FLOAT>(point.x), static_cast<FLOAT>(point.y), &isTrailingHit, &isInside, &metrics);
-	return TextBlockHitTestInfo{
-		metrics.textPosition,
-		metrics.length,
-		static_cast<bool>(isInside),
-		static_cast<bool>(isTrailingHit),
-		Rect(POINT2Point(D2D1::Point2F(metrics.left, metrics.top)), SIZE2Size(D2D1::SizeF(metrics.width, metrics.height))),
-	};
+	return HitTestMetricsToInfo(metrics, (bool)isInside, (bool)isTrailingHit);
 }
 
 const TextBlockHitTestInfo TextBlock::HitTestTextPosition(uint text_position) const {
 	FLOAT x, y;
 	DWRITE_HIT_TEST_METRICS metrics;
 	_layout->HitTestTextPosition(text_position, false, &x, &y, &metrics);
-	return TextBlockHitTestInfo{
-		metrics.textPosition,
-		metrics.length,
-		true,
-		false,
-		Rect(POINT2Point(D2D1::Point2F(metrics.left, metrics.top)), SIZE2Size(D2D1::SizeF(metrics.width, metrics.height))),
-	};
+	return HitTestMetricsToInfo(metrics, true, false);
 }
 
 void TextBlock::HitTestTextRange(uint text_position, uint text_length, vector<TextBlockHitTestInfo>& geometry_regions) const {
 	vector<DWRITE_HIT_TEST_METRICS> metrics;
 
 	UINT32 line_cnt;
-	_layout->GetLineMetrics(nullptr, 0, &line_cnt);
+	_layout->GetLineMetrics((DWRITE_LINE_METRICS1*)nullptr, 0, &line_cnt);
 
 	UINT32 actual_size = line_cnt; // The assumed actual line size.
 	do {
@@ -128,18 +135,13 @@ void TextBlock::HitTestTextRange(uint text_position, uint text_length, vector<Te
 
 	geometry_regions.resize(metrics.size());
 	for (size_t i = 0; i < geometry_regions.size(); ++i) {
-		geometry_regions[i] = TextBlockHitTestInfo{
-			metrics[i].textPosition,
-			metrics[i].length,
-			true,
-			false,
-			Rect(POINT2Point(D2D1::Point2F(metrics[i].left, metrics[i].top)), SIZE2Size(D2D1::SizeF(metrics[i].width, metrics[i].height))),
-		};
+		geometry_regions[i] = HitTestMetricsToInfo(metrics[i], true, false);
 
 		// Add width for empty lines.
 		if (geometry_regions[i].geometry_region.size.width < 5) { geometry_regions[i].geometry_region.size.width = 5; }
 	}
 }
+
 
 void TextBlock::SetStyle(uint begin, uint length, const TextStyleBase& style, bool internal_use_tag) {
 	_range_styles[(uint)style.GetType()].SetStyle(TextRange{ begin, length }, style);

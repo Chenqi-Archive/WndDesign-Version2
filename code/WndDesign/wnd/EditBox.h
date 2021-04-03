@@ -29,7 +29,7 @@ public:
 	};
 
 public:
-	EditBox(unique_ptr<Style> style, const wstring& text);
+	EditBox(unique_ptr<Style> style, const wstring& text = L"");
 	~EditBox();
 
 

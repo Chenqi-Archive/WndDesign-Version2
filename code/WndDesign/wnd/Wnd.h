@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WndObject.h"
-#include "../geometry/margin.h"
 #include "../style/wnd_style.h"
+#include "../geometry/margin.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -45,14 +45,17 @@ private:
 	Margin _margin;
 	Rect _client_region;  // in client_region's coordinates
 	Vector _client_to_display_offset;
-public:
+protected:
 	// point_on_client_region + GetClientOffset() = point_on_accessible_region
 	const Vector GetClientOffset() const { return Vector(_margin.left, _margin.top); }
 	const Rect GetClientRegion() const { return _client_region; }
 	const Size GetClientSize() const { return _client_region.size; }
 	const Vector ClientToDisplayOffset() const { return _client_to_display_offset; }
-public:
+protected:
 	bool IsScrollable() const;
+protected:
+	void ScrollIntoView(Point client_point);
+	void ScrollIntoView(Rect region_on_client);
 
 
 	//// layout update ////
@@ -138,7 +141,7 @@ private:
 	void LoseCapture() { _mouse_capture_info.Update(*this, ElementType::None); }
 private:
 	WndObject::SetCapture;
-public:
+protected:
 	void SetCapture() { _mouse_capture_info.Update(*this, ElementType::Client); }
 
 	// mouse track

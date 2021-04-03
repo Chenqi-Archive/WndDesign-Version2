@@ -104,7 +104,7 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 }
 
 bool WndBase::UpdateDisplayOffset(Vector display_offset) {
-	display_offset = BoundRectInRegion(Rect(point_zero + display_offset, _region_on_parent.size), _accessible_region).point - point_zero;
+	display_offset = ClampRectInRegion(Rect(point_zero + display_offset, _region_on_parent.size), _accessible_region).point - point_zero;
 	if (_display_offset == display_offset) { return false; }
 	_display_offset = display_offset;
 	if (HasParent()) { _parent->InvalidateChild(*this, region_infinite); }

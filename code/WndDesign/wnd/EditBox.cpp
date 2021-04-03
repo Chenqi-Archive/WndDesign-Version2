@@ -89,6 +89,7 @@ void EditBox::UpdateCaretRegion(const HitTestInfo& info) {
 		_caret_text_position += info.text_length;
 		_caret_region.point.x += static_cast<int>(info.geometry_region.size.width);
 	}
+	desktop.CommitReflowQueue(); ScrollIntoView(_caret_region);
 	InvalidateCaretRegion();
 }
 

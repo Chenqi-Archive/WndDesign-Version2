@@ -28,11 +28,28 @@ private:
 	uint _display_length = 0;
 	Vector _display_offset = vector_zero;
 public:
-	virtual void Update(Size entire_size, Rect display_region) override {
-		//assert(Rect(point_zero, entire_size).Contains(display_region));
+	virtual void Update(Wnd& wnd, Rect region, Size entire_size, Rect display_region) override {
+		Scrollbar::Update(wnd, region, entire_size, display_region); // update region
+
+		bool has_margin = HasMargin();
+
 		_entire_length = entire_size.height;
 		_display_length = display_region.size.height;
 		_display_offset = display_region.point - point_zero;
+
+		Size display_size = region.size;
+		_frame_region = Rect((int)(display_size.width - width), 0, width, display_size.height);
+		if (_entire_length == 0) {
+			_slider_region = region_empty;
+		} else {
+			uint slider_length = (uint)round((double)display_size.height * _display_length / _entire_length);
+			int slider_offset = (int)round((double)display_size.height * _display_offset.y / _entire_length);
+			_slider_region = Rect((int)(display_size.width - width), slider_offset, width, slider_length);
+		}
+
+		if (has_margin ^ HasMargin()) {
+			InvalidateWnd(wnd, _frame_region);
+		}
 	}
 
 	// margin calculation
@@ -52,21 +69,6 @@ private:
 private:
 	Rect _frame_region = region_empty;
 	Rect _slider_region = region_empty;
-private:
-	virtual void SizeUpdated(Wnd& wnd) override {
-		Size display_size = GetDisplaySize();
-		_frame_region = Rect((int)(display_size.width - width), 0, width, display_size.height);
-		if (_entire_length == 0) {
-			_slider_region = region_empty;
-		} else {
-			uint slider_length = (uint)round((double)display_size.height * _display_length / _entire_length);
-			int slider_offset = (int)round((double)display_size.height * _display_offset.y / _entire_length);
-			_slider_region = Rect((int)(display_size.width - width), slider_offset, width, slider_length);
-		}
-		if (HasMargin()) {
-			InvalidateWnd(wnd, _frame_region);
-		}
-	}
 public:
 	virtual bool IsVisible() const override { return HasMargin(); }
 	virtual void OnPaint(FigureQueue& figure_queue) override {
@@ -100,7 +102,7 @@ public:
 				int current_mouse_position = GetMouseMsg(para).point.y;
 				if (current_mouse_position != _mouse_down_position) {
 					int target_offset = _mouse_down_display_offset +
-						(int)round(((double)current_mouse_position - _mouse_down_position) * (int)_entire_length / GetDisplaySize().height);
+						(int)round(((double)current_mouse_position - _mouse_down_position) * (int)_entire_length / _frame_region.size.height);
 					SetWndScrollOffset(wnd, Vector(_display_offset.x, target_offset));
 				}
 			}

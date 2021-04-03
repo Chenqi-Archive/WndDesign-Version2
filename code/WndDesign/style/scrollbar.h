@@ -22,7 +22,7 @@ public:
 
 	// scroll offset update
 public:
-	virtual void Update(Size entire_size, Rect display_region) {}
+	virtual void Update(Wnd& wnd, Rect region, Size entire_size, Rect display_region) { _region = region; }
 
 	// margin calculation
 public:
@@ -31,8 +31,6 @@ public:
 	virtual const Margin GetMargin() const { return {}; }
 
 	// painting
-private:
-	virtual void SizeUpdated(Wnd& wnd) {}
 public:
 	virtual bool IsVisible() const { return false; }
 	virtual void OnPaint(FigureQueue& figure_queue) {}
@@ -46,10 +44,8 @@ public:
 private:
 	Rect _region;
 public:
-	void SetRegion(Wnd& wnd, Rect region) { _region = region; SizeUpdated(wnd); }
 	const Rect GetRegion() const { return _region; }
 protected:
-	const Size GetDisplaySize() const { return _region.size; }
 	void SetWndCapture(Wnd& wnd);
 	void ReleaseWndCapture(Wnd& wnd);
 	void InvalidateWnd(Wnd& wnd, Rect region);

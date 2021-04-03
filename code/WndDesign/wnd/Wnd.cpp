@@ -43,6 +43,18 @@ bool Wnd::IsScrollable() const {
 	return GetDisplaySize() == ExtendSizeByMargin(GetClientSize(), _margin) ? false : true;
 }
 
+void Wnd::ScrollIntoView(Point client_point) {
+	Point old_point = ClampPointInRegion(client_point + GetClientOffset(), GetAccessibleRegion());
+	Point new_point = ClampPointInRegion(old_point, ShrinkRegionByMargin(GetDisplayRegion(), _margin));
+	SetDisplayOffset(GetDisplayOffset() + (old_point - new_point));
+}
+
+void Wnd::ScrollIntoView(Rect region_on_client) {
+	Rect old_region = ClampRectInRegion(region_on_client + GetClientOffset(), GetAccessibleRegion());
+	Rect new_region = ClampRectInRegion(old_region, ShrinkRegionByMargin(GetDisplayRegion(), _margin));
+	SetDisplayOffset(GetDisplayOffset() + (old_region.point - new_region.point));
+}
+
 bool Wnd::MayRegionOnParentChange() {
 	const StyleCalculator& style = GetStyleCalculator(GetStyle());
 	if (_invalid_layout.content_layout && style.IsClientRegionAuto()) { _invalid_layout.client_region = true; }
@@ -104,10 +116,10 @@ void Wnd::UpdateScrollbar(Rect accessible_region, Rect display_region) {
 	Rect client_region_with_padding = ShrinkRegionByMargin(accessible_region, _margin_without_padding);
 	Rect displayed_client_region_with_padding = ShrinkRegionByMargin(display_region, _margin_without_padding);
 	GetScrollbar().Update(
+		*this, GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_region.size),
 		client_region_with_padding.size,
 		displayed_client_region_with_padding - (client_region_with_padding.point - point_zero)
 	);
-	GetScrollbar().SetRegion(*this, GetStyleCalculator(GetStyle()).GetDisplayRegionWithoutBorder(display_region.size));
 	_client_to_display_offset = GetClientOffset() - (display_region.point - point_zero);
 }
 

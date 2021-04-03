@@ -88,6 +88,9 @@ public:
 	void InvalidateChild(WndObject& child, Region& child_invalid_region) { GetChildFrame(child).Invalidate(child_invalid_region); }
 
 public:
+	virtual void CommitReflowQueue() override;
+	virtual void CommitRedrawQueue() override;
+
 	virtual void OnWndDetach(WndObject& wnd) override;
 	virtual void SetCapture(WndObject& wnd) override;
 	virtual void ReleaseCapture() override;

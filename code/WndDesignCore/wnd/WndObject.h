@@ -170,6 +170,10 @@ public:
 	void AddChild(WndObject& child) { RegisterChild(child); }
 	WndObject::RemoveChild;
 
+public:
+	virtual void CommitReflowQueue() pure;
+	virtual void CommitRedrawQueue() pure;
+
 private:
 	friend class WndObject;
 	virtual void OnWndDetach(WndObject& wnd) pure;

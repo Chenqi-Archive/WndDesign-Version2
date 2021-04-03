@@ -1,4 +1,5 @@
 #include "desktop.h"
+#include "reflow_queue.h"
 #include "redraw_queue.h"
 #include "../layer/background_types.h"
 #include "../system/win32_api.h"
@@ -192,6 +193,16 @@ void DesktopObjectImpl::OnChildRegionUpdate(WndObject& child) {
 void DesktopObjectImpl::OnChildCompositeEffectChange(WndObject& child) {
 	DesktopWndFrame& frame = GetChildFrame(child);
 	Win32::SetWndCompositeEffect(frame._hwnd, child.GetCompositeEffect());
+}
+
+void DesktopObjectImpl::CommitReflowQueue() {
+	static ReflowQueue& reflow_queue = GetReflowQueue();
+	reflow_queue.Commit();
+}
+
+void DesktopObjectImpl::CommitRedrawQueue() {
+	static RedrawQueue& redraw_queue = GetRedrawQueue();
+	redraw_queue.Commit();
 }
 
 void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {

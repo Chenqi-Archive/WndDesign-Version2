@@ -8,15 +8,16 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-inline const Point BoundPointInRegion(const Point& point, const Rect& rect) {
-	auto BoundNumberInInterval = [](int number, int begin, uint length) -> int {
-		if (number < begin) { return begin; }
-		if (int end = begin + length; number >= end) { return end - 1; }
-		return number;
-	};
+inline int ClampNumberInInterval(int number, int begin, uint length) {
+	if (number < begin) { number = begin; }
+	if (int end = begin + length; number >= end) { return end - 1; }
+	return number;
+}
+
+inline const Point ClampPointInRegion(const Point& point, const Rect& rect) {
 	return Point(
-		BoundNumberInInterval(point.x, rect.point.x, rect.size.width),
-		BoundNumberInInterval(point.y, rect.point.y, rect.size.height)
+		ClampNumberInInterval(point.x, rect.point.x, rect.size.width),
+		ClampNumberInInterval(point.y, rect.point.y, rect.size.height)
 	);
 }
 
@@ -33,7 +34,7 @@ inline float Distance(const Point& a, const Point& b) {
 }
 
 inline float Distance(const Point& point, const Rect& rect) {
-	return Distance(point, BoundPointInRegion(point, rect));
+	return Distance(point, ClampPointInRegion(point, rect));
 }
 
 
@@ -48,12 +49,12 @@ inline const Rect ShrinkRegionBySize(const Rect& region, const Size& size) {
 	return Rect(region.point, new_size);
 }
 
-inline const Rect BoundRectInRegion(Rect rect, const Rect& region) {
+inline const Rect ClampRectInRegion(Rect rect, const Rect& region) {
 	// If rect is larger than region, shrink rect.
 	if (rect.size.width > region.size.width) { rect.size.width = region.size.width; }
 	if (rect.size.height > region.size.height) { rect.size.height = region.size.height; }
 	// Calculate the bounding region for the left top point.
-	rect.point = BoundPointInRegion(rect.point, ShrinkRegionBySize(region, rect.size));
+	rect.point = ClampPointInRegion(rect.point, ShrinkRegionBySize(region, rect.size));
 	return rect;
 }
 
@@ -73,9 +74,11 @@ inline const Rect ShrinkRegionByLength(const Rect& rect, uint length) {
 inline const Point ScalePointBySize(Point point, Size size) {
 	return Point(point.x * static_cast<int>(size.width), point.y * static_cast<int>(size.height));
 }
+
 inline const Size ScaleSizeBySize(Size old_size, Size size) {
 	return Size(old_size.width * size.width, old_size.height * size.height);
 }
+
 inline const Rect ScaleRectBySize(Rect region, Size size) {
 	return Rect(ScalePointBySize(region.point, size), ScaleSizeBySize(region.size, size));
 }
@@ -85,6 +88,7 @@ inline const Rect ScaleRectBySize(Rect region, Size size) {
 inline int div_floor(int a, int b) {
 	if (a >= 0) { return a / b; } else { return (a - b + 1) / b; }
 }
+
 // Divide a by b, and round the result up.
 inline int div_ceil(int a, int b) {
 	if (a <= 0) { return a / b; } else { return (a + b - 1) / b; }

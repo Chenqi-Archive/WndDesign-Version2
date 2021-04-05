@@ -17,6 +17,7 @@ using std::wstring;
 class WndObject : Uncopyable {
 private:
 	friend class WndBase;
+	friend class DesktopObjectImpl;
 	unique_ptr<IWndBase> wnd;
 private:
 	friend class DesktopObject;
@@ -37,18 +38,19 @@ protected:
 		return child.GetParent() == this; 
 	}
 	void RegisterChild(WndObject& child) {
-		if (child.GetParent() == this) { throw std::invalid_argument("child already registered"); }
+		if (IsMyChild(child)) { throw std::invalid_argument("child already registered"); }
 		wnd->AddChild(*child.wnd); child.parent = this; child.OnAttachToParent();
 	}
-	void UnregisterChild(WndObject& child) {
-		if (child.GetParent() != this) { throw std::invalid_argument("child not registered"); }
-		wnd->RemoveChild(*child.wnd); child.parent = nullptr;
-		child.NotifyDesktopWhenDetached();
-	}
 private:
+	void UnregisterChild(WndObject& child) {
+		wnd->RemoveChild(*child.wnd); child.parent = nullptr; child.NotifyDesktopWhenDetached();
+	}
 	void NotifyDesktopWhenDetached();  // defined below
 public:
-	void RemoveChild(WndObject& child) { OnChildDetach(child); UnregisterChild(child); }
+	void RemoveChild(WndObject& child) { 
+		if (!IsMyChild(child)) { throw std::invalid_argument("child not registered"); }
+		OnChildDetach(child); UnregisterChild(child); 
+	}
 private:
 	virtual void OnAttachToParent() {}
 	virtual void OnChildDetach(WndObject& child) {}
@@ -122,7 +124,7 @@ private:
 
 	//// painting and composition ////
 protected:
-	void SetBackground(const Background& background) { wnd->SetBackground(background); }
+	void SetBackground(const Background& background) { wnd->SetBackground(background); Invalidate(region_infinite); }
 	void AllocateLayer() { wnd->AllocateLayer(); }
 	void Invalidate(Rect invalidate_client_region) { wnd->Invalidate(invalidate_client_region); }
 	void NonClientInvalidate(Rect invalid_non_client_region) {
@@ -146,11 +148,7 @@ protected:
 	void ReleaseCapture();
 	void SetFocus();
 public:
-	virtual bool NonClientHitTest(Size display_size, Point point) const { 
-		CompositeEffect composite_effect = GetCompositeEffect();
-		if (composite_effect._opacity == 0 || (composite_effect._opacity < 0xFF && composite_effect._mouse_penetrate)) { return false; }
-		return true; 
-	}
+	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
 	virtual void NonClientHandler(Msg msg, Para para) { 
 		if (IsMouseMsg(msg)) { GetMouseMsg(para).point += GetDisplayOffset(); } return Handler(msg, para);
 	}
@@ -167,8 +165,8 @@ public:
 	WNDDESIGNCORE_API static DesktopObject& Get();
 
 public:
-	void AddChild(WndObject& child) { RegisterChild(child); }
-	WndObject::RemoveChild;
+	virtual void AddChild(WndObject& child, uint win32_extended_style = 0) pure;
+	void RemoveChild(WndObject& child) { if (IsMyChild(child)) { WndObject::RemoveChild(child); } }
 
 public:
 	virtual void CommitReflowQueue() pure;

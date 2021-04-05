@@ -16,6 +16,7 @@ struct MessageBoxStyle : public TextBox::Style {
 		width.setFixed(300px);
 		height.max(250px);
 		position.setHorizontalCenter().setVerticalCenter();
+		composite.z_index(127);
 		padding.setAll(30px);
 		background.setColor(ColorSet::DarkGray);
 		paragraph.text_align(TextAlign::Center);
@@ -26,30 +27,23 @@ struct MessageBoxStyle : public TextBox::Style {
 static constexpr uint expire_time = 5000;
 
 
-MessageBox::MessageBox() :
-	TextBox(std::make_unique<MessageBoxStyle>(), L""), timer([&]() { Hide(); }) {
-	desktop.AddChild(*this);
-	hwnd = GetWndHandle(*this);
-	HideWndFromTaskbar(hwnd); Hide();
-}
+MessageBox::MessageBox() : TextBox(std::make_unique<MessageBoxStyle>(), L"") {}
 
 MessageBox::~MessageBox() {}
 
 void MessageBox::Hide() {
-	timer.Stop();
-	HideWnd(hwnd);
+	desktop.RemoveChild(*this);
+	if (callback) { callback(); callback = nullptr; }
+}
+
+void MessageBox::Alert(const wchar message[], std::function<void(void)> callback) {
+	SetText(message); this->callback = callback;
+	AddToolWindow(*this);
 }
 
 void MessageBox::NonClientHandler(Msg msg, Para para) {
-	if (msg == Msg::LoseFocus) { Hide(); }
+	if (msg == Msg::LeftDown) { Hide(); }
 	if (msg == Msg::KeyDown && GetKeyMsg(para).key == Key::Escape) { Hide(); }
-	if (IsMouseMsg(msg)) { timer.Set(expire_time); }
-}
-
-void MessageBox::ShowMessage(const wchar message[]) {
-	SetText(message);
-	ShowWnd(hwnd); SetFocus();
-	timer.Set(expire_time);
 }
 
 

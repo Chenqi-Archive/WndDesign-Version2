@@ -30,7 +30,17 @@ const pair<Size, Size> Wnd::CalculateMinMaxSize(Size parent_size) {
 }
 
 void Wnd::SetRegionStyle(Rect parent_specified_region, Size parent_size) {
-	const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle())).ResetRegionOnParent(parent_specified_region, parent_size);
+	StyleCalculator& style = const_cast<StyleCalculator&>(GetStyleCalculator(GetStyle()));
+	style.ResetRegionOnParent(parent_specified_region, parent_size);
+	if (parent_specified_region == Rect(point_zero, parent_size)) {
+		style.border._saved_width = style.border._width;
+		style.border._width = 0; MarginChanged();
+	} else {
+		if (style.border._saved_width != -1) {
+			style.border._width = style.border._saved_width; MarginChanged();
+			style.border._saved_width = (uint)-1;
+		}
+	}
 	RegionOnParentChanged();
 }
 
@@ -203,6 +213,7 @@ void Wnd::MouseTrackInfo::Update(Wnd& wnd, ElementType type) {
 }
 
 void Wnd::MouseTrackInfo::Update(Wnd& wnd, WndObject& child) {
+	if (IsChild() && _child == &child) { return; }
 	Update(wnd, ElementType::None);
 	_child = &child;
 	_child->NonClientHandler(Msg::MouseEnter, nullmsg);

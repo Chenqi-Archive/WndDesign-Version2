@@ -22,14 +22,11 @@ void CommitQueue() {
 
 BEGIN_NAMESPACE(Anonymous)
 
-static const wchar_t wnd_class_name[] = L"WndDesignFrame";
-HINSTANCE hInstance = NULL;
 
 inline bool IsMouseMsg(UINT msg) { return WM_MOUSEFIRST <= msg && msg <= WM_MOUSELAST; }
 inline bool IsKeyboardMsg(UINT msg) { return WM_KEYFIRST <= msg && msg <= WM_KEYLAST; }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static int window_cnt = 0;
     static bool mouse_leave_tracked = false;
 
     // Get the attached frame.
@@ -61,6 +58,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_LBUTTONUP: msg_type = Msg::LeftUp; break;
         case WM_RBUTTONDOWN: msg_type = Msg::RightDown; break;
         case WM_RBUTTONUP: msg_type = Msg::RightUp; break;
+        case WM_MBUTTONDOWN: msg_type = Msg::MiddleDown; break;
+        case WM_MBUTTONUP: msg_type = Msg::MiddleUp; break;
         case WM_MOUSEWHEEL: msg_type = Msg::MouseWheel;
             // The point is relative to the desktop, convert it to the point on window.
             mouse_msg.point = mouse_msg.point + frame->GetRegionOffset();
@@ -146,7 +145,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 WINDOWPOS* position = reinterpret_cast<WINDOWPOS*>(lParam);
                 if ((position->flags & SWP_NOSIZE) && (position->flags & SWP_NOMOVE)) { break; }  // Filter out other messages.
                 Rect rect(Point(position->x, position->y), Size(static_cast<uint>(position->cx), static_cast<uint>(position->cy)));
-                if (size_move_entered) { frame->SetRegion(rect); CommitQueue(); }
+                frame->SetRegion(rect); CommitQueue();
             }break;
         case WM_PAINT: {
                 PAINTSTRUCT ps;
@@ -161,7 +160,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             // convert scroll message to mouse wheel message
         case WM_HSCROLL:
-        case WM_VSCROLL: {
+        case WM_VSCROLL: 
+            {
                 POINT cursor_position;
                 GetCursorPos(&cursor_position);
                 short key_state = 0;
@@ -171,13 +171,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 switch (LOWORD(wParam)) {
                 case SB_LINEUP: case SB_PAGEUP:wheel_delta = WHEEL_DELTA; break;
                 case SB_LINEDOWN:case SB_PAGEDOWN:wheel_delta = -WHEEL_DELTA; break;
-                default:assert(0);
+                default: return 0;
                 }
                 return WndProc(
                     hWnd, msg == WM_HSCROLL ? WM_MOUSEHWHEEL : WM_MOUSEWHEEL,
                     (wheel_delta << 16) | key_state, ((short)cursor_position.y << 16) | (short)cursor_position.x
                 );
-            }break;
+            }
         default: goto FrameIrrelevantMessages;
         }
         return 0;
@@ -186,8 +186,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     //// frame irrelevant message ////
 FrameIrrelevantMessages:
     switch (msg) {
-    case WM_CREATE: window_cnt++; break;
-    case WM_DESTROY: window_cnt--; if (window_cnt == 0) { PostQuitMessage(0); }break;
+    case WM_CREATE: break;
+    case WM_DESTROY: if (frame != nullptr) { frame->OnDestroy(); }  break;
 
         // Intercept all non-client messages.
     case WM_NCCALCSIZE: break;  // Process the message to set client region the same as the window region.
@@ -204,6 +204,10 @@ FrameIrrelevantMessages:
     return 0;  // The message is handled.
 }
 
+
+static const wchar_t wnd_class_name[] = L"WndDesignFrame";
+HINSTANCE hInstance = NULL;
+
 inline void RegisterWndClass() {
     static bool has_wnd_class_registered = false;
     if (!has_wnd_class_registered) {
@@ -214,7 +218,7 @@ inline void RegisterWndClass() {
         wcex.lpszClassName = wnd_class_name;
         wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
         ATOM res = RegisterClassExW(&wcex);
-        assert(res != 0);
+        if (res == 0) { throw std::runtime_error("register class error"); }
         has_wnd_class_registered = true;
     }
 }
@@ -224,15 +228,15 @@ END_NAMESPACE(Anonymous)
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect) {
+HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, uint ex_style) {
     RegisterWndClass(); 
     HWND hWnd = CreateWindowExW(
-        NULL, wnd_class_name, title.c_str(),
+        ex_style, wnd_class_name, title.c_str(),
         WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_HSCROLL | WS_VSCROLL,
         region.point.x, region.point.y, region.size.width, region.size.height,
         NULL, NULL, hInstance, NULL
     );
-    assert(hWnd != NULL);
+    if (hWnd == NULL) { throw std::runtime_error("create window error"); }
     SetWndCompositeEffect(hWnd, composite_effect);
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     return hWnd;
@@ -255,18 +259,26 @@ void SetWndTitle(HANDLE hWnd, const wstring& title) {
 }
 
 void SetWndCompositeEffect(HANDLE hWnd, CompositeEffect composite_effect) {
+    // opacity and mouse-penerate
     LONG old_style = GetWindowLong((HWND)hWnd, GWL_EXSTYLE);
-    if ((old_style & WS_EX_LAYERED) == 0) {
-        SetWindowLong((HWND)hWnd, GWL_EXSTYLE, old_style | WS_EX_LAYERED);
+    if (!(old_style & WS_EX_LAYERED)) {
+        if (composite_effect._opacity == 0xFF && composite_effect._mouse_penetrate == false) {
+            goto SetZIndex;
+        }
+        old_style |= WS_EX_LAYERED;
     }
-    SetLayeredWindowAttributes((HWND)hWnd, RGB(0xFF, 0xFF, 0xFF), composite_effect._opacity, LWA_ALPHA);
+    if (composite_effect._mouse_penetrate == true) {
+        old_style |= WS_EX_TRANSPARENT;
+    } else {
+        old_style &= ~WS_EX_TRANSPARENT;
+    }
+    SetWindowLong((HWND)hWnd, GWL_EXSTYLE, old_style);
+    SetLayeredWindowAttributes((HWND)hWnd, 0, composite_effect._opacity, LWA_ALPHA);
 
-    if (composite_effect.IsTopmost()) {
-        SetWindowPos((HWND)hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    }
-    if (composite_effect.IsBottom()) {
-        SetWindowPos((HWND)hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    }
+SetZIndex:
+    // z-index
+    if (composite_effect.IsTopmost()) { SetWindowPos((HWND)hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE); }
+    if (composite_effect.IsBottom()) { SetWindowPos((HWND)hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE); }
 }
 
 void SetCapture(HANDLE hWnd) {
@@ -300,6 +312,10 @@ int MessageLoop() {
         CommitQueue();
     }
     assert(false); return 0;
+}
+
+void ExitMessageLoop() {
+    PostQuitMessage(0);
 }
 
 

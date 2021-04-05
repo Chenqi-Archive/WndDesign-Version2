@@ -11,6 +11,7 @@ class TextBox : public Wnd {
 public:
 	struct Style : Wnd::Style, TextBlockStyle {
 		Style() {
+			scrollbar.set(CreateDefaultScrollbar());
 			client.height.min(0px).normal(length_auto).max(length_max_tag);
 			client.width.min(0px).normal(length_auto).max(100pct);
 		}

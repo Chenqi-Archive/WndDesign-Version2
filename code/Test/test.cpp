@@ -1,4 +1,4 @@
-#include "ListLayout_and_EditBox_test.h"
+#include "Wnd_and_Desktop_test.h"
 
 
 #pragma comment(lib, "WndDesign.lib")

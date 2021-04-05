@@ -138,11 +138,11 @@ struct TextBlockStyle {
 
 
 struct TextBlockHitTestInfo {
-	uint text_position;
-	uint text_length;
-	bool is_inside;
-	bool is_trailing_hit;
-	Rect geometry_region;
+	uint text_position = 0;
+	uint text_length = 0;
+	bool is_inside = false;
+	bool is_trailing_hit = false;
+	Rect geometry_region = region_empty;
 };
 
 

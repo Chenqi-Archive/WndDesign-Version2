@@ -5,12 +5,13 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-void OverlapLayout::InsertChild(WndObject& child, Rect region, char z_index) {
+void OverlapLayout::InsertChild(WndObject& child, Rect region) {
+	CompositeEffect composite = child.GetCompositeEffect();
 	auto next_iter_pos = std::find_if(
 		_child_wnds.begin(), _child_wnds.end(),
-		[=](const ChildWndContainer& child_container) { return child_container.wnd.GetCompositeEffect()._z_index <= z_index; }
+		[=](const ChildWndContainer& child_container) { return child_container.composite._z_index <= composite._z_index; }
 	);
-	auto iter_pos = _child_wnds.emplace(next_iter_pos, ChildWndContainer{ child, region });
+	auto iter_pos = _child_wnds.emplace(next_iter_pos, ChildWndContainer{ child, region, composite });
 	iter_pos->list_index = iter_pos;
 	SetChildData(child, *iter_pos);
 }
@@ -24,7 +25,7 @@ const Rect OverlapLayout::EraseChild(WndObject& child) {
 
 void OverlapLayout::AddChild(WndObject& child) {
 	RegisterChild(child);
-	InsertChild(child, region_empty, child.GetCompositeEffect()._z_index);
+	InsertChild(child, region_empty);
 }
 
 void OverlapLayout::OnChildDetach(WndObject& child) {
@@ -35,7 +36,7 @@ void OverlapLayout::OnChildDetach(WndObject& child) {
 
 void OverlapLayout::OnChildCompositeEffectChange(WndObject& child) {
 	Rect region = EraseChild(child);
-	InsertChild(child, region, child.GetCompositeEffect()._z_index);
+	InsertChild(child, region);
 	Invalidate(region);
 }
 
@@ -74,7 +75,7 @@ void OverlapLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region,
 
 const Wnd::HitTestInfo OverlapLayout::ClientHitTest(Size client_size, Point point) const { 
 	for (auto& container : _child_wnds) {
-		if (container.region.Contains(point)){
+		if (!container.composite._mouse_penetrate && container.region.Contains(point)){
 			Point point_on_child = point - (container.region.point - point_zero);
 			if (container.wnd.NonClientHitTest(container.region.size, point_on_child)) {
 				return { &container.wnd, point_on_child };

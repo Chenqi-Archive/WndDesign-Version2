@@ -16,8 +16,6 @@ public:
 	static ToolTip& Get();
 
 private:
-	using HANDLE = void*;
-	HANDLE hwnd = nullptr;
 	Timer timer;
 	FadeAnimation fade_animation;
 
@@ -28,17 +26,16 @@ private:
 	void Hide();
 
 private:
-	virtual void NonClientHandler(Msg msg, Para para) override;
+	void OnMouseEnter(const wchar text[]);
 
 public:
-	void OnMouseEnter(const wchar text[]);
-	void OnMouseLeave() { Hide(); }
+	void Track(Msg msg, const wchar text[]) {
+		if (msg == Msg::MouseEnter) { OnMouseEnter(text); return; }
+		if (msg != Msg::MouseMove) { Hide(); return; }
+	}
 };
 
 inline ToolTip& GetToolTip() { return ToolTip::Get(); }
-
-inline void ShowToolTip(const wchar text[]) { GetToolTip().OnMouseEnter(text); }
-inline void HideToolTip() { GetToolTip().OnMouseLeave(); }
 
 
 END_NAMESPACE(WndDesign)

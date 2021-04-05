@@ -10,7 +10,7 @@ void ShowWnd(HANDLE hwnd);
 
 void HideWnd(HANDLE hwnd);
 
-void HideWndFromTaskbar(HANDLE hwnd);
+void AddToolWindow(WndObject& wnd);
 
 
 END_NAMESPACE(WndDesign)

@@ -15,10 +15,12 @@ struct ToolTipStyle : public TextBox::Style {
 	ToolTipStyle() {
 		width.max(200px);
 		height.max(500px);
-		composite.z_index(127);  // always topmost
+		position.left(0px).top(0px);
+		composite.z_index(127).mouse_penetrate(true);  // always topmost, and mouse transparent
 		border.width(1).color(ColorSet::Silver);
-		padding.setAll(5px);
+		padding.setAll(3px);
 		background.setColor(0xF1F2F7);
+		paragraph.line_height(length_auto);
 		font.size(14);
 	}
 };
@@ -41,26 +43,20 @@ MouseEnter 	        start_fade_in (show)									       hide
 
 
 ToolTip::ToolTip() :
-	TextBox(std::make_unique<ToolTipStyle>(), L""), timer([]() {}), fade_animation(*this, []() {}) {
-	desktop.AddChild(*this);
-	hwnd = GetWndHandle(*this);
-	HideWndFromTaskbar(hwnd); Hide();
+	TextBox(std::make_unique<ToolTipStyle>(), L""), 
+	timer([]() {}), fade_animation(*this, []() {}) {
 }
 
-ToolTip::~ToolTip() {
-	desktop.RemoveChild(*this);
-}
+ToolTip::~ToolTip() {}
 
 void ToolTip::FadeInBegin() {
 	timer.Stop();
 	Point position = GetCursorPosition();
 	GetStyle().position.left(px(position.x - 10)).top(px(position.y + 10));
-	RegionOnParentChanged();
 	GetStyle().composite._opacity = 0;
-	CompositeEffectChanged();
-	ShowWnd(hwnd); SetFocus();
 	fade_animation.callback = std::bind(&ToolTip::FadeInEnd, this);
 	fade_animation.Set(fade_in_time, 0xFF);
+	AddToolWindow(*this);
 }
 
 void ToolTip::FadeInEnd() {
@@ -76,12 +72,9 @@ void ToolTip::FadeOutBegin() {
 
 void ToolTip::Hide() {
 	timer.Stop(); fade_animation.Stop();
-	HideWnd(hwnd);
+	desktop.RemoveChild(*this);
 }
 
-void ToolTip::NonClientHandler(Msg msg, Para para) {
-	if (msg == Msg::LoseFocus) { Hide(); }
-}
 
 void ToolTip::OnMouseEnter(const wchar text[]) {
 	Hide(); SetText(text);

@@ -57,6 +57,7 @@ public:
 	void LoseCapture();
 	void LoseFocus();
 	void ReceiveMessage(Msg msg, Para para) const;
+	void OnDestroy();
 };
 
 
@@ -77,7 +78,7 @@ public:
 		return *GetChildData<DesktopWndFrame*>(child);
 	}
 
-	void AddChild(WndBase& child, WndObject& child_object);
+	virtual void AddChild(WndObject& child, uint ex_style) override;
 	virtual void OnChildDetach(WndObject& child) override;
 
 public:
@@ -96,6 +97,9 @@ public:
 	virtual void ReleaseCapture() override;
 	virtual void SetFocus(WndObject& wnd) override;
 
+private:
+	bool message_loop_entered = false;
+public:
 	virtual void MessageLoop() override;
 	virtual void Terminate() override;
 
@@ -123,7 +127,6 @@ public:
 private:
 	DesktopObjectImpl& GetObject() const { return static_cast<DesktopObjectImpl&>(_object); }
 private:
-	virtual void AddChild(IWndBase& child_wnd) override;
 	virtual void InvalidateChild(WndBase& child, Region& child_invalid_region) override { GetObject().InvalidateChild(child._object, child_invalid_region); }
 };
 

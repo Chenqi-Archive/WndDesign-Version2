@@ -30,7 +30,7 @@ void DesktopWndFrame::OnRegionChange(Rect region) {
 
 void DesktopWndFrame::SetRegion(Rect region) {
 	if (_wnd.GetRegionOnParent() == region) { return; }
-	static_cast<DesktopObjectImpl&>(DesktopObject::Get()).SetChildRegionStyle(_wnd_object, region);
+	static_cast<DesktopObjectImpl&>(desktop).SetChildRegionStyle(_wnd_object, region);
 }
 
 const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
@@ -137,6 +137,10 @@ void DesktopWndFrame::ReceiveMessage(Msg msg, Para para) const {
 	_wnd_object.NonClientHandler(msg, para);
 }
 
+void DesktopWndFrame::OnDestroy() {
+	desktop.RemoveChild(_wnd_object);
+}
+
 
 WNDDESIGNCORE_API DesktopObject& DesktopObject::Get() {
     static DesktopObjectImpl desktop_object;
@@ -149,11 +153,13 @@ DesktopObjectImpl::DesktopObjectImpl() :
 
 DesktopObjectImpl::~DesktopObjectImpl() {}
 
-void DesktopObjectImpl::AddChild(WndBase& child, WndObject& child_object) {
-	HANDLE hwnd = Win32::CreateWnd(region_empty, child_object.GetTitle(), child_object.GetCompositeEffect());
-	DesktopWndFrame& frame = _child_wnds.emplace_front(child, child_object, hwnd);
+void DesktopObjectImpl::AddChild(WndObject& child, uint ex_style) {
+	Rect region = UpdateChildRegion(child, GetSize());
+	RegisterChild(child);
+	HANDLE hwnd = Win32::CreateWnd(region, child.GetTitle(), child.GetCompositeEffect(), ex_style);
+	DesktopWndFrame& frame = _child_wnds.emplace_front(static_cast<WndBase&>(*child.wnd), child, hwnd);
 	frame._desktop_index = _child_wnds.begin();
-	SetChildFrame(child_object, frame);
+	SetChildFrame(child, frame);
 }
 
 void DesktopObjectImpl::OnChildDetach(WndObject& child) {
@@ -161,6 +167,7 @@ void DesktopObjectImpl::OnChildDetach(WndObject& child) {
 	HANDLE hwnd = frame._hwnd;
 	_child_wnds.erase(frame._desktop_index);
 	Win32::DestroyWnd(hwnd);
+	if (message_loop_entered && _child_wnds.empty()) { Win32::ExitMessageLoop(); }
 }
 
 void DesktopObjectImpl::SetChildRegionStyle(WndObject& child, Rect parent_specified_region) {
@@ -228,7 +235,10 @@ void DesktopObjectImpl::SetFocus(WndObject& wnd) {
 }
 
 void DesktopObjectImpl::MessageLoop() {
+	if (_child_wnds.empty()) { return; }
+	message_loop_entered = true;
 	Win32::MessageLoop();
+	message_loop_entered = false;
 }
 
 void DesktopObjectImpl::Terminate() {
@@ -271,12 +281,6 @@ DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_ob
 }
 
 DesktopBase::~DesktopBase() {}
-
-void DesktopBase::AddChild(IWndBase& child_wnd) {
-	WndBase::AddChild(child_wnd);
-	WndBase& child = static_cast<WndBase&>(child_wnd);
-	GetObject().AddChild(child, child._object);
-}
 
 
 END_NAMESPACE(WndDesign)

@@ -119,18 +119,15 @@ void ListLayout::RemoveChild(uint row_begin, uint row_count) {
 	if (row_count > row_number - row_begin) { row_count = row_number - row_begin; }
 	for (uint row = row_begin; row < row_begin + row_count; ++row) {
 		if (_rows[row].wnd != nullptr) {
-			UnregisterChild(*_rows[row].wnd);
-			_rows[row].wnd = nullptr;
-			_rows[row].Invalidate();
+			WndObject::RemoveChild(*_rows[row].wnd);
 		}
 	}
-	ContentLayoutChanged(row_begin);
 }
 
 void ListLayout::OnChildDetach(WndObject& child) {
 	Wnd::OnChildDetach(child);
 	uint row = GetChildData(child);
-	assert(row < GetRowNumber());
+	assert(row < GetRowNumber() && _rows[row].wnd == &child);
 	_rows[row].wnd = nullptr;
 	_rows[row].Invalidate();
 	ContentLayoutChanged(row);

@@ -11,7 +11,7 @@ using HANDLE = void*;
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect);
+HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, uint ex_style);
 void DestroyWnd(HANDLE hWnd);
 
 void SetWndUserData(HANDLE hWnd, void* data);
@@ -27,6 +27,7 @@ void SetFocus(HANDLE hWnd);
 void ReleaseFocus();
 
 int MessageLoop();
+void ExitMessageLoop();
 
 
 END_NAMESPACE(Win32)

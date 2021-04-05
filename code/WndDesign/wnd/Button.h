@@ -13,6 +13,7 @@ public:
 		BackgroundStyle background_hover;
 		BackgroundStyle background_press;
 		Style() {
+			scrollbar.set(CreateEmptyScrollbar());
 			background_press = background_hover = background;
 		}
 	};
@@ -30,15 +31,15 @@ protected:
 
 	//// message handling ////
 private:
-	enum class State { Normal, Hover, Down } _state = State::Normal;
+	enum class State { Normal, Hover, Press } _state = State::Normal;
 protected:
 	void Handler(Msg msg, Para para) override {
+		TextBox::Handler(msg, para);
 		switch (msg) {
-		case Msg::MouseEnter: assert(_state == State::Normal); _state = State::Hover; OnHover(); break;
-		case Msg::LeftDown: assert(_state == State::Hover); _state = State::Down; OnPress(); break;
-		case Msg::LeftUp: if (_state == State::Down) { OnClick(); } break;
+		case Msg::MouseEnter: if (_state == State::Normal) { _state = State::Hover; OnHover(); } break;
 		case Msg::MouseLeave: _state = State::Normal; OnLeave(); break;
-		default:break;
+		case Msg::LeftDown: _state = State::Press; OnPress(); break;
+		case Msg::LeftUp: if (_state == State::Press) { OnClick(); _state = State::Hover; } break;
 		}
 	}
 protected:

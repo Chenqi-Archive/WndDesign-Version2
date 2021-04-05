@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../wnd/TextBox.h"
-#include "../message/timer.h"
+
+#include <functional>
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -15,23 +16,18 @@ public:
 	static MessageBox& Get();
 
 private:
-	using HANDLE = void*;
-	HANDLE hwnd;
-	Timer timer;
+	std::function<void(void)> callback;
 
 private:
 	void Hide();
+public:
+	void Alert(const wchar message[], std::function<void(void)> callback = nullptr);
 
 private:
 	virtual void NonClientHandler(Msg msg, Para para) override;
-
-public:
-	void ShowMessage(const wchar message[]);
 };
 
 inline MessageBox& GetMessageBox() { return MessageBox::Get(); }
-
-inline void ShowMessageBox(const wchar message[]) { GetMessageBox().ShowMessage(message); }
 
 
 END_NAMESPACE(WndDesign)

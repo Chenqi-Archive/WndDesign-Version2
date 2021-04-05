@@ -26,10 +26,12 @@ public:
 private:
 	virtual void NonClientHandler(Msg msg, Para para) override {
 		Wnd::NonClientHandler(msg, para);
-		if (msg == Msg::LeftDown) { AeroSnapDraggingEffect(*this, GetMouseMsg(para).point); }
-		if (msg == Msg::RightDown) { ShowMessageBox(L"This is Main Window"); }
-		if (msg == Msg::MouseEnter) { ShowToolTip(L"Main Window"); }
-		if (msg == Msg::MouseLeave) { HideToolTip(); }
+		GetToolTip().Track(msg, L"Main Window");
+		switch (msg) {
+		case Msg::LeftDown: AeroSnapDraggingEffect(*this, GetMouseMsg(para).point); break;
+		case Msg::RightDown: GetMessageBox().Alert(L"This is Main Window"); break;
+		case Msg::MiddleDown: desktop.Terminate(); break;
+		}
 	}
 };
 

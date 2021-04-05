@@ -37,8 +37,8 @@ struct WndStyle {
 	// (relative to the inner edges of parent window)
 	struct PositionStyle {
 	public:
-		ValueTag _left = 0px;
-		ValueTag _top = 0px;
+		ValueTag _left = position_auto;
+		ValueTag _top = position_auto;
 		ValueTag _right = position_auto;
 		ValueTag _bottom = position_auto;
 	public:
@@ -74,6 +74,7 @@ struct WndStyle {
 		uint _width = 0;
 		Color _color = ColorSet::Black;
 		uint _radius = 0;
+		uint _saved_width = (uint)-1;  // for internal use
 		unique_ptr<BorderResizer> _resizer = CreateEmptyBorderResizer();
 	public:
 		constexpr BorderStyle& width(uint width) { _width = width; return *this; }
@@ -86,7 +87,7 @@ struct WndStyle {
 	// The scrollbar resource.
 	struct ScrollbarStyle {
 	public:
-		unique_ptr<Scrollbar> _resource = CreateDefaultScrollbar();
+		unique_ptr<Scrollbar> _resource = CreateEmptyScrollbar();
 	public:
 		void set(unique_ptr<Scrollbar> scrollbar_resource) { _resource = std::move(scrollbar_resource); }
 	}scrollbar;

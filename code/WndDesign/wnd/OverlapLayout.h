@@ -24,7 +24,7 @@ private:
 	struct ChildWndContainer {
 		WndObject& wnd;
 		Rect region;
-		//uint z_index;
+		CompositeEffect composite;
 		list<ChildWndContainer>::iterator list_index;
 	};
 
@@ -40,7 +40,7 @@ private:
 	}
 
 private:
-	void InsertChild(WndObject& child, Rect region, char z_index);
+	void InsertChild(WndObject& child, Rect region);
 	const Rect EraseChild(WndObject& child);
 
 public:

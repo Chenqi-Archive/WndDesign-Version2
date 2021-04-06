@@ -1,30 +1,11 @@
 #pragma once
 
-#include "../../common/core.h"
 #include "../../common/uncopyable.h"
 #include "../../geometry/geometry.h"
 
-
-//////////////////////////////////////////////////////////
-////           Device Independent Resources           ////
-//////////////////////////////////////////////////////////
-
-struct ID2D1Factory1;
+#include "directx_resource.h"
 
 
-BEGIN_NAMESPACE(WndDesign)
-
-WNDDESIGNCORE_API ID2D1Factory1& GetD2DFactory();
-
-END_NAMESPACE(WndDesign)
-
-
-
-//////////////////////////////////////////////////////////
-////            Device Dependent Resources            ////
-//////////////////////////////////////////////////////////
-
-struct ID2D1DeviceContext;
 struct ID2D1Bitmap1;
 
 
@@ -33,9 +14,13 @@ BEGIN_NAMESPACE(WndDesign)
 class FigureQueue;
 
 
-WNDDESIGNCORE_API ID2D1DeviceContext& GetD2DDeviceContext();
+inline ID2D1Factory1& GetD2DFactory() { return *DirectXResources::Get().d2d_factory; }
+inline ID2D1DeviceContext& GetD2DDeviceContext() { return *DirectXResources::Get().d2d_device_context; }
+inline ID2D1SolidColorBrush& GetD2DSolidColorBrush() { return *DirectXResources::Get().d2d_solid_color_brush; }
+
 
 void BeginDraw();
+
 void EndDraw();
 
 

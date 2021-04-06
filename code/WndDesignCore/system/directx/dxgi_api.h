@@ -1,21 +1,15 @@
 #pragma once
 
-#include "../../common/core.h"
-
-
-struct ID3D11Device;
-struct IDXGIDevice1;
-struct IDXGIAdapter;
-struct IDXGIFactory2;
+#include "directx_resource.h"
 
 
 BEGIN_NAMESPACE(WndDesign)
 
 
-ID3D11Device& GetD3DDevice();
-IDXGIDevice1& GetDXGIDevice();
-IDXGIAdapter& GetDXGIAdapter();
-IDXGIFactory2& GetDXGIFactory();
+inline ID3D11Device& GetD3DDevice() { return *DirectXResources::Get().d3d_device; }
+inline IDXGIDevice1& GetDXGIDevice() { return *DirectXResources::Get().dxgi_device; }
+inline IDXGIAdapter& GetDXGIAdapter() { return *DirectXResources::Get().dxgi_adapter; }
+inline IDXGIFactory2& GetDXGIFactory() { return *DirectXResources::Get().dxgi_factory; }
 
 
 END_NAMESPACE(WndDesign)

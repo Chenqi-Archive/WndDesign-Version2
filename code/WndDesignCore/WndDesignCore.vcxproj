@@ -193,6 +193,8 @@
     <ClInclude Include="message\msg_base.h" />
     <ClInclude Include="layer\composite_effect.h" />
     <ClInclude Include="system\directx\d2d_api_window.h" />
+    <ClInclude Include="system\directx\directx_resource.h" />
+    <ClInclude Include="system\init.h" />
     <ClInclude Include="system\metrics.h" />
     <ClInclude Include="layer\figure_queue.h" />
     <ClInclude Include="render\ObjectBase.h" />
@@ -217,10 +219,10 @@
     <ClCompile Include="geometry\region.cpp" />
     <ClCompile Include="layer\layer.cpp" />
     <ClCompile Include="system\directx\d2d_api_window.cpp" />
+    <ClCompile Include="system\directx\directx_resource.cpp" />
     <ClCompile Include="system\ime.cpp" />
     <ClCompile Include="system\metrics.cpp" />
     <ClCompile Include="system\directx\d2d_api.cpp" />
-    <ClCompile Include="system\directx\dxgi_api.cpp" />
     <ClCompile Include="system\timer.cpp" />
     <ClCompile Include="system\win32.cpp" />
     <ClCompile Include="system\win32_api.cpp" />

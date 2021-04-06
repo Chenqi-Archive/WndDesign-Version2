@@ -1,16 +1,11 @@
 #include "../wnd/WndObject.h"
 #include "../WndDesign.h"
+#include "../../WndDesignCore/system/init.h"
 
 #include <Windows.h>
 
-using std::vector;
-using std::wstring;
-
 
 #pragma comment(lib, "WndDesignCore.lib")
-
-
-extern int main();
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -27,12 +22,19 @@ vector<wstring> GetCommandLineArgs() {
 	return args;
 }
 
+
 END_NAMESPACE(WndDesign)
 
 
+using namespace WndDesign;
+
+extern int main();
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	if (FAILED(CoInitialize(NULL))) { return 0; }
+	WndDesignCoreInitialize();
 	int ret = main();
-	CoUninitialize();
+	desktop.Terminate(); // destroy all windows and clear their d2d resources
+	WndDesignCoreUninitialize();
 	return ret;
 }

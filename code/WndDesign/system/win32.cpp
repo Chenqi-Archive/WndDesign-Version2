@@ -14,8 +14,8 @@ void HideWnd(HANDLE hwnd) {
 	ShowWindow((HWND)hwnd, SW_HIDE);
 }
 
-void AddToolWindow(WndObject& wnd) {
-	desktop.AddChild(wnd, WS_EX_TOOLWINDOW);
+void HideWndFromTaskbar(HANDLE hwnd) {
+	SetWindowLong((HWND)hwnd, GWL_EXSTYLE, GetWindowLong((HWND)hwnd, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
 }
 
 

@@ -1,4 +1,4 @@
-#include "WndObject.h"
+#include "DesktopObject.h"
 
 
 BEGIN_NAMESPACE(WndDesign)

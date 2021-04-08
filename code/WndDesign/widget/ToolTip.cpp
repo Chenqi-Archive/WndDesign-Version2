@@ -1,4 +1,5 @@
 #include "ToolTip.h"
+#include "../wnd/DesktopObject.h"
 #include "../system/win32.h"
 
 
@@ -56,7 +57,7 @@ void ToolTip::FadeInBegin() {
 	GetStyle().composite._opacity = 0;
 	fade_animation.callback = std::bind(&ToolTip::FadeInEnd, this);
 	fade_animation.Set(fade_in_time, 0xFF);
-	AddToolWindow(*this);
+	desktop.AddChild(*this, [](HANDLE hWnd) { HideWndFromTaskbar(hWnd); });
 }
 
 void ToolTip::FadeInEnd() {

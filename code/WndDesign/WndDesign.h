@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wnd/WndObject.h"
+#include "wnd/DesktopObject.h"
 #include "figure/figure_types.h"
 
 #include <vector>

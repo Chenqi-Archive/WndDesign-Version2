@@ -1,4 +1,5 @@
 #include "EditBox.h"
+#include "DesktopObject.h"
 #include "../system/ime.h"
 #include "../system/clipboard.h"
 

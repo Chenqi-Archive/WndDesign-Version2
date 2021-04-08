@@ -1,4 +1,5 @@
 #include "MessageBox.h"
+#include "../wnd/DesktopObject.h"
 #include "../system/win32.h"
 
 
@@ -38,7 +39,7 @@ void MessageBox::Hide() {
 
 void MessageBox::Alert(const wchar message[], std::function<void(void)> callback) {
 	SetText(message); this->callback = callback;
-	AddToolWindow(*this);
+	desktop.AddChild(*this, [](HANDLE hWnd) { HideWndFromTaskbar(hWnd); });
 }
 
 void MessageBox::NonClientHandler(Msg msg, Para para) {

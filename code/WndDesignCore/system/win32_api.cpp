@@ -11,6 +11,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 bool size_move_entered = false;  // referenced in timer.cpp
+ref_ptr<DesktopWndFrame> mouse_tracked_frame = nullptr;  // referenced in desktop.cpp
 
 void CommitQueue() {
     static ReflowQueue& reflow_queue = GetReflowQueue();
@@ -27,7 +28,6 @@ inline bool IsMouseMsg(UINT msg) { return WM_MOUSEFIRST <= msg && msg <= WM_MOUS
 inline bool IsKeyboardMsg(UINT msg) { return WM_KEYFIRST <= msg && msg <= WM_KEYLAST; }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static bool mouse_leave_tracked = false;
 
     // Get the attached frame.
     DesktopWndFrame* frame = reinterpret_cast<DesktopWndFrame*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
@@ -43,14 +43,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_MOUSEMOVE:
             msg_type = Msg::MouseMove;
             // Track mouse message for mouse leave.
-            if (!mouse_leave_tracked) {
+            if (mouse_tracked_frame == nullptr) {
                 TRACKMOUSEEVENT track_mouse_event;
                 track_mouse_event.cbSize = sizeof(TRACKMOUSEEVENT);
                 track_mouse_event.dwFlags = TME_LEAVE;
                 track_mouse_event.hwndTrack = hWnd;
                 track_mouse_event.dwHoverTime = HOVER_DEFAULT;
                 TrackMouseEvent(&track_mouse_event);
-                mouse_leave_tracked = true;
+                mouse_tracked_frame = frame;
                 frame->ReceiveMessage(Msg::MouseEnter, nullmsg);
             }
             break;
@@ -154,7 +154,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 EndPaint(hWnd, &ps);
             }break;
 
-        case WM_MOUSELEAVE: frame->ReceiveMessage(Msg::MouseLeave, nullmsg); mouse_leave_tracked = false; break;
+        case WM_MOUSELEAVE: frame->OnMouseLeave(); break;
         case WM_CAPTURECHANGED:frame->LoseCapture(); break;
         case WM_KILLFOCUS: frame->LoseFocus(); break;
 
@@ -228,15 +228,16 @@ END_NAMESPACE(Anonymous)
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, uint ex_style) {
+HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, std::function<void(HANDLE)> callback) {
     RegisterWndClass(); 
     HWND hWnd = CreateWindowExW(
-        ex_style, wnd_class_name, title.c_str(),
+        NULL, wnd_class_name, title.c_str(),
         WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_HSCROLL | WS_VSCROLL,
         region.point.x, region.point.y, region.size.width, region.size.height,
         NULL, NULL, hInstance, NULL
     );
     if (hWnd == NULL) { throw std::runtime_error("create window error"); }
+    if (callback) { callback(hWnd); }
     SetWndCompositeEffect(hWnd, composite_effect);
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     return hWnd;

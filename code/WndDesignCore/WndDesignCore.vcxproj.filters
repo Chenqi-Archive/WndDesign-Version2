@@ -150,6 +150,9 @@
     <ClInclude Include="system\directx\directx_resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wnd\DesktopObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="layer\layer.cpp">
@@ -191,7 +194,7 @@
     <ClCompile Include="wnd\reflow_queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wnd\WndObject.cpp">
+    <ClCompile Include="wnd\DesktopObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="system\ime.cpp">

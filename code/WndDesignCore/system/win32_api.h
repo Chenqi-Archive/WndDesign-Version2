@@ -11,7 +11,7 @@ using HANDLE = void*;
 BEGIN_NAMESPACE(Win32)
 
 
-HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, uint ex_style);
+HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, std::function<void(HANDLE)> callback);
 void DestroyWnd(HANDLE hWnd);
 
 void SetWndUserData(HANDLE hWnd, void* data);

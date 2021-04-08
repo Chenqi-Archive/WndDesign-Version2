@@ -60,7 +60,7 @@
     <ClCompile Include="style\scrollbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wnd\WndObject.cpp">
+    <ClCompile Include="wnd\DesktopObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="style\border_resizer.cpp">
@@ -243,6 +243,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="message\fade_animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\DesktopObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

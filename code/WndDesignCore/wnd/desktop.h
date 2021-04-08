@@ -1,7 +1,7 @@
 #pragma once
 
 #include "wnd_base.h"
-#include "WndObject.h"
+#include "DesktopObject.h"
 #include "../system/directx/d2d_api_window.h"
 
 
@@ -54,6 +54,7 @@ private:
 	void SetCapture(WndObject& wnd, Vector offset);
 	void SetFocus(WndObject& wnd);
 public:
+	void OnMouseLeave();
 	void LoseCapture();
 	void LoseFocus();
 	void ReceiveMessage(Msg msg, Para para) const;
@@ -78,7 +79,7 @@ public:
 		return *GetChildData<DesktopWndFrame*>(child);
 	}
 
-	virtual void AddChild(WndObject& child, uint ex_style) override;
+	virtual void AddChild(WndObject& child, std::function<void(HANDLE)> callback) override;
 	virtual void OnChildDetach(WndObject& child) override;
 
 public:
@@ -92,10 +93,11 @@ public:
 	virtual void CommitReflowQueue() override;
 	virtual void CommitRedrawQueue() override;
 
-	virtual void OnWndDetach(WndObject& wnd) override;
-	virtual void SetCapture(WndObject& wnd) override;
-	virtual void ReleaseCapture() override;
-	virtual void SetFocus(WndObject& wnd) override;
+public:
+	void OnWndDetach(WndObject& wnd);
+	void SetCapture(WndObject& wnd);
+	void ReleaseCapture();
+	void SetFocus(WndObject& wnd);
 
 private:
 	bool message_loop_entered = false;

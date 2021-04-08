@@ -8,6 +8,8 @@
 
 BEGIN_NAMESPACE(WndDesign)
 
+extern ref_ptr<DesktopWndFrame> mouse_tracked_frame;
+
 
 DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd) :
 	_wnd(wnd), _wnd_object(wnd_object), _hwnd(hwnd), _resource(_hwnd) {
@@ -16,6 +18,7 @@ DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwn
 }
 
 DesktopWndFrame::~DesktopWndFrame() {
+	OnMouseLeave();
 	Win32::SetWndUserData(_hwnd, nullptr);
 	LeaveRedrawQueue();
 }
@@ -112,6 +115,13 @@ void DesktopWndFrame::SetFocus(WndObject& wnd) {
 	_focus_wnd = &wnd;
 }
 
+void DesktopWndFrame::OnMouseLeave() {
+	if (mouse_tracked_frame == this) {
+		mouse_tracked_frame = nullptr;
+		_wnd_object.NonClientHandler(Msg::MouseLeave, nullmsg);
+	}
+}
+
 void DesktopWndFrame::LoseCapture() {
 	if (_capture_wnd == nullptr) { return; }
 	_capture_wnd->NonClientHandler(Msg::LoseCapture, nullmsg);
@@ -153,10 +163,10 @@ DesktopObjectImpl::DesktopObjectImpl() :
 
 DesktopObjectImpl::~DesktopObjectImpl() {}
 
-void DesktopObjectImpl::AddChild(WndObject& child, uint ex_style) {
+void DesktopObjectImpl::AddChild(WndObject& child, std::function<void(HANDLE)> callback) {
 	Rect region = UpdateChildRegion(child, GetSize());
 	RegisterChild(child);
-	HANDLE hwnd = Win32::CreateWnd(region, child.GetTitle(), child.GetCompositeEffect(), ex_style);
+	HANDLE hwnd = Win32::CreateWnd(region, child.GetTitle(), child.GetCompositeEffect(), callback);
 	DesktopWndFrame& frame = _child_wnds.emplace_front(static_cast<WndBase&>(*child.wnd), child, hwnd);
 	frame._desktop_index = _child_wnds.begin();
 	SetChildFrame(child, frame);
@@ -281,6 +291,12 @@ DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_ob
 }
 
 DesktopBase::~DesktopBase() {}
+
+
+void WndBase::SetCapture() { static_cast<DesktopObjectImpl&>(desktop).SetCapture(_object); }
+void WndBase::ReleaseCapture() { static_cast<DesktopObjectImpl&>(desktop).ReleaseCapture(); }
+void WndBase::SetFocus() { static_cast<DesktopObjectImpl&>(desktop).SetFocus(_object); }
+void WndBase::NotifyDesktopWhenDetached() { static_cast<DesktopObjectImpl&>(desktop).OnWndDetach(_object); }
 
 
 END_NAMESPACE(WndDesign)

@@ -99,6 +99,7 @@ void WndBase::RemoveChild(IWndBase& child_wnd) {
 	assert(child._parent == this);
 	_child_wnds.erase(child._index_on_parent);
 	child.ClearParent();
+	child.NotifyDesktopWhenDetached();
 	// Child's depth will be reset at UpdateInvalidRegion() or UpdateLayout().
 	// Child's visible region remains unchanged until attached to a parent window next time.
 }

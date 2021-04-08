@@ -43,9 +43,8 @@ protected:
 	}
 private:
 	void UnregisterChild(WndObject& child) {
-		wnd->RemoveChild(*child.wnd); child.parent = nullptr; child.NotifyDesktopWhenDetached();
+		wnd->RemoveChild(*child.wnd); child.parent = nullptr;
 	}
-	void NotifyDesktopWhenDetached();  // defined below
 public:
 	void RemoveChild(WndObject& child) { 
 		if (!IsMyChild(child)) { throw std::invalid_argument("child not registered"); }
@@ -144,9 +143,9 @@ private:
 
 	//// message handling ////
 protected:
-	void SetCapture();
-	void ReleaseCapture();
-	void SetFocus();
+	void SetCapture() { wnd->SetCapture(); }
+	void ReleaseCapture() { wnd->ReleaseCapture(); }
+	void SetFocus() { wnd->SetFocus(); }
 public:
 	virtual bool NonClientHitTest(Size display_size, Point point) const { return true; }
 	virtual void NonClientHandler(Msg msg, Para para) { 
@@ -154,42 +153,6 @@ public:
 	}
 	virtual void Handler(Msg msg, Para para) {}
 };
-
-
-class ABSTRACT_BASE DesktopObject : protected WndObject {
-protected:
-	DesktopObject(unique_ptr<IWndBase> desktop) : WndObject(std::move(desktop)) {}
-	~DesktopObject() {}
-
-public:
-	WNDDESIGNCORE_API static DesktopObject& Get();
-
-public:
-	virtual void AddChild(WndObject& child, uint win32_extended_style = 0) pure;
-	void RemoveChild(WndObject& child) { if (IsMyChild(child)) { WndObject::RemoveChild(child); } }
-
-public:
-	virtual void CommitReflowQueue() pure;
-	virtual void CommitRedrawQueue() pure;
-
-private:
-	friend class WndObject;
-	virtual void OnWndDetach(WndObject& wnd) pure;
-	virtual void SetCapture(WndObject& wnd) pure;
-	virtual void ReleaseCapture() pure;
-	virtual void SetFocus(WndObject& wnd) pure;
-public:
-	virtual void MessageLoop() pure;
-	virtual void Terminate() pure;
-};
-
-extern DesktopObject& desktop;  // initialized in WndObject.cpp (both in dll and in lib)
-
-
-inline void WndObject::NotifyDesktopWhenDetached() { desktop.OnWndDetach(*this); }
-inline void WndObject::SetCapture() { desktop.SetCapture(*this); }
-inline void WndObject::ReleaseCapture() { desktop.ReleaseCapture(); }
-inline void WndObject::SetFocus() { desktop.SetFocus(*this); }
 
 
 END_NAMESPACE(WndDesign)

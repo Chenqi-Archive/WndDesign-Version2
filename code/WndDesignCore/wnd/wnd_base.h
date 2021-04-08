@@ -159,6 +159,19 @@ public:
 	void UpdateInvalidRegion(FigureQueue& figure_queue);
 	/* called by parent window (WndObject) , the coordinate space of figure_queue now is parent's client region */
 	virtual void Composite(FigureQueue& figure_queue, Rect parent_invalid_region, CompositeEffect composite_effect) const override;
+
+
+	////////////////////////////////////////////////////////////
+	////                  Message Handling                  ////
+	////////////////////////////////////////////////////////////
+
+public:
+	virtual void SetCapture() override;		   // defined in desktop.cpp
+	virtual void ReleaseCapture() override;	   // the same
+	virtual void SetFocus() override;		   // the same
+
+private:
+	void NotifyDesktopWhenDetached();		   // the same
 };
 
 

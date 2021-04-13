@@ -135,6 +135,7 @@ private:
 	bool HasLayer() const { return _layer != nullptr; }
 public:
 	virtual void AllocateLayer() override;
+	void RefreshLayer();
 
 
 	//// redraw queue ////

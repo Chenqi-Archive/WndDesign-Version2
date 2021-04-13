@@ -35,7 +35,7 @@ void TextBlock::TextChanged() {
 	// Recreate TextFormat and TextLayout.
 	SafeRelease(AsTextLayout(&_layout));
 	SafeRelease(AsTextFormat(&_format));
-	hr = GetDWriteFactory().CreateTextFormat(
+	hr << GetDWriteFactory().CreateTextFormat(
 		_style.font._family.c_str(),
 		NULL,
 		static_cast<DWRITE_FONT_WEIGHT>(_style.font._weight),
@@ -45,7 +45,7 @@ void TextBlock::TextChanged() {
 		_style.font._locale.c_str(),
 		AsTextFormat(&_format)
 	);
-	hr = GetDWriteFactory().CreateTextLayout(
+	hr << GetDWriteFactory().CreateTextLayout(
 		_text.c_str(), static_cast<UINT>(_text.length()),
 		AsTextFormat(_format),
 		(FLOAT)_max_size.width, (FLOAT)_max_size.height,

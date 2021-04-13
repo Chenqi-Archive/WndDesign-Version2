@@ -34,7 +34,7 @@ WindowResource::WindowResource(HANDLE hwnd) :
     swap_chain_desc.Flags = 0;
     swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
-    hr = GetDXGIFactory().CreateSwapChainForHwnd(
+    hr << GetDXGIFactory().CreateSwapChainForHwnd(
         &GetD3DDevice(),
         static_cast<HWND>(hwnd),
         &swap_chain_desc,
@@ -53,13 +53,13 @@ WindowResource::~WindowResource() {
 
 void WindowResource::WindowTarget::Create(IDXGISwapChain1& swap_chain) {
     IDXGISurface* dxgi_surface = nullptr;
-    hr = swap_chain.GetBuffer(0, IID_PPV_ARGS(&dxgi_surface));
+    hr << swap_chain.GetBuffer(0, IID_PPV_ARGS(&dxgi_surface));
 
     D2D1_BITMAP_PROPERTIES1 bitmap_properties = D2D1::BitmapProperties1(
         D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
         D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
     );
-    hr = GetD2DDeviceContext().CreateBitmapFromDxgiSurface(
+    hr << GetD2DDeviceContext().CreateBitmapFromDxgiSurface(
         dxgi_surface,
         &bitmap_properties,
         &bitmap
@@ -73,7 +73,7 @@ void WindowResource::WindowTarget::Destroy() {
 
 void WindowResource::OnResize(Size size) {
     target.Destroy();
-    hr = swap_chain->ResizeBuffers(0, size.width, size.height, DXGI_FORMAT_UNKNOWN, 0);
+    hr << swap_chain->ResizeBuffers(0, size.width, size.height, DXGI_FORMAT_UNKNOWN, 0);
     target.Create(*swap_chain);
     has_presented = false;
 }
@@ -91,7 +91,7 @@ void WindowResource::Present(vector<Rect>&& dirty_regions) {
         // The entire region must be presented for the first time.
         has_presented = true;
     }
-    hr = swap_chain->Present1(0, 0, &present_parameters);
+    hr << swap_chain->Present1(0, 0, &present_parameters);
 }
 
 

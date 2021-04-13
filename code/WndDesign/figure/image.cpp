@@ -13,12 +13,12 @@ BEGIN_NAMESPACE(Anonymous)
 
 IWICFormatConverter* LoadFromDecoder(IWICBitmapDecoder* decoder) {
 	IWICFormatConverter* converter = nullptr;
-	hr = GetWICFactory().CreateFormatConverter(&converter);
+	hr << GetWICFactory().CreateFormatConverter(&converter);
 
 	IWICBitmapFrameDecode* source = nullptr;
-	hr = decoder->GetFrame(0, &source);
+	hr << decoder->GetFrame(0, &source);
 
-	hr = converter->Initialize(
+	hr << converter->Initialize(
 		source,
 		GUID_WICPixelFormat32bppPBGRA,
 		WICBitmapDitherTypeNone,
@@ -35,14 +35,14 @@ IWICFormatConverter* LoadImageFromFile(const wstring& file_name) {
 	IWICBitmapDecoder* decoder = nullptr;
 
 	try {
-		hr &= GetWICFactory().CreateDecoderFromFilename(
+		hr << GetWICFactory().CreateDecoderFromFilename(
 			file_name.c_str(),
 			NULL,
 			GENERIC_READ,
 			WICDecodeMetadataCacheOnDemand,
 			&decoder
 		);
-	} catch (...) {
+	} catch (std::runtime_error&) {
 		throw std::invalid_argument("invalid iamge file");
 	}
 
@@ -55,21 +55,21 @@ IWICFormatConverter* LoadImageFromFile(const wstring& file_name) {
 
 IWICFormatConverter* LoadImageFromMemory(void* address, size_t size) {
 	IWICStream* stream = nullptr;
-	hr = GetWICFactory().CreateStream(&stream);
-	hr = stream->InitializeFromMemory(
+	hr << GetWICFactory().CreateStream(&stream);
+	hr << stream->InitializeFromMemory(
 		reinterpret_cast<BYTE*>(address),
 		static_cast<DWORD>(size)
 	);
 
 	IWICBitmapDecoder* decoder = nullptr;
 	try {
-		hr &= GetWICFactory().CreateDecoderFromStream(
+		hr << GetWICFactory().CreateDecoderFromStream(
 			stream,
 			NULL,
 			WICDecodeMetadataCacheOnLoad,
 			&decoder
 		);
-	} catch (...) {
+	} catch (std::runtime_error&) {
 		SafeRelease(&stream);
 		throw std::invalid_argument("invalid iamge address");
 	}
@@ -108,7 +108,7 @@ void Image::LoadD2DBitmap() {
 		D2D1_BITMAP_OPTIONS_NONE,  // Only used as source.
 		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 	);
-	hr = GetD2DDeviceContext().CreateBitmapFromWicBitmap(
+	hr << GetD2DDeviceContext().CreateBitmapFromWicBitmap(
 		AsIWICFormatConverter(wic_image),
 		&bitmap_properties,
 		AsID2D1Bitmap1(&d2d_bitmap)

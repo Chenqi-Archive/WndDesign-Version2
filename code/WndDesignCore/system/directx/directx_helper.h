@@ -12,13 +12,9 @@ BEGIN_NAMESPACE(WndDesign)
 
 
 struct HResultWrapper {
-	// Abort when failed.
-	void operator=(HRESULT hr) const {
-		assert(SUCCEEDED(hr));
-	}
-	// Throw when failed.
-	void operator&=(HRESULT hr) const {
-		if (!SUCCEEDED(hr)) { throw std::runtime_error("hresult failed"); }
+	const HResultWrapper& operator<<(HRESULT hr) const {
+		if (!SUCCEEDED(hr)) { throw std::runtime_error("hresult failure"); }
+		return *this;
 	}
 };
 inline static const HResultWrapper hr;

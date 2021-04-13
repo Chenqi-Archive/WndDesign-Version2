@@ -44,6 +44,7 @@ public:
 public:
 	void UpdateInvalidRegion(FigureQueue& figure_queue);
 	void Present();
+	void RefreshLayer();
 
 private:
 	Point _capture_wnd_offset_from_desktop;
@@ -92,6 +93,7 @@ public:
 public:
 	virtual void CommitReflowQueue() override;
 	virtual void CommitRedrawQueue() override;
+	void RefreshLayer();
 
 public:
 	void OnWndDetach(WndObject& wnd);
@@ -120,6 +122,8 @@ public:
 		return { nullptr, point_zero };
 	}
 };
+
+inline DesktopObjectImpl& GetDesktop() { return static_cast<DesktopObjectImpl&>(desktop); }
 
 
 class DesktopBase : public WndBase {

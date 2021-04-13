@@ -12,7 +12,7 @@ BEGIN_NAMESPACE(Anonymous)
 class WICFactory {
 public:
     WICFactory() : factory(nullptr) {
-        hr = CoCreateInstance(
+        hr << CoCreateInstance(
             CLSID_WICImagingFactory2,
             nullptr,
             CLSCTX_INPROC_SERVER,

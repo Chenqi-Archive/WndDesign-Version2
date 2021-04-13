@@ -33,7 +33,7 @@ void DesktopWndFrame::OnRegionChange(Rect region) {
 
 void DesktopWndFrame::SetRegion(Rect region) {
 	if (_wnd.GetRegionOnParent() == region) { return; }
-	static_cast<DesktopObjectImpl&>(desktop).SetChildRegionStyle(_wnd_object, region);
+	GetDesktop().SetChildRegionStyle(_wnd_object, region);
 }
 
 const pair<Size, Size> DesktopWndFrame::CalculateMinMaxSize() {
@@ -87,6 +87,13 @@ void DesktopWndFrame::Present() {
 	if (bounding_region.IsEmpty()) { return; }
 	_resource.Present(std::move(regions));
 	_invalid_region.Clear();
+}
+
+void DesktopWndFrame::RefreshLayer() {
+#pragma message(Remark"May use a unique_ptr to manage WindowResource, but this method also works.")
+	_resource.~WindowResource();
+	new(&_resource)WindowResource(_hwnd);
+	Invalidate(region_infinite);
 }
 
 void DesktopWndFrame::OnWndDetach(WndObject& wnd) {
@@ -222,6 +229,13 @@ void DesktopObjectImpl::CommitRedrawQueue() {
 	redraw_queue.Commit();
 }
 
+void DesktopObjectImpl::RefreshLayer() {
+	for (DesktopWndFrame& frame : _child_wnds) {
+		frame.RefreshLayer();
+		frame._wnd.RefreshLayer();
+	}
+}
+
 void DesktopObjectImpl::OnWndDetach(WndObject& wnd) {
 	if (ref_ptr<DesktopWndFrame> frame = GetWndFrame(wnd); frame != nullptr) {
 		frame->OnWndDetach(wnd);
@@ -293,10 +307,10 @@ DesktopBase::DesktopBase(DesktopObjectImpl& desktop_object) : WndBase(desktop_ob
 DesktopBase::~DesktopBase() {}
 
 
-void WndBase::SetCapture() { static_cast<DesktopObjectImpl&>(desktop).SetCapture(_object); }
-void WndBase::ReleaseCapture() { static_cast<DesktopObjectImpl&>(desktop).ReleaseCapture(); }
-void WndBase::SetFocus() { static_cast<DesktopObjectImpl&>(desktop).SetFocus(_object); }
-void WndBase::NotifyDesktopWhenDetached() { static_cast<DesktopObjectImpl&>(desktop).OnWndDetach(_object); }
+void WndBase::SetCapture() { GetDesktop().SetCapture(_object); }
+void WndBase::ReleaseCapture() { GetDesktop().ReleaseCapture(); }
+void WndBase::SetFocus() { GetDesktop().SetFocus(_object); }
+void WndBase::NotifyDesktopWhenDetached() { GetDesktop().OnWndDetach(_object); }
 
 
 END_NAMESPACE(WndDesign)

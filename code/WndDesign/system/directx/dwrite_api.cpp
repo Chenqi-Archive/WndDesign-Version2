@@ -12,7 +12,7 @@ BEGIN_NAMESPACE(Anonymous)
 struct DWriteFactory {
 public:
 	DWriteFactory() : factory(NULL) {
-		hr = DWriteCreateFactory(
+		hr << DWriteCreateFactory(
 			DWRITE_FACTORY_TYPE_SHARED,
 			__uuidof(IDWriteFactory),
 			reinterpret_cast<IUnknown**>(&factory)

@@ -199,6 +199,14 @@ void WndBase::AllocateLayer() {
 	ResetVisibleRegion();
 }
 
+void WndBase::RefreshLayer() {
+	if (HasLayer()) {
+		_layer.reset();
+		AllocateLayer();
+	}
+	for (auto child : _child_wnds) { child->RefreshLayer(); }
+}
+
 void WndBase::JoinRedrawQueue() {
 	if (IsDepthValid() && !_redraw_queue_index.valid()) {
 		GetRedrawQueue().AddWnd(*this);

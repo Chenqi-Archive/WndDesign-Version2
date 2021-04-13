@@ -30,11 +30,13 @@ public:
 	ID2D1DeviceContext* d2d_device_context;
 	ID2D1SolidColorBrush* d2d_solid_color_brush;
 
-public:
+private:
 	DirectXResources();
 	~DirectXResources();
 
 public:
+	static void Create();
+	static void Destroy();
 	WNDDESIGNCORE_API static const DirectXResources& Get();
 };
 

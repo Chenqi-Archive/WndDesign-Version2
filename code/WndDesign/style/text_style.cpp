@@ -135,27 +135,27 @@ void TextStyleRangeList::ApplyTo(TextLayout& layout) const {
 
 
 void TextStyleFont::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetFontFamilyName(value.c_str(), TextRange2TextRange(range));
+	hr << layout.SetFontFamilyName(value.c_str(), TextRange2TextRange(range));
 }
 
 void TextStyleSize::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetFontSize(value, TextRange2TextRange(range));
+	hr << layout.SetFontSize(value, TextRange2TextRange(range));
 }
 
 void TextStyleBold::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetFontWeight(value ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL, TextRange2TextRange(range));
+	hr << layout.SetFontWeight(value ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL, TextRange2TextRange(range));
 }
 
 void TextStyleItalic::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetFontStyle(value ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL, TextRange2TextRange(range));
+	hr << layout.SetFontStyle(value ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL, TextRange2TextRange(range));
 }
 
 void TextStyleUnderline::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetUnderline(value, TextRange2TextRange(range));
+	hr << layout.SetUnderline(value, TextRange2TextRange(range));
 }
 
 void TextStyleColor::ApplyTo(TextLayout& layout, TextRange range) const {
-	hr = layout.SetDrawingEffect(&GetSolidColorBrush(value), TextRange2TextRange(range));
+	hr << layout.SetDrawingEffect(&GetSolidColorBrush(value), TextRange2TextRange(range));
 }
 
 

@@ -58,7 +58,15 @@ void RedrawQueue::Commit() {
 		frame.UpdateInvalidRegion(figure_queue); figure_queue.Clear();
 	}
 
-	EndDraw();
+	try {
+		EndDraw();
+	} catch (std::runtime_error&) {
+		DirectXResources::Destroy();
+		DirectXResources::Create();
+		GetDesktop().RefreshLayer();
+		_has_invalid_frame = true;
+		return Commit();
+	}
 
 	// Present and remove desktop windows.
 	while (!_queue[next_depth].empty()) {

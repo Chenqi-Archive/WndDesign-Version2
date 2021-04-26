@@ -14,9 +14,6 @@ struct StyleCalculator : public WndStyle {
 private:
 	StyleCalculator() = delete;
 
-public:
-	static inline const std::invalid_argument style_parse_exception = std::invalid_argument("style parse error");
-
 	// style dependency identification
 public:
 	static bool IsLengthRelative(const LengthStyle& length) {
@@ -93,18 +90,16 @@ public:
 		return normal_length;
 	}
 	static const ValueTag Clamp(ValueTag normal_length, ValueTag min_length, ValueTag max_length) {
-		if (normal_length.AsUnsigned() < min_length.AsUnsigned()) { normal_length.Set(min_length.AsUnsigned()); }
-		if (normal_length.AsUnsigned() > max_length.AsUnsigned()) { normal_length.Set(max_length.AsUnsigned()); }
+		if (normal_length.AsUnsigned() < min_length.AsUnsigned()) { normal_length = px(min_length.AsUnsigned()); }
+		if (normal_length.AsUnsigned() > max_length.AsUnsigned()) { normal_length = px(max_length.AsUnsigned()); }
 		return normal_length;
 	}
 	static const uint CalculatePosition(ValueTag position_low, ValueTag position_high, uint parent_length, uint length) {
 		if (position_low.IsAuto() || position_low.IsCenter()) {
 			if (position_low.IsCenter()) {
-				position_low.Set((((int)parent_length) - (int)length) / 2);
+				position_low = px((((int)parent_length) - (int)length) / 2);
 			} else if (!position_high.IsAuto()) {
-				position_low.Set((int)parent_length - position_high.AsSigned() - (int)length);
-			} else {
-				throw style_parse_exception;
+				position_low = px((int)parent_length - position_high.AsSigned() - (int)length);
 			}
 		}
 		return position_low.AsSigned();
@@ -124,7 +119,7 @@ public:
 			if (IsPositionAuto(position_low) || IsPositionAuto(position_high)) {
 				normal_length = max_length;
 			} else {
-				normal_length.Set((int)parent_length - position_low.AsSigned() - position_high.AsSigned());
+				normal_length = px((int)parent_length - position_low.AsSigned() - position_high.AsSigned());
 			}
 		}
 		normal_length = Clamp(normal_length, min_length, max_length);

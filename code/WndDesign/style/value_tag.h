@@ -19,9 +19,6 @@ public:
 	explicit constexpr ValueTag(int value, Tag tag = Tag::Pixel) : _value(value), _tag(tag) {}
 	explicit constexpr ValueTag(uint value, Tag tag = Tag::Pixel) : _value(static_cast<int>(value)), _tag(tag) {}
 
-	constexpr void Set(int value, Tag tag = Tag::Pixel) { _value = value; _tag = tag; }
-	constexpr void Set(uint value, Tag tag = Tag::Pixel) { _value = static_cast<int>(value); _tag = tag; }
-
 	constexpr bool IsPixel() const { return _tag == Tag::Pixel; }
 	constexpr bool IsPercent() const { return _tag == Tag::Percent; }
 	constexpr bool IsCenter() const { return _tag == Tag::Center; }
@@ -31,11 +28,12 @@ public:
 	constexpr int AsSigned() const { return _value; }
 	constexpr uint AsUnsigned() const { return _value >= 0 ? static_cast<uint>(_value) : 0; }
 
-	constexpr void ConvertToPixel(uint entire_length) {
+	constexpr ValueTag& ConvertToPixel(uint entire_length) {
 		if (_tag == Tag::Percent) {
 			_value = _value * static_cast<int>(entire_length) / 100;
 			_tag = Tag::Pixel;
 		}
+		return *this;
 	}
 };
 

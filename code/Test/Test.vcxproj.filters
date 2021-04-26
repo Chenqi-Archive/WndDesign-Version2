@@ -32,5 +32,8 @@
     <ClInclude Include="figure_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SplitLayout_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

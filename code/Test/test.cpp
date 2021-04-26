@@ -1,4 +1,4 @@
-#include "Wnd_and_Desktop_test.h"
+#include "SplitLayout_test.h"
 
 
 #pragma comment(lib, "WndDesign.lib")

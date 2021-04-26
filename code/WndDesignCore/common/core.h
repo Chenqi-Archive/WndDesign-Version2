@@ -42,7 +42,7 @@ using alloc_ptr = T*;   // [BE CAREFUL] A tag for raw pointer that is allocated 
 using uchar = unsigned char;
 using ushort = unsigned short;
 using uint = unsigned int;
-using ulonglong = unsigned long long;
+using uint64 = unsigned long long;
 using wchar = wchar_t;
 
 

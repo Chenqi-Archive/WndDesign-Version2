@@ -84,6 +84,9 @@
     <ClCompile Include="widget\MessageBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wnd\SplitLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="figure\figure_types.h">
@@ -246,6 +249,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wnd\DesktopObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wnd\SplitLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

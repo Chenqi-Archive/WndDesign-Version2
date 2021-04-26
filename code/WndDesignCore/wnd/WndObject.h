@@ -56,18 +56,16 @@ private:
 
 
 	//// data used by parent window ////
-protected:
-	using Data = ulonglong; static_assert(sizeof(Data) == 8);
 private:
-	Data data = 0;
+	uint64 data = 0;
 protected:
 	template<class T> static void SetChildData(WndObject& child, T data) {
-		static_assert(sizeof(Data) == sizeof(T));
-		child.data = *reinterpret_cast<Data*>(&data);
+		static_assert(sizeof(T) <= sizeof(uint64));
+		memcpy(&child.data, &data, sizeof(T));
 	}
 	template<class T> static T GetChildData(WndObject& child) {
-		static_assert(sizeof(Data) == sizeof(T));
-		return *reinterpret_cast<T*>(&child.data);
+		static_assert(sizeof(T) <= sizeof(uint64));
+		T data; memcpy(&data, &child.data, sizeof(T)); return data;
 	}
 
 
@@ -85,7 +83,7 @@ protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
 	const Vector SetDisplayOffset(Vector display_offset) { return wnd->SetDisplayOffset(display_offset); }
 private:
-	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrolling
+	virtual void OnDisplayRegionChange(Rect accessible_region, Rect display_region) {}  // for scrollbar update
 	virtual void OnCachedRegionChange(Rect accessible_region, Rect cached_region) {}  // for lazy-loading
 
 

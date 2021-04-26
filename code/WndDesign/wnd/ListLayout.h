@@ -12,7 +12,7 @@ using std::vector;
 
 class ListLayout : public Wnd {
 public:
-	struct Style : public Wnd::Style {
+	struct Style : Wnd::Style {
 		struct GridlineStyle {
 			uint _width = 3;
 			Color _color = ColorSet::Black;
@@ -81,12 +81,8 @@ public:
 
 	//// child windows ////
 private:
-	static void SetChildData(WndObject& child, uint row) {
-		WndObject::SetChildData(child, static_cast<ulonglong>(row));
-	}
-	static uint GetChildData(WndObject& child) {
-		return static_cast<uint>(WndObject::GetChildData<ulonglong>(child));
-	}
+	static void SetChildData(WndObject& child, uint row) { WndObject::SetChildData<uint>(child, row); }
+	static uint GetChildData(WndObject& child) { return WndObject::GetChildData<uint>(child); }
 public:
 	void SetChild(WndObject& child, uint row);
 	void InsertChild(WndObject& child, uint row);

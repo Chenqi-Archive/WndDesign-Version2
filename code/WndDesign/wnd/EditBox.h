@@ -109,6 +109,7 @@ private:
 	bool HasSelection() const { return _selection_end > _selection_begin; }
 	void DoSelection(Point mouse_move_position);
 	void SelectWord();
+	void SelectParagraph();
 	void SelectAll();
 	void ClearSelection();
 

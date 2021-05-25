@@ -168,6 +168,15 @@ void EditBox::SelectWord() {
 	UpdateSelectionRegion(); HideCaret();
 }
 
+void EditBox::SelectParagraph() {
+	const wstring& text = GetText(); uint length = (uint)text.length();
+	_selection_begin = _caret_text_position - 1; _selection_end = _caret_text_position;
+	while (_selection_begin < length && text[_selection_begin] != L'\n') { _selection_begin--; } 
+	while (_selection_end < length && text[_selection_end] != L'\n') { _selection_end++; }
+	_selection_begin++; _selection_end++;
+	UpdateSelectionRegion(); HideCaret();
+}
+
 void EditBox::SelectAll() {
 	_selection_begin = 0;
 	_selection_end = (uint)GetText().size();
@@ -273,7 +282,7 @@ void EditBox::Handler(Msg msg, Para para) {
 	switch (_mouse_tracker.Track(msg, para)) {
 	case MouseTrackMsg::LeftDown: SetFocus(); SetCaret(GetMouseMsg(para).point); break;
 	case MouseTrackMsg::LeftDoubleClick: SelectWord(); break;
-	case MouseTrackMsg::LeftTripleClick: SelectAll(); break;
+	case MouseTrackMsg::LeftTripleClick: SelectParagraph(); break;
 	case MouseTrackMsg::LeftDrag: DoSelection(GetMouseMsg(para).point); break;
 	case MouseTrackMsg::LeftUp:
 	case MouseTrackMsg::MouseMove:

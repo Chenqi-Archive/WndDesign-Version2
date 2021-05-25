@@ -70,10 +70,10 @@ void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	// Figures are drawn in desktop's coordinates, but the target is in window's coordinates, so first
 	//   push the group as the desktop relative to the target.
 	Vector offset_from_desktop = point_zero - _wnd.GetRegionOnParent().point;
-	figure_queue.PushOffset(offset_from_desktop);
+	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, bounding_region - offset_from_desktop);
 	figure_queue.Append(bounding_region.point - offset_from_desktop, new BackgroundFigure(NullBackground::Get(), bounding_region, true));
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop, CompositeEffect{});
-	figure_queue.PopOffset(offset_from_desktop);
+	figure_queue.EndGroup(group_begin);
 
 	Target& target = _resource.GetTarget();
 	for (auto& region : regions) {

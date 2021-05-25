@@ -40,17 +40,6 @@ const ListLayoutStyleCalculator& GetStyleCalculator(ListLayout::Style& style) {
 END_NAMESPACE(Anonymous)
 
 
-ListLayout::ListLayout(unique_ptr<Style> style) :
-	Wnd(std::move(style)),
-	_default_grid_size(),
-	_min_max_grid_height(),
-	_rows(),
-	_content_size(),
-	_invalid_layout_row_begin(0) {
-}
-
-ListLayout::~ListLayout() {}
-
 uint ListLayout::HitTestRow(uint y) const {
 	auto cmp = [](const RowContainer& row, uint y) { return row.y > y; };
 	auto it_row = std::lower_bound(_rows.rbegin(), _rows.rend(), y, cmp);

@@ -31,8 +31,8 @@ public:
 	};
 
 public:
-	ListLayout(unique_ptr<Style> style);
-	~ListLayout();
+	ListLayout(unique_ptr<Style> style) : Wnd(std::move(style)) {}
+	~ListLayout() {}
 
 
 	//// style ////
@@ -42,7 +42,7 @@ protected:
 
 private:
 	Size _default_grid_size;
-	std::pair<uint, uint> _min_max_grid_height;
+	std::pair<uint, uint> _min_max_grid_height = {};
 private:
 	bool UpdateDefaultGridSize(Size grid_size) {
 		return _default_grid_size == grid_size ? false : (_default_grid_size = grid_size, true);
@@ -54,7 +54,7 @@ private:
 
 	//// row operation ////
 public:
-	static inline const uint row_end = -1;
+	static constexpr uint row_end = -1;
 private:
 	struct RowContainer {
 		uint y = 0;
@@ -95,7 +95,7 @@ private:
 
 	//// layout update ////
 private:
-	uint _invalid_layout_row_begin;
+	uint _invalid_layout_row_begin = 0;
 private:
 	void ContentLayoutChanged(uint row_begin);
 private:

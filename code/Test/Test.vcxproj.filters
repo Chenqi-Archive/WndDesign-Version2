@@ -32,7 +32,7 @@
     <ClInclude Include="figure_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SplitLayout_test.h">
+    <ClInclude Include="SplitLayout_and_FlowLayout_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

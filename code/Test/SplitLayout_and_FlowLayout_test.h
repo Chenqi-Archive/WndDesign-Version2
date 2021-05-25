@@ -1,5 +1,7 @@
 #include "../WndDesign/WndDesign.h"
 #include "../WndDesign/wnd/SplitLayout.h"
+#include "../WndDesign/wnd/FlowLayout.h"
+#include "../WndDesign/wnd/Button.h"
 #include "../WndDesign/wnd/EditBox.h"
 
 

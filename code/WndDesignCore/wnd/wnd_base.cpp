@@ -270,8 +270,8 @@ void WndBase::UpdateInvalidRegion(FigureQueue& figure_queue) {
 }
 
 void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region, CompositeEffect composite_effect) const {
-	//parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
-	assert(_region_on_parent.Contains(parent_invalid_region)); // intersection should have been done by parent.
+	parent_invalid_region = parent_invalid_region.Intersect(_region_on_parent);
+	//assert(_region_on_parent.Contains(parent_invalid_region)); // intersection should have been done by parent.
 
 	// Composite non-client region.
 	Vector display_region_offset = _region_on_parent.point - point_zero;

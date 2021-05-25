@@ -193,6 +193,7 @@
     <ClInclude Include="message\msg_base.h" />
     <ClInclude Include="layer\composite_effect.h" />
     <ClInclude Include="system\directx\d2d_api_window.h" />
+    <ClInclude Include="system\directx\dcomp_api.h" />
     <ClInclude Include="system\directx\directx_resource.h" />
     <ClInclude Include="system\init.h" />
     <ClInclude Include="system\metrics.h" />

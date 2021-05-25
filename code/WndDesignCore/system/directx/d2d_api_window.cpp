@@ -1,6 +1,7 @@
 #include "directx_helper.h"
 #include "d2d_api_window.h"
 #include "dxgi_api.h"
+#include "dcomp_api.h"
 
 
 //////////////////////////////////////////////////////////
@@ -11,42 +12,37 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-inline const Size GetWindowSize(HANDLE hwnd) {
-    RECT rc;
-    GetClientRect(static_cast<HWND>(hwnd), &rc);
-    return Size(rc.right - rc.left, rc.bottom - rc.top);
-}
-
-
-WindowResource::WindowResource(HANDLE hwnd) : 
+WindowResource::WindowResource(HANDLE hwnd, Size size) :
     swap_chain(nullptr), target(), has_presented(false) {
     DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = { 0 };
-    swap_chain_desc.Width = 0;   // width and height will be calculated automatically
-    swap_chain_desc.Height = 0;
+    swap_chain_desc.Width = size.width;   // width and height will be calculated automatically
+    swap_chain_desc.Height = size.height;
     swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     swap_chain_desc.Stereo = false;
     swap_chain_desc.SampleDesc.Count = 1;
     swap_chain_desc.SampleDesc.Quality = 0;
     swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swap_chain_desc.BufferCount = 2;
-    swap_chain_desc.Scaling = DXGI_SCALING_NONE;
+    swap_chain_desc.Scaling = DXGI_SCALING_STRETCH;
     swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
     swap_chain_desc.Flags = 0;
-    swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+    swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
 
-    hr << GetDXGIFactory().CreateSwapChainForHwnd(
-        &GetD3DDevice(),
-        static_cast<HWND>(hwnd),
-        &swap_chain_desc,
-        nullptr,
-        nullptr,
-        &swap_chain
-    );
+    hr << GetDXGIFactory().CreateSwapChainForComposition(&GetD3DDevice(), &swap_chain_desc, nullptr, &swap_chain);
 
     target.Create(*swap_chain);
+
+    hr << GetDCompDevice().CreateTargetForHwnd(static_cast<HWND>(hwnd), false, &comp_target);
+    hr << GetDCompDevice().CreateVisual(&comp_visual); 
+    comp_visual->SetContent(swap_chain);
+    comp_target->SetRoot(comp_visual);
+    GetDCompDevice().Commit();
 }
 
 WindowResource::~WindowResource() {
+    SafeRelease(&comp_visual);
+    SafeRelease(&comp_target);
+
     target.Destroy();
     SafeRelease(&swap_chain);
 }

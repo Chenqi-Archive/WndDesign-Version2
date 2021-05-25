@@ -12,6 +12,9 @@
 
 struct IDXGISwapChain1;
 
+struct IDCompositionTarget;
+struct IDCompositionVisual;
+
 using HANDLE = void*;
 
 
@@ -32,8 +35,12 @@ private:
 		void Destroy();
 	}target;
 
+private:
+	IDCompositionTarget* comp_target;
+	IDCompositionVisual* comp_visual;
+
 public:
-	WindowResource(HANDLE hwnd);
+	WindowResource(HANDLE hwnd, Size size);
 	~WindowResource();
 
 	void OnResize(Size size);

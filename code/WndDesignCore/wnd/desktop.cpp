@@ -11,8 +11,8 @@ BEGIN_NAMESPACE(WndDesign)
 extern ref_ptr<DesktopWndFrame> mouse_tracked_frame;
 
 
-DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd) :
-	_wnd(wnd), _wnd_object(wnd_object), _hwnd(hwnd), _resource(_hwnd) {
+DesktopWndFrame::DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd, Size size) :
+	_wnd(wnd), _wnd_object(wnd_object), _hwnd(hwnd), _resource(_hwnd, size) {
 	// Store the pointer of the attached frame as the user data.
 	Win32::SetWndUserData(_hwnd, this);
 }
@@ -71,6 +71,7 @@ void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	//   push the group as the desktop relative to the target.
 	Vector offset_from_desktop = point_zero - _wnd.GetRegionOnParent().point;
 	figure_queue.PushOffset(offset_from_desktop);
+	figure_queue.Append(bounding_region.point - offset_from_desktop, new BackgroundFigure(NullBackground::Get(), bounding_region, true));
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop, CompositeEffect{});
 	figure_queue.PopOffset(offset_from_desktop);
 
@@ -92,7 +93,7 @@ void DesktopWndFrame::Present() {
 void DesktopWndFrame::RefreshLayer() {
 #pragma message(Remark"May use a unique_ptr to manage WindowResource, but this method also works.")
 	_resource.~WindowResource();
-	new(&_resource)WindowResource(_hwnd);
+	new(&_resource)WindowResource(_hwnd, _wnd.GetRegionOnParent().size);
 	Invalidate(region_infinite);
 }
 
@@ -174,7 +175,7 @@ void DesktopObjectImpl::AddChild(WndObject& child, std::function<void(HANDLE)> c
 	Rect region = UpdateChildRegion(child, GetSize());
 	RegisterChild(child);
 	HANDLE hwnd = Win32::CreateWnd(region, child.GetTitle(), child.GetCompositeEffect(), callback);
-	DesktopWndFrame& frame = _child_wnds.emplace_front(static_cast<WndBase&>(*child.wnd), child, hwnd);
+	DesktopWndFrame& frame = _child_wnds.emplace_front(static_cast<WndBase&>(*child.wnd), child, hwnd, region.size);
 	frame._desktop_index = _child_wnds.begin();
 	SetChildFrame(child, frame);
 }

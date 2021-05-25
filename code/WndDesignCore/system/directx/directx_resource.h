@@ -8,6 +8,8 @@ struct IDXGIDevice1;
 struct IDXGIAdapter;
 struct IDXGIFactory2;
 
+struct IDCompositionDevice;
+
 struct ID2D1Factory1;
 struct ID2D1DeviceContext;
 struct ID2D1SolidColorBrush;
@@ -23,6 +25,10 @@ public:
 	IDXGIDevice1* dxgi_device;
 	IDXGIAdapter* dxgi_adapter;
 	IDXGIFactory2* dxgi_factory;
+
+	/// DComp ///
+public:
+	IDCompositionDevice* dcomp_device;
 
 	/// D2D ///
 public:

@@ -4,6 +4,7 @@
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dcomp.lib")
 
 
 BEGIN_NAMESPACE(WndDesign)
@@ -37,6 +38,10 @@ DirectXResources::DirectXResources() {
     hr << dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory));
 
 
+    // Create DComp device.
+    hr << DCompositionCreateDevice(dxgi_device, __uuidof(IDCompositionDevice), reinterpret_cast<void**>(&dcomp_device));
+
+
     // Create D2D factory.
     hr << D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &d2d_factory);
 
@@ -54,6 +59,8 @@ DirectXResources::~DirectXResources() {
     SafeRelease(&d2d_solid_color_brush);
     SafeRelease(&d2d_device_context);
 	SafeRelease(&d2d_factory);
+
+    SafeRelease(&dcomp_device);
 
     SafeRelease(&dxgi_factory);
     SafeRelease(&dxgi_adapter);

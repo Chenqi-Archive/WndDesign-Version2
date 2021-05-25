@@ -29,7 +29,7 @@ const NullBackground& NullBackground::Get() {
 }
 
 void NullBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	target.Clear(Color2COLOR(ColorSet::White));
+	target.Clear(Color2COLOR(color_transparent));
 }
 
 

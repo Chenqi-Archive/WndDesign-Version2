@@ -21,7 +21,7 @@ private:
 	list<DesktopWndFrame>::iterator _desktop_index;
 
 public:
-	DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd);
+	DesktopWndFrame(WndBase& wnd, WndObject& wnd_object, HANDLE hwnd, Size size);
 	~DesktopWndFrame();
 
 public:

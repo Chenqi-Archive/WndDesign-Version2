@@ -230,12 +230,10 @@ BEGIN_NAMESPACE(Win32)
 
 HANDLE CreateWnd(Rect region, const wstring& title, CompositeEffect composite_effect, std::function<void(HANDLE)> callback) {
     RegisterWndClass(); 
-    HWND hWnd = CreateWindowExW(
-        NULL, wnd_class_name, title.c_str(),
-        WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_HSCROLL | WS_VSCROLL,
-        region.point.x, region.point.y, region.size.width, region.size.height,
-        NULL, NULL, hInstance, NULL
-    );
+    HWND hWnd = CreateWindowExW(WS_EX_NOREDIRECTIONBITMAP, wnd_class_name, title.c_str(),
+                                WS_POPUP | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_HSCROLL | WS_VSCROLL,
+                                region.point.x, region.point.y, region.size.width, region.size.height,
+                                NULL, NULL, hInstance, NULL);
     if (hWnd == NULL) { throw std::runtime_error("create window error"); }
     if (callback) { callback(hWnd); }
     SetWndCompositeEffect(hWnd, composite_effect);

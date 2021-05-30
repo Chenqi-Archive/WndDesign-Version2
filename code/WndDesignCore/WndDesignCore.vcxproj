@@ -170,7 +170,6 @@
   <ItemGroup>
     <ClInclude Include="common\core.h" />
     <ClInclude Include="common\list_iterator.h" />
-    <ClInclude Include="common\reference_wrapper.h" />
     <ClInclude Include="common\uncopyable.h" />
     <ClInclude Include="figure\color.h" />
     <ClInclude Include="figure\figure_base.h" />

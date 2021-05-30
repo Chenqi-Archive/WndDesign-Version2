@@ -1,7 +1,6 @@
 #pragma once
 
 #include "wnd_base_interface.h"
-#include "../common/reference_wrapper.h"
 #include "../common/list_iterator.h"
 #include "../geometry/region.h"
 

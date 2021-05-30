@@ -72,9 +72,6 @@
     <ClInclude Include="figure\figure_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common\reference_wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="layer\tiling_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>

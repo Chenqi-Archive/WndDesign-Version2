@@ -130,13 +130,4 @@ void TextBlockFigure::DrawOn(RenderTarget& target, Vector offset) const {
 }
 
 
-//////////////////////////////////////////////////////////
-////                background_types.h                ////
-//////////////////////////////////////////////////////////
-
-void SolidColorBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	target.Clear(Color2COLOR(color));
-}
-
-
 END_NAMESPACE(WndDesign)

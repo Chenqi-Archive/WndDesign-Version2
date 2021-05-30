@@ -1,4 +1,5 @@
 #include "background_types.h"
+#include "figure_types.h"
 #include "../geometry/geometry_helper.h"
 #include "../geometry/rect_point_iterator.h"
 
@@ -13,16 +14,9 @@ shared_ptr<Background> GetNullBackground() {
 
 
 void SolidColorBackground::DrawOn(Rect region, RenderTarget& target, Vector offset) const {
-	Rectangle rectangle(region.size, color);
-	rectangle.DrawOn(target, offset);
+	Rectangle(region.size, color).DrawOn(target, offset);
 }
 
-
-void ImageRepeatBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	// First clear the region to be transparent.
-	SolidColorBackground solid_color(color_transparent); solid_color.Clear(region, target, offset);  
-	DrawOn(region, target, offset);
-}
 
 void ImageRepeatBackground::DrawOn(Rect region, RenderTarget& target, Vector offset) const {
 	using RepeatRange = Rect;

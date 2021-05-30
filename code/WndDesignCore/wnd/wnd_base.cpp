@@ -3,7 +3,6 @@
 #include "redraw_queue.h"
 #include "WndObject.h"
 #include "../layer/layer.h"
-#include "../layer/background_types.h"
 #include "../geometry/geometry_helper.h"
 
 
@@ -28,7 +27,6 @@ WndBase::WndBase(WndObject& object) :
 	_cached_region(region_empty),
 
 	_reflow_queue_index(),
-	_background(NullBackground::Get()),
 	_layer(),
 
 	_redraw_queue_index(),
@@ -253,7 +251,7 @@ void WndBase::UpdateInvalidRegion(FigureQueue& figure_queue) {
 
 		auto [bounding_region, regions] = _invalid_region.GetRect();
 		uint group_index = figure_queue.BeginGroup(vector_zero, bounding_region);
-		figure_queue.Append(bounding_region.point, new BackgroundFigure(_background, bounding_region, true));
+		figure_queue.Append(point_zero, new ClearCommand());
 		_object.OnPaint(figure_queue, _accessible_region, bounding_region);
 		figure_queue.EndGroup(group_index);
 
@@ -282,9 +280,8 @@ void WndBase::Composite(FigureQueue& figure_queue, Rect parent_invalid_region, C
 		Vector client_offset = vector_zero - _display_offset;
 		Rect invalid_client_region = invalid_region - client_offset;
 		if (HasLayer()) {
-			figure_queue.Append(invalid_region.point, new LayerFigure(*_layer, _background, invalid_client_region));
+			figure_queue.Append(invalid_region.point, new LayerFigure(*_layer, invalid_client_region));
 		} else {
-			figure_queue.Append(invalid_region.point, new BackgroundFigure(_background, invalid_client_region, false));
 			figure_queue.PushOffset(client_offset);
 			_object.OnPaint(figure_queue, _accessible_region, invalid_client_region);
 			figure_queue.PopOffset(client_offset);

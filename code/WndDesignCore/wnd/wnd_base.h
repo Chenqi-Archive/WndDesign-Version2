@@ -121,13 +121,6 @@ public:
 	////                    Composition                    ////
 	///////////////////////////////////////////////////////////
 
-	//// background ////
-private:
-	reference_wrapper<const Background> _background;
-public:
-	virtual void SetBackground(const Background& background) override { _background = background; }
-
-
 	//// layer management ////
 private:
 	unique_ptr<Layer> _layer;

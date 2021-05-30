@@ -122,7 +122,6 @@ private:
 
 	//// painting and composition ////
 protected:
-	void SetBackground(const Background& background) { wnd->SetBackground(background); Invalidate(region_infinite); }
 	void AllocateLayer() { wnd->AllocateLayer(); }
 	void Invalidate(Rect invalidate_client_region) { wnd->Invalidate(invalidate_client_region); }
 	void NonClientInvalidate(Rect invalid_non_client_region) {

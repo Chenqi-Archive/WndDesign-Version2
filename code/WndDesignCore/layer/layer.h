@@ -68,17 +68,19 @@ public:
 };
 
 
-struct Background;
-
 struct LayerFigure : Figure {
 	const Layer& layer;
-	const Background& background;
 	Rect region;
 
-	LayerFigure(const Layer& layer, const Background& background, Rect region) :
-		layer(layer), background(background), region(region) {
-	}
+	LayerFigure(const Layer& layer, Rect region) :layer(layer), region(region) {}
 	virtual const Rect GetRegion() const override { return Rect(point_zero, region.size); }
+	virtual void DrawOn(RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
+};
+
+
+struct ClearCommand : Figure {
+	ClearCommand() {}
+	virtual const Rect GetRegion() const override { return region_infinite; }
 	virtual void DrawOn(RenderTarget& target, Vector offset) const override;  // defined in figure_types.cpp
 };
 

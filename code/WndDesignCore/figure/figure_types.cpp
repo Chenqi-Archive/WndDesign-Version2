@@ -1,4 +1,3 @@
-#include "../layer/background_types.h"
 #include "../layer/layer.h"
 #include "../geometry/rect_point_iterator.h"
 #include "../geometry/geometry_helper.h"
@@ -16,20 +15,6 @@ BEGIN_NAMESPACE(WndDesign)
 
 const Size GetTargetSize(const RenderTarget& target) {
 	return SIZE2Size(target.GetSize());
-}
-
-
-//////////////////////////////////////////////////////////
-////                background_types.h                ////
-//////////////////////////////////////////////////////////
-
-const NullBackground& NullBackground::Get() {
-	static NullBackground null_background;
-	return null_background;
-}
-
-void NullBackground::Clear(Rect region, RenderTarget& target, Vector offset) const {
-	target.Clear(Color2COLOR(color_transparent));
 }
 
 
@@ -53,14 +38,12 @@ void LayerFigure::DrawOn(RenderTarget& target, Vector offset) const {
 				D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
 				Rect2RECT(region_on_tile)
 			);
-		} else {
-			background.DrawOn(
-				region_on_tile + tile_offset,
-				target,
-				offset
-			);
 		}
 	}
+}
+
+void ClearCommand::DrawOn(RenderTarget& target, Vector offset) const {
+    target.Clear(Color2COLOR(color_transparent));
 }
 
 

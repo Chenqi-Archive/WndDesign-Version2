@@ -1,4 +1,5 @@
 #include "SplitLayout.h"
+#include "../figure/figure_types.h"
 
 #include <algorithm>
 

@@ -13,7 +13,6 @@ using std::unique_ptr;
 
 class WndObject;
 class FigureQueue;
-struct Background;
 
 constexpr uint max_wnd_depth = 63;  // depth (valid) <= 63
 
@@ -39,7 +38,6 @@ struct ABSTRACT_BASE IWndBase {
 	virtual void InvalidateLayout() pure;
 
 	//// painting and composition ////
-	virtual void SetBackground(const Background& background) pure;
 	virtual void AllocateLayer() pure;
 	virtual void Invalidate(Rect region) pure;
 	virtual void InvalidateChild(IWndBase& child, Rect child_invalid_region) pure;

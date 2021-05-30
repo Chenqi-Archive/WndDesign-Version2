@@ -6,7 +6,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-Wnd::Wnd(unique_ptr<Style> style) : 
+Wnd::Wnd(unique_ptr<Style> style) :
 	_style(std::move(style)),
 	_margin_without_padding(),
 	_margin(),
@@ -14,10 +14,8 @@ Wnd::Wnd(unique_ptr<Style> style) :
 	_client_to_display_offset(),
 	_invalid_layout({ true, true, true, true }),
 	_mouse_capture_info({ ElementType::None }),
-	_mouse_track_info({ ElementType::None, nullptr })
-{
+	_mouse_track_info({ ElementType::None, nullptr }) {
 	if (_style == nullptr) { throw std::invalid_argument("style can't be null"); }
-	SetBackground(_style->background.Get());
 }
 
 Wnd::~Wnd() {}
@@ -49,7 +47,7 @@ void Wnd::ResetRegionOnParent(Rect old_window_region, Margin margin_to_extend) {
 	RegionOnParentChanged();
 }
 
-bool Wnd::IsScrollable() const { 
+bool Wnd::IsScrollable() const {
 	return GetDisplaySize() == ExtendSizeByMargin(GetClientSize(), _margin) ? false : true;
 }
 
@@ -167,6 +165,7 @@ void Wnd::OnDisplayRegionChange(Rect accessible_region, Rect display_region) {
 void Wnd::OnPaint(FigureQueue& figure_queue, Rect accessible_region, Rect invalid_region) const {
 	Rect invalid_client_region = (invalid_region - GetClientOffset()).Intersect(GetClientRegion());
 	if (invalid_client_region.IsEmpty()) { return; }
+	figure_queue.Append(invalid_region.point, new BackgroundFigure(GetStyle().background.Get(), invalid_region));
 	Vector offset = figure_queue.PushOffset(GetClientOffset());
 	OnClientPaint(figure_queue, GetClientRegion(), invalid_client_region);
 	figure_queue.PopOffset(offset);

@@ -1,7 +1,7 @@
 #include "desktop.h"
 #include "reflow_queue.h"
 #include "redraw_queue.h"
-#include "../layer/background_types.h"
+#include "../layer/layer.h"
 #include "../system/win32_api.h"
 #include "../system/metrics.h"
 
@@ -71,7 +71,7 @@ void DesktopWndFrame::UpdateInvalidRegion(FigureQueue& figure_queue) {
 	//   push the group as the desktop relative to the target.
 	Vector offset_from_desktop = point_zero - _wnd.GetRegionOnParent().point;
 	uint group_begin = figure_queue.BeginGroup(offset_from_desktop, bounding_region - offset_from_desktop);
-	figure_queue.Append(bounding_region.point - offset_from_desktop, new BackgroundFigure(NullBackground::Get(), bounding_region, true));
+	figure_queue.Append(point_zero, new ClearCommand());
 	_wnd.Composite(figure_queue, bounding_region - offset_from_desktop, CompositeEffect{});
 	figure_queue.EndGroup(group_begin);
 

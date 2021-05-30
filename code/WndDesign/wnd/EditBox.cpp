@@ -1,5 +1,6 @@
 #include "EditBox.h"
 #include "DesktopObject.h"
+#include "../figure/figure_types.h"
 #include "../system/ime.h"
 #include "../system/clipboard.h"
 

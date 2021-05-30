@@ -78,7 +78,8 @@ public:
 	const Size GetDisplaySize() const { return GetDisplayRegion().size; }
 	const Vector GetDisplayOffset() const { return GetDisplayRegion().point - point_zero; }
 	const Point ConvertPointToNonClientPoint(Point point) const { return point - GetDisplayOffset(); }
-	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (wnd->GetRegionOnParent().point - point_zero); }
+	const Rect GetRegionOnParent() const { return wnd->GetRegionOnParent(); }
+	const Point ConvertNonClientPointToParentPoint(Point point) const { return point + (GetRegionOnParent().point - point_zero); }
 protected:
 	void SetAccessibleRegion(Rect accessible_region) { wnd->SetAccessibleRegion(accessible_region); }
 	const Vector SetDisplayOffset(Vector display_offset) { return wnd->SetDisplayOffset(display_offset); }
@@ -95,7 +96,7 @@ protected:
 	static const Rect UpdateChildRegion(WndObject& child, Size parent_size) { return child.UpdateRegionOnParent(parent_size); }
 	static void SetChildRegionStyle(WndObject& child, Rect child_region, Size client_size) { child.SetRegionStyle(child_region, client_size); }
 	static void SetChildRegion(WndObject& child, Rect region_on_parent) { child.wnd->SetRegionOnParent(region_on_parent); }
-	static const Rect GetChildRegion(WndObject& child) { return child.wnd->GetRegionOnParent(); }
+	static const Rect GetChildRegion(WndObject& child) { return child.GetRegionOnParent(); }
 private:
 	virtual bool MayRegionOnParentChange() { return false; }
 	virtual void ChildRegionMayChange(WndObject& child) {}

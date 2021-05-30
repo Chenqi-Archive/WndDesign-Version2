@@ -9,29 +9,33 @@ BEGIN_NAMESPACE(WndDesign)
 
 class ValueTag {
 public:
-	enum class Tag { Pixel, Percent, Center, Auto, Undefined };
+	enum class Tag { Pixel, Percent, Center, Auto, _Number };
+	static_assert(static_cast<uint>(Tag::_Number) <= 0b1000);
 
 private:
-	int _value;
-	Tag _tag;
+	uint value_tag;
+
+private:
+	constexpr int value() const { return static_cast<int>(value_tag) >> 3; }
+	constexpr Tag tag() const { return static_cast<Tag>(value_tag & 0b111); }
 
 public:
-	explicit constexpr ValueTag(int value, Tag tag = Tag::Pixel) : _value(value), _tag(tag) {}
-	explicit constexpr ValueTag(uint value, Tag tag = Tag::Pixel) : _value(static_cast<int>(value)), _tag(tag) {}
+	explicit constexpr ValueTag(uint value, Tag tag) : value_tag((value << 3) | static_cast<uint>(tag)) {}
+	explicit constexpr ValueTag(int value, Tag tag) : ValueTag(static_cast<uint>(value), tag) {}
 
-	constexpr bool IsPixel() const { return _tag == Tag::Pixel; }
-	constexpr bool IsPercent() const { return _tag == Tag::Percent; }
-	constexpr bool IsCenter() const { return _tag == Tag::Center; }
-	constexpr bool IsAuto() const { return _tag == Tag::Auto; }
-	constexpr bool IsUndefined() const { return _tag == Tag::Undefined; }
+	constexpr bool IsPixel() const { return tag() == Tag::Pixel; }
+	constexpr bool IsPercent() const { return tag() == Tag::Percent; }
+	constexpr bool IsCenter() const { return tag() == Tag::Center; }
+	constexpr bool IsAuto() const { return tag() == Tag::Auto; }
 
-	constexpr int AsSigned() const { return _value; }
-	constexpr uint AsUnsigned() const { return _value >= 0 ? static_cast<uint>(_value) : 0; }
+	constexpr int AsSigned() const { return value(); }
+	constexpr uint AsUnsigned() const { return value() >= 0 ? static_cast<uint>(value()) : 0; }
+
+	constexpr ValueTag operator-() const { return ValueTag(-value(), tag()); }
 
 	constexpr ValueTag& ConvertToPixel(uint entire_length) {
-		if (_tag == Tag::Percent) {
-			_value = _value * static_cast<int>(entire_length) / 100;
-			_tag = Tag::Pixel;
+		if (tag() == Tag::Percent) { 
+			*this = ValueTag(value() * static_cast<int>(entire_length) / 100, Tag::Pixel);
 		}
 		return *this;
 	}
@@ -53,13 +57,13 @@ constexpr ValueTag px(int number) {
 	return ValueTag(number, ValueTag::Tag::Pixel);
 }
 constexpr ValueTag px(uint number) {
-	return ValueTag(static_cast<int>(number), ValueTag::Tag::Pixel);
+	return ValueTag(number, ValueTag::Tag::Pixel);
 }
 constexpr ValueTag pct(int number) {
 	return ValueTag(number, ValueTag::Tag::Percent);
 }
 constexpr ValueTag pct(uint number) {
-	return ValueTag(static_cast<int>(number), ValueTag::Tag::Percent);
+	return ValueTag(number, ValueTag::Tag::Percent);
 }
 
 

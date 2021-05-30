@@ -23,11 +23,11 @@ uint FlowLayout::HitTestChild(uint x, uint y) const {
 
 void FlowLayout::SetChild(WndObject& child, uint pos) {
 	if (pos >= _child_wnds.size()) { throw std::invalid_argument("invalid row number"); }
-	RemoveChild(pos);
-	RegisterChild(child);
-	_rows[row].wnd = &child;
-	_rows[row].Invalidate();
-	SetChildData(child, row);
+	//RemoveChild(pos);
+	//RegisterChild(child);
+	//_rows[row].wnd = &child;
+	//_rows[row].Invalidate();
+	//SetChildData(child, row);
 }
 
 void FlowLayout::InsertChild(WndObject& child, uint pos) {
@@ -51,7 +51,7 @@ void FlowLayout::ChildRegionMayChange(WndObject& child) {
 }
 
 const Rect FlowLayout::UpdateContentLayout(Size client_size) {
-
+	return region_empty;
 }
 
 void FlowLayout::OnChildRegionUpdate(WndObject& child) {
@@ -63,7 +63,7 @@ void FlowLayout::OnClientPaint(FigureQueue& figure_queue, Rect client_region, Re
 }
 
 const Wnd::HitTestInfo FlowLayout::ClientHitTest(Size client_size, Point point) const {
-
+	return {};
 }
 
 

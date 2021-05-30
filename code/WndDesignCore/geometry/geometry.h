@@ -9,7 +9,7 @@
 BEGIN_NAMESPACE(WndDesign)
 
 
-constexpr uint length_max = 0x3FFFFFFF;  // For safe conversion to int.
+constexpr uint length_max = 0x0FFFFFFF;
 constexpr uint length_min = 0;
 constexpr Size size_max = Size(length_max, length_max);
 constexpr Size size_min = Size(length_min, length_min);
